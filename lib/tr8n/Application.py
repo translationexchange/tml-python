@@ -34,41 +34,13 @@ __author__ = 'randell'
 
 
 
-class Session:
+class Application:
 
 	def __init__(self):
-		self.application= None
-		self.current_user= None
-		self.current_language= None
-		self.current_translator= None
-		self.current_source= None
-		self.current_component= None
-		self.block_options= None
-		self.key = None
-		self.secret = None
-		self.host = None
+		# TODO
+		self
 
-	def init(self, key = None, secret = None, host = None):
-		self.key = None
-		self.secret = None
-		self.host = None
-		# TODO add logic for setting up application
-		return self.application
-
-	def reset(self):
-		self.application= None
-		self.current_user= None
-		self.current_language= None
-		self.current_translator= None
-		self.current_source= None
-		self.current_component= None
-		self.block_options= None
-
-
-
-
-
-# Define module level global session variable
-session = Session()
-
+	def language(self, locale = None):
+		# TODO Return language for given local
+		self
 

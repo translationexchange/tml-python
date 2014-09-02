@@ -32,9 +32,26 @@
 
 __author__ = 'randell'
 
+import re
 
 class Evaluator:
 
-		def __init__(self):
-			# TODO
-			self
+		def __init__(self, expression):
+			self.expression = expression
+			if re.compile('^\(').match(expression):
+				self.tokens = re.findall('/[()]|\w+|@\w+|[\+\-\!\|\=>&<\*\/%]+|".*?"|\'.*?\'/',expression)
+
+		def parse(self):
+			if not self.tokens: return self.expression
+			token = self.tokens.pop(0)
+			if not token: return None
+			if token == '(': return self.parse_list()
+			if re.compile("^['\"].*").match(token): return token[1:len(token)-2]
+			if re.compile("/\d+/").match(token): return int(token)
+			return token
+
+
+		def parse_list(self):
+			list = [token for token in iter(self.parse(), ')')]
+			self.tokens.pop(0)
+			return list

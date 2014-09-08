@@ -37,19 +37,30 @@ class Evaluator:
 
 		def __init__(self):
 			self.vars = {}
-			# self.env = {
-			#     # McCarthy's Elementary S-functions and Predicates
-			#     'label'   : lambda l, r : self.vars[l] = r,
-			#     'quote'   : lambda { |expr|      expr },
-			#     'car'     : lambda { |list|      list[1] },
-			#     'cdr'     : lambda { |list|      list.drop(1) },
-			#     'cons'    : lambda { |e, cell|   [e] + cell },
-			#     'eq'      : lambda { |l, r|      l == r },
-			#     'atom'    : lambda { |expr|      [Symbol, String, Fixnum, Float].include?(expr.class) },
-			#     'cond'    : lambda { |c, t, f|   evaluate(c) ? evaluate(t) : evaluate(f) },
-			#
-			#     # Tr8n Extensions
-			#     '='       : lambda { |l, r|      l == r },                                             # ['=', 1, 2]
+			def label():
+				def f(l,r):
+					self.vars[l] = r
+					return r
+				return f
+			def drop():
+				def f(list,n):
+					[list.pop(0) for i in (0,n)]
+					return list
+				return f
+
+			self.env = {
+			    # McCarthy's Elementary S-functions and Predicates
+			    'label'   : lambda l, r : label()(l,r),
+			    'quote'   : lambda expr :       expr ,
+			    'car'     : lambda list :       list[1],
+			    'cdr'     : lambda list:      drop()(list,1),
+			    'cons'    : lambda e, cell:    [e] + cell ,
+			    'eq'      : lambda l, r:       l == r ,
+			    'atom'    : lambda expr:       isinstance(expr,(type(None),str,int,float,bool)),
+			    'cond'    : lambda c, t, f:    (self.evaluate(t) if self.evaluate(c) else self.evaluate(f))
+
+			    # Tr8n Extensions
+				'='       : lambda l, r :       l == r                                              # ['=', 1, 2]
 			#     '!='      : lambda { |l, r|      l != r },                                             # ['!=', 1, 2]
 			#     '<'       : lambda { |l, r|      l < r },                                              # ['<', 1, 2]
 			#     '>'       : lambda { |l, r|      l > r },                                              # ['>', 1, 2]
@@ -115,7 +126,7 @@ class Evaluator:
 			#       list = (list.is_a?(String) ? vars[list] : list)
 			#       list.is_a?(Array) ? list.any?{|e| e == value} : false
 			#     },
-			# }
+			}
 
     #   def regexp_from_string(str)
     #     return Regexp.new(/#{str}/) unless /^\//.match(str)
@@ -140,18 +151,18 @@ class Evaluator:
     #     @env[fn].call(*args)
     #   end
     #
-    #   def evaluate(expr)
-    #     if @env['atom'].call(expr)
-    #       return @vars[expr] if expr.is_a?(String) and @vars[expr]
-    #       return expr
-    #     end
-    #
-    #     fn = expr[0]
-    #     args = expr.drop(1)
-    #
-    #     unless ['quote', 'car', 'cdr', 'cond', 'if', '&&', '||', 'and', 'or', 'true', 'false', 'let', 'count', 'all', 'any'].member?(fn)
-    #       args = args.map { |a| self.evaluate(a) }
-    #     end
-    #     apply(fn, args)
-    #   end
+		def evaluate(expr)
+			# if @env['atom'].call(expr)
+			#   return @vars[expr] if expr.is_a?(String) and @vars[expr]
+			#   return expr
+			# end
+			#
+			# fn = expr[0]
+			# args = expr.drop(1)
+			#
+			# unless ['quote', 'car', 'cdr', 'cond', 'if', '&&', '||', 'and', 'or', 'true', 'false', 'let', 'count', 'all', 'any'].member?(fn)
+			#   args = args.map { |a| self.evaluate(a) }
+			# end
+			# apply(fn, args)
+		end
     # end

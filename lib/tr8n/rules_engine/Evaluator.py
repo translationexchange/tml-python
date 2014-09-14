@@ -29,10 +29,13 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
+from _ctypes import ArgumentError
+
 __author__ = 'randell'
 
 
 from datetime import date
+from compiler.ast import flatten
 import re
 
 class Evaluator:
@@ -51,7 +54,30 @@ class Evaluator:
 					self.vars[l] = r
 					return r
 				return f
-
+			def inF():
+				def f(values,search):
+				    search = str(search).strip()
+				    for e in values.split(','):
+						if e.find('..') > 0:
+							bounds = e.strip().split('..')
+							if search in list(range(bounds[0].strip(),bounds[-1].strip())):
+								return True
+							elif (e.strip() == search):
+								return True
+					return False
+				return f
+			def replace():
+				def f(search,replace_with, s):
+					if re.compile('/\/i$/').match(subject):
+						replace_with = re.compile("/\$(\d+)/").sub(replace_with,'\\\\\1')						 # for compatibility with Perl notation
+			        search = self.regexp_from_string(search)
+					search.sub(subject,replace)
+					return subject
+				return f
+			def within():
+				def f(values,search):
+					bounds = map(values.split('..'), lambda d: int(d))
+					return search in list(range(bounds[0],bounds[-1]))
 
 			self.env = {
 			    # McCarthy's Elementary S-functions and Predicates
@@ -92,72 +118,37 @@ class Evaluator:
 			    'now'     : lambda date.now(),                                                       # ['now']
 			
 			    'append'  : lambda l, r:      str(r) + str(l) ,                                    # ['append', 'world', 'hello ']
-			    'prepend' : lambda l, r:      str(l) + str(r)                                     # ['prepend', 'hello  ', 'world']
-			    # 'match'   : lambda { |search, subject|                                                 # ['match', /a/, 'abc']
-			    #   search = regexp_from_string(search)
-			    #   not search.match(subject).nil?
-			    # },
-			    # 'in'      : lambda { |values, search|                                                  # ['in', '1,2,3,5..10,20..24', '@n']
-			    #   search = search.to_s.strip
-			    #   values.split(',').each do |e|
-			    #     if e.index('..')
-			    #       bounds = e.strip.split('..')
-			    #       return true if (bounds.first.strip..bounds.last.strip).include?(search)
-			    #     end
-			    #     return true if e.strip == search
-			    #   end
-			    #   false
-			    # },
-			#     'within'  : lambda { |values, search|                                                 # ['within', '0..3', '@n']
-			#       bounds = values.split('..').map{|d| Integer(d)}
-			#       (bounds.first..bounds.last).include?(search)
-			#     },
-			#     'replace' : lambda { |search, replace, subject|                                       # ['replace', '/^a/', 'v', 'abc']
-			#                                                                                            # handle regular expression
-			#       if /\/i$/.match(search)
-			#         replace = replace.gsub(/\$(\d+)/, '\\\\\1') # for compatibility with Perl notation
-			#       end
-			#       search = regexp_from_string(search)
-			#       subject.gsub(search, replace)
-			#     },
-			#     'count'   : lambda { |list|                                                          # ['count', '@genders']
-			#       (list.is_a?(String) ? vars[list] : list).count
-			#     },
-			#     'all'     : lambda { |list, value|                                                   # ['all', '@genders', 'male']
-			#       list = (list.is_a?(String) ? vars[list] : list)
-			#       list.is_a?(Array) ? list.all?{|e| e == value} : false
-			#     },
-			#     'any'     : lambda { |list, value|                                                   # ['any', '@genders', 'female']
-			#       list = (list.is_a?(String) ? vars[list] : list)
-			#       list.is_a?(Array) ? list.any?{|e| e == value} : false
-			#     },
+			    'prepend' : lambda l, r:      str(l) + str(r),                                     # ['prepend', 'hello  ', 'world']
+			    'match'   : lambda search, subject:  not self.regexp_from_string(search).match(subject),   # ['match', /a/, 'abc']
+			    'in'      : lambda values, search: inF()(values,search) ,                                                 # ['in', '1,2,3,5..10,20..24', '@n']
+			    'within'  : lambda values, search: within(values,search),                                                 # ['within', '0..3', '@n']
+			    'replace' : lambda search, replace, subject : replace()(search,replace,subject),
+			    'count'   : lambda list : len(self.vars[list] if isinstance(list,str) else list) , # ['count', '@genders']
+			    'all'     : lambda list, value: all([v == value for v in flatten(list)]),   # ['all', '@genders', 'male']
+			    'any'     : lambda list, value: any([v == value for v in flatten(list)]) # ['any', '@genders', 'female']
 			}
 
-      def regexp_from_string(self,str)
-            pattern = re.compile(str)
-            pattern2 = "^\/"
-            match1 = re.match(pattern2,str)
-            return pattern if not match1 else None
-    #
-    #     str = str.gsub(/^\//, '')
-    #
-    #     if /\/i$/.match(str)
-    #       str = str.gsub(/\/i$/, '')
-    #       return Regexp.new(/#{str}/i)
-    #     end
-    #
-    #     str = str.gsub(/\/$/, '')
-    #     Regexp.new(/#{str}/)
-    #   end
-    #
-    #   def reset!
-    #     @vars = {}
-    #   end
-    #
-		def apply(self, fn, args)
-			#raise "undefined symbols #{fn}" unless @env.keys.include?(fn)
-			self.env[fn].call(*args)
+		def regexp_from_string(self,str):
+		    pattern = re.compile(str)
+		    pattern2 = "^\/"
+		    match1 = re.match(pattern2,str)
+		    if not match1:
+		        return pattern
+		    str = re.compile("/^\//").sub('',str)
+		    if re.compile("\/i$/").match(str):
+				str = re.compile("/\/i$/").sub("",str)
+				return re.compile("/%s/i"%str)
+		    str = re.compile("/\/$/").sub('',str)
+		    return re.compile("/%s/"%str)
 
+
+		def reset(self):
+			self.vars = {}
+
+		def apply(self, fn, args)
+			if (fn not in self.env.keys()):
+				raise ArgumentError("undefined symbols #{fn}")
+			self.env[fn].call(*args)
     #
 		def evaluate(self,expr):
 			None
@@ -167,9 +158,9 @@ class Evaluator:
 			fn = expr[0]
 			args = Evaluator.drop(expr,1)
 
-			unless ['quote', 'car', 'cdr', 'cond', 'if', '&&', '||', 'and', 'or', 'true', 'false', 'let', 'count', 'all', 'any'].member?(fn)
-			  args = args.map { |a| self.evaluate(a) }
-			end
+			if fn not in ['quote', 'car', 'cdr', 'cond', 'if', '&&', '||', 'and', 'or', 'true', 'false', 'let', 'count', 'all', 'any']:
+			  args = map(args , lambda a: self.evaluate(a))
+
 			self.apply(fn, args)
 
     # end

@@ -32,6 +32,7 @@
 
 __author__ = 'randell'
 
+import logging
 
 
 class Session:
@@ -47,13 +48,8 @@ class Session:
 		self.key = None
 		self.secret = None
 		self.host = None
+		self.application = None
 
-	def init(self, key = None, secret = None, host = None):
-		self.key = None
-		self.secret = None
-		self.host = None
-		# TODO add logic for setting up application
-		return self.application
 
 	def reset(self):
 		self.application= None
@@ -65,10 +61,20 @@ class Session:
 		self.block_options= None
 
 
+	@classmethod
+	def initialize(cls, key = None, secret = None, host = None):
+		logging.debug("Initializing session (%s,%s,%s)"%(key,secret,None))
+		session = Session()
+		session.key = None
+		session.secret = None
+		session.host = None
+
+		cls.__instance = session # Set module level instance
+		# TODO add logic for setting up application
+		return session.application
 
 
 
-# Define module level global session variable
-session = Session()
+
 
 

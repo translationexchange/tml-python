@@ -36,7 +36,11 @@ __author__ = 'randell'
 import logging
 import sys
 import unittest
+from tr8n import session
 from unittest import TestCase
+
+
+
 
 class BaseTest(TestCase):
 
@@ -49,9 +53,12 @@ class BaseTest(TestCase):
 
 		logging.debug("enter")
 
+
 	@classmethod
 	def setUp(self):
 		logging.debug("enter")
+
+
 		# Left blank for base class
 
 	@classmethod

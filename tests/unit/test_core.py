@@ -34,8 +34,11 @@
 __author__ = 'randell'
 
 import logging
+from  tr8n.session import Session
 from  base import BaseTest
 
+KEY = "testkey"
+SECRET = "testsecret"
 
 class TestCore(BaseTest):
 
@@ -50,3 +53,4 @@ class TestCore(BaseTest):
 	def test_hello_world(self):
 		logging.debug("enter")
 		logging.info("Hello World")
+		Session.initialize(KEY,SECRET)

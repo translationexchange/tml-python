@@ -38,6 +38,29 @@ from datetime import date
 from compiler.ast import flatten
 import re
 
+class Parser:
+
+		def __init__(self, expression):
+			self.expression = expression
+			if re.compile('^\(').match(expression):
+				self.tokens = re.findall('/[()]|\w+|@\w+|[\+\-\!\|\=>&<\*\/%]+|".*?"|\'.*?\'/',expression)
+
+		def parse(self):
+			if not self.tokens: return self.expression
+			token = self.tokens.pop(0)
+			if not token: return None
+			if token == '(': return self.parse_list()
+			if re.compile("^['\"].*").match(token): return token[1:len(token)-2]
+			if re.compile("/\d+/").match(token): return int(token)
+			return token
+
+
+		def parse_list(self):
+			list = [token for token in iter(self.parse(), ')')]
+			self.tokens.pop(0)
+			return list
+
+
 class Evaluator:
 
 		@staticmethod
@@ -111,12 +134,12 @@ class Evaluator:
 			    'let'     : lambda l, r:      label()(l,r) ,                                       # ['let', 'n', 5]
 			    'true'    : lambda  True ,                                                           # ['true']
 			    'false'   : lambda  False ,                                                          # ['false']
-			
+
 			    'date'    : lambda date:      date.strptime(date, '%Y-%m-%d'),                    # ['date', '2010-01-01']
 			    'today'   : lambda date.now().today(),                                               # ['today']
 			    'time'    : lambda time:      date.strptime(date '%Y-%m-%d %H:%M:%S'),           # ['time', '2010-01-01 10:10:05']
 			    'now'     : lambda date.now(),                                                       # ['now']
-			
+
 			    'append'  : lambda l, r:      str(r) + str(l) ,                                    # ['append', 'world', 'hello ']
 			    'prepend' : lambda l, r:      str(l) + str(r),                                     # ['prepend', 'hello  ', 'world']
 			    'match'   : lambda search, subject:  not self.regexp_from_string(search).match(subject),   # ['match', /a/, 'abc']
@@ -164,3 +187,4 @@ class Evaluator:
 			self.apply(fn, args)
 
     # end
+

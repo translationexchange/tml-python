@@ -34,6 +34,8 @@ __author__ = 'randell'
 
 import logging
 
+from tr8n.application import Application
+
 
 class Session:
 
@@ -70,8 +72,10 @@ class Session:
 		session.host = None
 
 		cls.__instance = session # Set module level instance
+		session.application = Application()
 		# TODO add logic for setting up application
 		return session.application
+
 
 
 

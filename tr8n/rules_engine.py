@@ -77,7 +77,7 @@ class Evaluator:
 					self.vars[l] = r
 					return r
 				return f
-			def inF():
+			def in_f():
 				def f(values,search):
 				    search = str(search).strip()
 				    for e in values.split(','):
@@ -143,7 +143,7 @@ class Evaluator:
 			    'append'  : lambda l, r:      str(r) + str(l) ,                                    # ['append', 'world', 'hello ']
 			    'prepend' : lambda l, r:      str(l) + str(r),                                     # ['prepend', 'hello  ', 'world']
 			    'match'   : lambda search, subject:  not self.regexp_from_string(search).match(subject),   # ['match', /a/, 'abc']
-			    'in'      : lambda values, search: inF()(values,search) ,                                                 # ['in', '1,2,3,5..10,20..24', '@n']
+			    'in'      : lambda values, search: in_f()(values,search) ,                                                 # ['in', '1,2,3,5..10,20..24', '@n']
 			    'within'  : lambda values, search: within(values,search),                                                 # ['within', '0..3', '@n']
 			    'replace' : lambda search, replace, subject : replace()(search,replace,subject),
 			    'count'   : lambda list : len(self.vars[list] if isinstance(list,str) else list) , # ['count', '@genders']

@@ -53,4 +53,7 @@ class TestCore(BaseTest):
 	def test_hello_world(self):
 		logging.debug("enter")
 		logging.info("Hello World")
-		Session.initialize(KEY,SECRET)
+		app = Session.initialize(KEY,SECRET)
+		english = app.language('en-US')
+		self.assertEquals(english.translate('Hello World'),'Hello World')
+

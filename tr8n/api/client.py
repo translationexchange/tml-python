@@ -32,24 +32,18 @@
 
 __author__ = 'randell'
 
-from language import Language
-from source import Source
-from api.client import Client
 
-class Application:
-
-	def __init__(self):
-		# TODO
-		self.api  = Client()
-
-	def language(self, locale = None):
-		# TODO Return language for given local
-		return Language(locale)
-
-	def source(self, source, locale):
-		self.sources = self.sources or dict()
-		if not source in self.sources:
-			self.sources.put(source,Source(application=self,source = source).fetch_translations(locale))
-		return self.sources.get(source)
+import requests, json
 
 
+class Client:
+
+	API_HOST = 'https://api.translationexchange.com'
+	API_PATH = '/v1'
+
+	def results(self, path, params = {}, opts = {}):
+		return self.get(path, params, opts)['results']
+
+
+	def get(self.path, params = {}, opts = {}):
+		self.api(path, params, opts.merge(:method => :get))

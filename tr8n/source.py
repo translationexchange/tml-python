@@ -32,24 +32,23 @@
 
 __author__ = 'randell'
 
-from language import Language
-from source import Source
-from api.client import Client
+from os.path import join
 
-class Application:
+class Source:
 
-	def __init__(self):
-		# TODO
-		self.api  = Client()
+	def __init__(self, application, source):
+		self.application = application
+		self.source = source
 
-	def language(self, locale = None):
-		# TODO Return language for given local
-		return Language(locale)
+	@classmethod
+	def cache_key(cls, locale, source):
+		join(locale,'sources' , source.split('/'))
 
-	def source(self, source, locale):
-		self.sources = self.sources or dict()
-		if not source in self.sources:
-			self.sources.put(source,Source(application=self,source = source).fetch_translations(locale))
-		return self.sources.get(source)
+	def fetch_translations(self, locale):
+		self.translations = self.translations or dict()
+		if locale in self.translations:
+			return self
+		self.translations.put(locale,dict())
 
-
+		results = self.application.api_client.get("sources/#{self.key}/translations",{'locale' : locale, 'per_page' : 10000}, {'cache_key'=> Tml::Source.cache_key(locale, self.source)})
+		return results

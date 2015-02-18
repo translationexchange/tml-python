@@ -1,6 +1,6 @@
 # encoding: UTF-8
-#--
-# Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+# --
+# Copyright (c) 2015, Translation Exchange, Inc.
 #
 #  _______                  _       _   _             ______          _
 # |__   __|                | |     | | (_)           |  ____|        | |
@@ -32,53 +32,18 @@
 
 __author__ = 'randell'
 
-import logging
-
-from tr8n.application import Application
+import requests, json
 
 
-class Session:
+class Client:
+    API_HOST = 'https://api.translationexchange.com'
+    API_PATH = '/v1'
 
-	def __init__(self):
-		self.application= None
-		self.current_user= None
-		self.current_language= None
-		self.current_translator= None
-		self.current_source= None
-		self.current_component= None
-		self.block_options= None
-		self.key = None
-		self.secret = None
-		self.host = None
-		self.application = None
+    def results(self, path, params={}, opts={}):
+        return self.get(path, params, opts)['results']
 
 
-	def reset(self):
-		self.application= None
-		self.current_user= None
-		self.current_language= None
-		self.current_translator= None
-		self.current_source= None
-		self.current_component= None
-		self.block_options= None
-
-
-	@classmethod
-	def initialize(cls, key = None, secret = None, host = None):
-		logging.debug("Initializing session (%s,%s,%s)"%(key,secret,None))
-		session = Session()
-		session.key = None
-		session.secret = None
-		session.host = None
-
-		cls.__instance = session # Set module level instance
-		session.application = Application()
-		# TODO add logic for setting up application
-		return session.application
-
-
-
-
-
-
-
+    # def get(self.
+    #
+    # path, params = {}, opts = {}):
+    # self.api(path, params, opts.merge(:method = >:get))

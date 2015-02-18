@@ -1,6 +1,6 @@
 # encoding: UTF-8
-#--
-# Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+# --
+# Copyright (c) 2015, Translation Exchange, Inc.
 #
 #  _______                  _       _   _             ______          _
 # |__   __|                | |     | | (_)           |  ____|        | |
@@ -32,24 +32,52 @@
 
 __author__ = 'randell'
 
-from language import Language
-from source import Source
-from api.client import Client
+import logging
 
-class Application:
+from tml.application import Application
 
-	def __init__(self):
-		# TODO
-		self.api  = Client()
 
-	def language(self, locale = None):
-		# TODO Return language for given local
-		return Language(locale)
+class Session:
+    def __init__(self):
+        self.application = None
+        self.current_user = None
+        self.current_language = None
+        self.current_translator = None
+        self.current_source = None
+        self.current_component = None
+        self.block_options = None
+        self.key = None
+        self.secret = None
+        self.host = None
+        self.application = None
 
-	def source(self, source, locale):
-		self.sources = self.sources or dict()
-		if not source in self.sources:
-			self.sources.put(source,Source(application=self,source = source).fetch_translations(locale))
-		return self.sources.get(source)
+
+    def reset(self):
+        self.application = None
+        self.current_user = None
+        self.current_language = None
+        self.current_translator = None
+        self.current_source = None
+        self.current_component = None
+        self.block_options = None
+
+
+    @classmethod
+    def initialize(cls, key=None, secret=None, host=None):
+        logging.debug("Initializing session (%s,%s,%s)" % (key, secret, None))
+        session = Session()
+        session.key = None
+        session.secret = None
+        session.host = None
+
+        cls.__instance = session  # Set module level instance
+        session.application = Application()
+        # TODO add logic for setting up application
+        return session.application
+
+
+
+
+
 
 

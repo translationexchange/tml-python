@@ -1,6 +1,6 @@
 # encoding: UTF-8
-#--
-# Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+# --
+# Copyright (c) 2015, Translation Exchange, Inc.
 #
 #  _______                  _       _   _             ______          _
 # |__   __|                | |     | | (_)           |  ____|        | |
@@ -32,18 +32,25 @@
 
 __author__ = 'randell'
 
-
-import requests, json
-
-
-class Client:
-
-	API_HOST = 'https://api.translationexchange.com'
-	API_PATH = '/v1'
-
-	def results(self, path, params = {}, opts = {}):
-		return self.get(path, params, opts)['results']
+from os.path import join
 
 
-	def get(self.path, params = {}, opts = {}):
-		self.api(path, params, opts.merge(:method => :get))
+class Source:
+    def __init__(self, application, source):
+        self.application = application
+        self.source = source
+
+    @classmethod
+    def cache_key(cls, locale, source):
+        join(locale, 'sources', source.split('/'))
+
+    def fetch_translations(self, locale):
+        self.translations = self.translations or dict()
+        if locale in self.translations:
+            return self
+        self.translations.put(locale, dict())
+
+        results = self.application.api_client.get("sources/#{self.key}/translations",
+                                                  {'locale': locale, 'per_page': 10000},
+            {'cache_key' => Tml::Source.cache_key(locale, self.source)})
+        return results

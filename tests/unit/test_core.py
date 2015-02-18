@@ -1,6 +1,6 @@
 # encoding: UTF-8
-#--
-# Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+# --
+# Copyright (c) 2015, Translation Exchange, Inc.
 #
 #  _______                  _       _   _             ______          _
 # |__   __|                | |     | | (_)           |  ____|        | |
@@ -34,26 +34,26 @@
 __author__ = 'randell'
 
 import logging
-from  tr8n.session import Session
+from  tml.session import Session
 from  base import BaseTest
 
 KEY = "testkey"
 SECRET = "testsecret"
 
+
 class TestCore(BaseTest):
+    @classmethod
+    def setUp(self):
+        logging.debug("enter")
 
-	@classmethod
-	def setUp(self):
-		logging.debug("enter")
+    @classmethod
+    def tearDown(self):
+        logging.debug("enter")
 
-	@classmethod
-	def tearDown(self):
-		logging.debug("enter")
-
-	def test_hello_world(self):
-		logging.debug("enter")
-		logging.info("Hello World")
-		app = Session.initialize(KEY,SECRET)
-		english = app.language('en-US')
-		self.assertEquals(english.translate('Hello World'),'Hello World')
+    def test_hello_world(self):
+        logging.debug("enter")
+        logging.info("Hello World")
+        app = Session.initialize(KEY, SECRET)
+        english = app.language('en-US')
+        self.assertEquals(english.translate('Hello World'), 'Hello World')
 

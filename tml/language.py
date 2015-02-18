@@ -1,15 +1,15 @@
 # encoding: UTF-8
-#--
-# Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+# --
+# Copyright (c) 2015, Translation Exchange, Inc.
 #
-#  _______                  _       _   _             ______          _
-# |__   __|                | |     | | (_)           |  ____|        | |
+#  _______				    _		_   _		      ______		   _
+# |__   __|				  | |     | | (_)		    |  ____|		 | |
 #    | |_ __ __ _ _ __  ___| | __ _| |_ _  ___  _ __ | |__  __  _____| |__   __ _ _ __   __ _  ___
 #    | | '__/ _` | '_ \/ __| |/ _` | __| |/ _ \| '_ \|  __| \ \/ / __| '_ \ / _` | '_ \ / _` |/ _ \
 #    | | | | (_| | | | \__ \ | (_| | |_| | (_) | | | | |____ >  < (__| | | | (_| | | | | (_| |  __/
 #    |_|_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|______/_/\_\___|_| |_|\__,_|_| |_|\__, |\___|
-#                                                                                        __/ |
-#                                                                                       |___/
+#																								    __/ |
+#																								   |___/
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -32,23 +32,35 @@
 
 __author__ = 'randell'
 
-from os.path import join
 
-class Source:
+class Language:
+    def __init__(self, locale):
+        # TODO
+        self.locale = locale
+        self.name = None
+        self.english_name = None
+        self.native_name = None
+        self.right_to_left = None
+        self.flag_url = None
 
-	def __init__(self, application, source):
-		self.application = application
-		self.source = source
+    #######################################################################################################
+    # Translation Methods
+    #
+    # Note - when inline translation mode is enable, cache will not be used and translators will
+    # always hit the live service to get the most recent translations
+    #
+    # Some cache adapters cache by source, others by key. Some are read-only, some are built on the fly.
+    #
+    # There are three ways to call the tr method
+    #
+    # tr(label, description = "", tokens = {}, options = {})
+    # or
+    # tr(label, tokens = {}, options = {})
+    # or
+    # tr(:label => label, :description => "", :tokens => {}, :options => {})
+    ########################################################################################################
 
-	@classmethod
-	def cache_key(cls, locale, source):
-		join(locale,'sources' , source.split('/'))
+    def translate(self, label, description=None, tokens={}, options={}):
+        return None
 
-	def fetch_translations(self, locale):
-		self.translations = self.translations or dict()
-		if locale in self.translations:
-			return self
-		self.translations.put(locale,dict())
 
-		results = self.application.api_client.get("sources/#{self.key}/translations",{'locale' : locale, 'per_page' : 10000}, {'cache_key'=> Tml::Source.cache_key(locale, self.source)})
-		return results

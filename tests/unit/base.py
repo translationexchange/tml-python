@@ -1,6 +1,6 @@
 # encoding: UTF-8
-#--
-# Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+# --
+# Copyright (c) 2015, Translation Exchange, Inc.
 #
 #  _______                  _       _   _             ______          _
 # |__   __|                | |     | | (_)           |  ____|        | |
@@ -36,40 +36,40 @@ __author__ = 'randell'
 import logging
 import sys
 import unittest
-from tr8n import session
+from tml import session
 from unittest import TestCase
 
 
-
-
 class BaseTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        logging.basicConfig(stream=sys.stdout)
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().handlers[0].setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)-8s %(filename)s %(module)s.%(funcName)s:%(lineno)d %(message)s",
+                              "%a, %d %b %Y %H:%M:%S"))
+
+        logging.debug("enter")
 
 
-	@classmethod
-	def setUpClass(cls):
-		logging.basicConfig(stream=sys.stdout)
-		logging.getLogger().setLevel(logging.DEBUG)
-		logging.getLogger().handlers[0].setFormatter(logging.Formatter("%(asctime)s %(levelname)-8s %(filename)s %(module)s.%(funcName)s:%(lineno)d %(message)s", "%a, %d %b %Y %H:%M:%S"))
-
-		logging.debug("enter")
+    @classmethod
+    def setUp(self):
+        logging.debug("enter")
 
 
-	@classmethod
-	def setUp(self):
-		logging.debug("enter")
+    # Left blank for base class
+
+    @classmethod
+    def tearDownClass(cls):
+        logging.debug("enter")
 
 
-		# Left blank for base class
+    @classmethod
+    def tearDown(self):
+        logging.debug("enter")
 
-	@classmethod
-	def tearDownClass(cls):
-		logging.debug("enter")
+    # Left blank for base class
 
-
-	@classmethod
-	def tearDown(self):
-		logging.debug("enter")
-		# Left blank for base class
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()

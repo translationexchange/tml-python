@@ -1,15 +1,14 @@
 <p align="center">
-  <img src="https://raw.github.com/tr8n/tr8n/master/doc/screenshots/tr8nlogo.png">
+  <img src="https://avatars0.githubusercontent.com/u/1316274?v=3&s=200">
 </p>
 
-Tr8n Core Library For Python
+TML For Python
 ==================
 
-Tr8n core library for Python is a set of classes that provide translation functionality for any Python based application.
-The library uses Tr8n's TML (Translation Markup Language) that allows you to encode complex language structures in simple, yet powerful forms.
+TML for Python is a set of classes that provide translation functionality for any Python based application.
 
-The library works in conjunctions with tr8nhub.com service that provides machine and human translations for your application.
-In order to use the library, you should sign up at tr8nhub.com, create a new application and copy the application key and secret.
+The library works in conjunctions with translationexchange.com service that provides machine and human translations for your application.
+In order to use the library, please sign up at translationexchange.com, create a new application and copy the application token.
 
 
 Django Integration
@@ -22,7 +21,7 @@ Installation
 
 To install using pip, use:
 
-pip install tr8n_core
+pip install tml
 
 
 Registering Your App
@@ -43,23 +42,21 @@ The library can be invoked from the python command. To use tr8n client you must 
 Links
 ==================
 
-* Register on TranslationExchange.com: https://translationexchange.com
+* Register on TranslationExchange.com: http://translationexchange.com
 
-* Read TranslationExchange's documentation: http://wiki.tr8nhub.com
-
-* Visit TranslationExchange's blog: http://blog.tr8nhub.com
+* Read Translation Exchange documentation: http://translationexchange.com/docs
 
 * Follow TranslationExchange on Twitter: https://twitter.com/translationx
 
 * Connect with TranslationExchange on Facebook: https://www.facebook.com/translationexchange
 
-* If you have any questions or suggestions, contact us: info@translationexchange.com
+* If you have any questions or suggestions, contact us: feedback@translationexchange.com
 
 
 Copyright and license
 ==================
 
-Copyright (c) 2014 Michael Berkovich, TranslationExchange.com
+Copyright (c) 2015 Translation Exchange Inc
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

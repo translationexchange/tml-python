@@ -1,6 +1,7 @@
 import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken
 
+
 class LenRulesCompiler(object):
     """ Dumb rules compiller """
     def compile(self, token, value, options):
@@ -53,7 +54,7 @@ class TokenTest(unittest.TestCase):
 
     def test_parse_piped(self):
         v = PipeToken.validate('{name||rule}')
-        self.assertEquals(v.__class___, PipeToken, 'Check is pipe token')
+        self.assertEquals(v.__class__, PipeToken, 'Check is pipe token')
 
 
 if __name__=='__main__':

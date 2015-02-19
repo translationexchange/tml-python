@@ -33,17 +33,67 @@
 __author__ = 'randell'
 
 import requests, json
+from ..exceptions import Error
 
 
-class Client:
+class Client(object):
+    """ API Client """
     API_HOST = 'https://api.translationexchange.com'
-    API_PATH = '/v1'
+    API_PATH = 'v1'
 
-    def results(self, path, params={}, opts={}):
-        return self.get(path, params, opts)['results']
+    def __init__(self, token):
+        """ Client .ctor
+            Args:
+                token (string): API access token
+        """
+        self.token = token
+
+    def get(self, url, params = {}):
+        """ Call API method """
+        try:
+            url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
+            params.update({'token': self.token})
+            resp = requests.get(url, params)
+            resp.raise_for_status() # check http status
+            ret = resp.json()
+            if 'error' in ret:
+                raise APIError(ret['error'], url = url, client = self)
+            return ret
+        except Exception as e:
+            raise HttpError(e, url = url, client = self)
 
 
-    # def get(self.
-    #
-    # path, params = {}, opts = {}):
-    # self.api(path, params, opts.merge(:method = >:get))
+class ClientError(Error):
+    """ Abstract API error """
+    def __init__(self, url, client):
+        """ Abtract API Error
+            Args:
+                url (string): rest URL
+                client (Client): client instance
+        """
+        self.client = client
+        self.url = url
+
+    def __str__(self):
+        """ String repr for error """
+        return 'TML API call fault to %s' % self.url
+
+
+class HttpError(ClientError):
+    """ Something wrong whith HTTP """
+    def __init__(self, error, url, client):
+        super(HttpError, self).__init__(url, client)
+        self.error = error
+
+    def __str__(self):
+        return '%s with %s: %s' % (super(HttpError, self).__str__(), self.error.__class__.__name__, self.error)
+
+
+class APIError(ClientError):
+    def __init__(self, error, url, client):
+        super(HttpError, self).__init__(url, client)
+        self.error = error
+
+    def __str__(self):
+        return '%s with API error: %s' % (super(HttpError, self).__str__(), self.error)
+

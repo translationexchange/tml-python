@@ -1,55 +1,63 @@
-# encoding: UTF-8
-# --
-# Copyright (c) 2015, Translation Exchange, Inc.
-#
-#  _______                  _       _   _             ______          _
-# |__   __|                | |     | | (_)           |  ____|        | |
-#    | |_ __ __ _ _ __  ___| | __ _| |_ _  ___  _ __ | |__  __  _____| |__   __ _ _ __   __ _  ___
-#    | | '__/ _` | '_ \/ __| |/ _` | __| |/ _ \| '_ \|  __| \ \/ / __| '_ \ / _` | '_ \ / _` |/ _ \
-#    | | | | (_| | | | \__ \ | (_| | |_| | (_) | | | | |____ >  < (__| | | | (_| | | | | (_| |  __/
-#    |_|_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|______/_/\_\___|_| |_|\__,_|_| |_|\__, |\___|
-#                                                                                        __/ |
-#                                                                                       |___/
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#++
+# -*- coding: utf-8 -*-
+from tml.exceptions import Error
 
-__author__ = 'randell'
+class Application(object):
+    """ Application """
+    def __init__(self, client, data):
+        """ Application instance
+            Args:
+                client (Client): api client
+                data (dict): application data
+        """
+        self.client = client
+        self.data = data
 
-from language import Language
-from source import Source
-from api.client import Client
+    @classmethod
+    def current(cls, client):
+        """ Load current application
+            Args:
+                client (Client): api client
+            Throws:
+                api.ClientError
+            Returns:
+                Application
+        """
+        return Application(client = client, data = client.get('applications/current', {'definition':1}))
 
+    @classmethod
+    def load_by_id(cls, id, client):
+        """ Load current application
+            Args:
+                id (int): application id
+                client (Client): api client
+            Throws:
+                api.ClientError
+            Returns:
+                Application
+        """
+        return Application(client = client, data = client.get('applications/%d' % id, {'definition':1}))
 
-class Application:
-    def __init__(self):
-        # TODO
-        self.api = Client()
+    @property
+    def id(self):
+        """ Application ID getter
+            Returns:
+                (int): application id in sysem
+        """
+        return self.data['id']
 
-    def language(self, locale=None):
-        # TODO Return language for given local
-        return Language(locale)
+    @property
+    def default_locale(self):
+        """ Get default locale for app """
+        return self.get_locale(self.data['default_locale'])
 
-    def source(self, source, locale):
-        self.sources = self.sources or dict()
-        if not source in self.sources:
-            self.sources.put(source, Source(application=self, source=source).fetch_translations(locale))
-        return self.sources.get(source)
+class ApplicationError(Error):
+    """ Error in application context """
+    def __init__(self, application):
+        self.application = application
+
+    @property
+    def context(self):
+        """ Context message """
+        return 'in application %d' % self.application.id
 
 

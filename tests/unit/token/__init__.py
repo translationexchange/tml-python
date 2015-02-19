@@ -1,5 +1,6 @@
 import unittest
-from tml.token import VariableToken, TextToken, RulesToken, PipeToken
+from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
+    TokenMatcher, InvalidTokenSyntax
 
 
 class LenRulesCompiler(object):
@@ -55,6 +56,17 @@ class TokenTest(unittest.TestCase):
     def test_parse_piped(self):
         v = PipeToken.validate('{name||rule}')
         self.assertEquals(v.__class__, PipeToken, 'Check is pipe token')
+
+    def test_token_matcher(self):
+        """ Token matcher """
+        m = TokenMatcher([TextToken, VariableToken, PipeToken, RulesToken])
+        self.assertEquals(TextToken, m.build_token('Hello').__class__, 'Test plain text')
+        self.assertEquals(VariableToken, m.build_token('{name}').__class__, 'Test {name}')
+        self.assertEquals(RulesToken, m.build_token('{name|rule}').__class__, 'Test {name|rule}')
+        self.assertEquals(PipeToken, m.build_token('{name||rule}').__class__, 'Test {name||rule}')
+        with self.assertRaises(InvalidTokenSyntax) as context:
+            m.build_token('{invalid~token}')
+        self.assertEquals('Token syntax is not supported for token "{invalid~token}"', str(context.exception), 'Check exception message')
 
 
 if __name__=='__main__':

@@ -106,3 +106,33 @@ class PipeToken(RulesToken):
         """ Execute token """
         return '%s %s' % (self.token.execute(data, options), self.rules.execute(data, options))
 
+class TokenMatcher(object):
+    """ Class which select first supported token for text """
+    def __init__(self, classes):
+        """ .ctor
+            Args:
+                classes (AbstractToken.__class__[]): list of supported token classes
+        """
+        self.classes = classes
+
+    def build_token(self, text):
+        """ Build token for text - return first matched token
+            Args:
+                text (string): token text
+            Returns:
+                AbstractToken: token object
+        """
+        for cls in self.classes:
+            ret = cls.validate(text)
+            if ret:
+                return ret
+        # No token find:
+        raise InvalidTokenSyntax(text)
+
+class InvalidTokenSyntax(Error):
+    """ Unsupported token syntax """
+    def __init__(self, text):
+        self.text = text
+
+    def __str__(self):
+        return u'Token syntax is not supported for token "%s"' % self.text

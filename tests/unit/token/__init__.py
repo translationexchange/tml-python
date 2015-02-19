@@ -2,18 +2,19 @@ import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax
 
-
-class LenRulesCompiler(object):
-    """ Dumb rules compiller """
+class ReturnRuleCompiler(object):
     def compile(self, token, value, options):
-        self.value = value
-        return self
+        return DumbText(token.rules)
+
+class DumbText(object):
+    def __init__(self, text):
+        self.text = text
 
     def execute(self):
-        """ Say Hello """
-        return '%d symbols' % len(self.value)
+        return self.text
 
-RulesToken.rules_compiller = LenRulesCompiler()
+
+RulesToken.rules_compiller = ReturnRuleCompiler()
 
 class TokenTest(unittest.TestCase):
     """ Test client """
@@ -36,7 +37,7 @@ class TokenTest(unittest.TestCase):
     def test_execute_rules(self):
         """ Execute rules """
         token = RulesToken('name', 'somerule')
-        self.assertEquals('4 symbols', token.execute({'name':'Jonh'}, {}), 'Execute token')
+        self.assertEquals('somerule', token.execute({'name':'Jonh'}, {}), 'Execute token')
 
     def test_parse_rules(self):
         """ Test rules token parsing """
@@ -49,9 +50,8 @@ class TokenTest(unittest.TestCase):
 
     def test_execute_piped(self):
         """ Execute piped token """
-        PipeToken.rules_compiller = LenRulesCompiler()
         v =PipeToken('name', 'somerule')
-        self.assertEquals('John 4 symbols', v.execute({'name':'John'},{}), 'Execute piped token')
+        self.assertEquals('John somerule', v.execute({'name':'John'},{}), 'Execute piped token')
 
     def test_parse_piped(self):
         v = PipeToken.validate('{name||rule}')

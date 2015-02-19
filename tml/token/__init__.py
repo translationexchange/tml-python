@@ -40,8 +40,11 @@ class TextToken(AbstractToken):
     @classmethod
     def validate(cls, text):
         """ Validate tokenized string """
+        if text == '':
+            # Empty text
+            return TextToken(text)
         if text[0]!='{':
-            return TextToken(str)
+            return TextToken(text)
 
 class VariableToken(AbstractToken):
     """ Token for variabel {name} """
@@ -128,6 +131,17 @@ class TokenMatcher(object):
                 return ret
         # No token find:
         raise InvalidTokenSyntax(text)
+
+def execute_all(tokens, data, options):
+    """ Execute all tokens
+        Args:
+            tokens (AbstractToken[]): list of tokens
+            data (dict): context
+            options (dict): execution options
+        Returns:
+            string: executed tokens
+    """
+    return ''.join([token.execute(data, options) for token in tokens])
 
 class InvalidTokenSyntax(Error):
     """ Unsupported token syntax """

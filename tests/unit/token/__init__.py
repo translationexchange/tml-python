@@ -18,6 +18,17 @@ RulesToken.rules_compiller = ReturnRuleCompiler()
 
 class TokenTest(unittest.TestCase):
     """ Test client """
+    def text_parse_text(self):
+        """ Parse text """
+        t = TextToken.validate('test')
+        self.assertEqual(t.__class__, TextToken, 'Fetch text token')
+        self.assertEqual('test', t.execute({}, {}), 'Store text')
+        # Empty:
+        t = TextToken.validate('')
+        self.assertEqual(t.__class__, TextToken, 'Fetch empty token')
+        self.assertEqual('', t.execute({}, {}), 'Store text')
+
+
     def test_execute_variable(self):
         v = VariableToken('name')
         self.assertEquals('John', v.execute({'name':'John'}, {}), 'Fetch name')

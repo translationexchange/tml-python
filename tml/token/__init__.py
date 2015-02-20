@@ -1,6 +1,5 @@
 # encoding: UTF-8
 import re
-from django.template.base import Token
 from ..exceptions import Error 
 
 class AbstractToken(object):

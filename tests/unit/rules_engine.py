@@ -61,6 +61,6 @@ class rules_engine(unittest.TestCase):
 
         with self.assertRaises(ParseError) as context:
            parse('(not (closed (expression))')
-        self.assertEquals(ParseError.QUOTE_IS_NOT_CLOSED, context.exception.code, 'Not closed quote')
+        self.assertEquals(ParseError.EXPRESSION_IS_NOT_CLOSED, context.exception.code, 'Not closed quote')
         self.assertEquals(5, context.exception.pos, 'Not closed quote pos')
 

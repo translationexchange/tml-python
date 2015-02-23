@@ -2,6 +2,7 @@ from .gender import Gender
 from _ctypes import ArgumentError
 
 class Genders(object):
+    """ List of objects having gender """
     @classmethod
     def match(cls, data):
         """ Check is data list of genders """

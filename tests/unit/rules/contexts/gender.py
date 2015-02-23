@@ -1,7 +1,7 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
 import unittest
-from tml.rules.variables.gender import *
+from tml.rules.contexts.gender import *
 
 class Male(object):
     """ Male class """

@@ -14,7 +14,7 @@ class NoGender(object):
     pass
 
 
-class rules_variables_gender(unittest.TestCase):
+class gender(unittest.TestCase):
     def test_gender(self):
         """ Test gender mathcher """
         self.assertEquals(Gender.MALE, Gender.match('male'), 'male')

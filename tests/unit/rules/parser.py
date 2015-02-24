@@ -30,6 +30,7 @@ class rules_parser(unittest.TestCase):
         self.assertEquals(['hello','world'],
                   parse('(hello   world)'),
                   'Ignore multispace')
+        self.assertEquals(['quote', '@value'], parse('@value'), '@value')
 
     def test_errors(self):
         # Check parse errrors:

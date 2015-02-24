@@ -2,6 +2,10 @@
 """ Rules parser """
 
 __author__ = 'toukmanov'
+import re
+
+NO_EXPRESSION_PATTERN = re.compile('^\@(\w+)$')
+NO_EXPRESSION = '(quote @%s)'
 
 def parse(text):
     """ Parse rule 
@@ -17,6 +21,10 @@ def parse(text):
     quote = None
     stack = [] # expressions stack
     stack_pos = []
+    # @value:
+    just_return = NO_EXPRESSION_PATTERN.match(text)
+    if just_return:
+        return parse(NO_EXPRESSION % just_return.group(1))
     # Check that expression is in brackets:
     if text[0] != '(':
         raise ParseError('No opened bracked found', ParseError.INVALID_SYNTAX, text, 0)

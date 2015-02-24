@@ -2,6 +2,8 @@
 """ Test rules built-in functions """
 import unittest
 from tml.rules.engine import *
+from tml.rules.functions import SUPPORTED_FUNCTIONS
+from tml.rules.parser import parse
 
 def die():
     raise Exception('Die')
@@ -55,4 +57,14 @@ class rules_engine(unittest.TestCase):
             self.engine.execute(['mod', '10', ['die']], {})
         self.assertEquals(FunctionCallFault, context.exception.parent_error.__class__, 'Handle information about original error')
         self.assertEquals(2, context.exception.part_number, 'Store part number')
+
+    def test_compare(self):
+        engine = RulesEngine(SUPPORTED_FUNCTIONS)
+        self.assertTrue(engine.execute(['<', '@value', '10'], {'value': 8}), '8 < 10')
+        self.assertFalse(engine.execute(['<', '@value', '7'], {'value': 8}), '! 8 < 7')
+        self.assertTrue(engine.execute(['<', '7', '@value'], {'value': 8}), '7 < 8')
+        q = parse('(&& (< 3 @value) (> 12 @value))')
+        self.assertTrue(engine.execute(q, {'value': 8}))
+        self.assertFalse(engine.execute(q, {'value': 3}))
+        self.assertFalse(engine.execute(q, {'value': 14}))
 

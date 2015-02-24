@@ -2,6 +2,7 @@
 """ Test rules built-in functions """
 import unittest
 from tml.rules.functions import *
+import re
 
 
 class rules_functions(unittest.TestCase):
@@ -43,4 +44,20 @@ class rules_functions(unittest.TestCase):
         self.assertTrue(in_f('1..5', '3'), '"3" in 1..5')
         self.assertTrue(in_f('1..5', 3), '3 in 1..5')
         self.assertTrue(in_f('1..3,5..8', 7), '7 in 1..3,5..8')
+
+    def test_build_preg(self):
+        self.assertEqual(re.I, build_flags('i'), 'Regexp i flag')
+        self.assertEqual(re.I|re.M, build_flags('mi'), 'Regexp im flag')
+        self.assertEquals(re.compile('\d+'), build_regexp('\d+'), '\d+')
+        self.assertEquals(re.compile('[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
+        self.assertEquals(re.compile('[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
+        self.assertEquals(re.compile('[a-z]+'), build_regexp('/[a-z]+/'), '/[a-z]+/')
+
+    def test_all(self):
+        self.assertTrue(SUPPORTED_FUNCTIONS['all'](['male','male','male'], 'male'),'All is male')
+        self.assertFalse(SUPPORTED_FUNCTIONS['all'](['male','female'],'male'),'One is not male')
+
+    def test_any(self):
+        self.assertTrue(SUPPORTED_FUNCTIONS['any'](['male','female'],'male'), 'Any is male')
+        self.assertFalse(SUPPORTED_FUNCTIONS['any'](['female','female'],'male'), 'Nobody is male')
 

@@ -1,43 +1,26 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
 import unittest
-from tml.rules.variables import *
+from tml.rules.contexts import *
 
 def die(object):
     raise Exception('Bad function')
 
+class Dumn(object):
+    def __str__(self):
+        return 'qwerty'
+
 
 class rules_variables(unittest.TestCase):
     """ Test for rules variables """
-    def setUp(self):
-        self.f = Fetcher({'@self': lambda object: object, '@len':lambda object: len(object), '@die': die}) 
-
-    def test_fetcher(self): 
-        self.assertEquals('hello', self.f.fetch('@self', 'hello'), 'Check fetcher')
-        self.assertEquals(5, self.f.fetch('@len', 'hello'), 'Another fetcher')
-
-    def test_unsupported_type(self):
-        with self.assertRaises(UnsupportedType) as context:
-            self.f.fetch('@ololo', 'Hello')
-        self.assertEquals('@ololo', context.exception.type, 'Store wrong type')
-        self.assertEquals('Hello', context.exception.object, 'Store object')
-
-    def test_unsupported_format(self):
-        with self.assertRaises(UnsupportedFormat) as context:
-            self.f.fetch('@die', 'Hello')
-        self.assertEquals('@die', context.exception.type, 'Store wrong type')
-        self.assertEquals('Hello', context.exception.object, 'Store object')
-        self.assertEquals('Bad function', context.exception.exception[0], 'Store previous exception')
-
-    def test_fetch_all(self):
-        self.assertEquals({'self':'Hello','len': 5},
-                          self.f.fetch_all(['@self','@len'], 'Hello'),
-                          'Fetch all')
-
-    def test_fethc_all_error(self):
-        with self.assertRaises(UnsupportedFormat) as context:
-            self.f.fetch_all(['@self','@len','@die'], 'Hello')
-
+    def test_context(self):
+        self.assertEquals(('date', Date(2015, 02, 23)), get_context('2015-02-23'), 'Date context')
+        self.assertEquals(('gender', Gender.MALE), get_context({'name':'John', 'gender':'male'}), 'Gender context')
+        self.assertEquals(('genders', [Gender.MALE, Gender.FEMALE]), get_context([{'name':'John', 'gender':'male'}, 'female']), 'Genders context')
+        self.assertEquals(('list', 3), get_context([{'name':'John', 'gender':'male'}, 'female', 'no gender']), 'List context')
+        self.assertEquals(('number', 12), get_context(12), 'Number context')
+        self.assertEquals(('number', 12), get_context(12), 'Number context')
+        self.assertEqual(('value','qwerty'), get_context(Dumn()), 'Default context')
 
 if __name__ == '__main__':
     unittest.main()

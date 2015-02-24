@@ -116,7 +116,7 @@ def build_regexp(pattern):
     return re.compile(pattern)
 
 
-SUPPORTED_FUNCTIONS = {  
+SUPPORTED_FUNCTIONS = {
     # McCarthy's Elementary S-functions and Predicates
     'quote': lambda expr: expr,
     'car': lambda list: list[1],
@@ -126,8 +126,8 @@ SUPPORTED_FUNCTIONS = {
     # Tr8n Extensions
     '=': lambda l, r: l == r,  # ['=', 1, 2]
     '!=': lambda l, r: l != r,  # ['!=', 1, 2]
-    '<': lambda l, r: l < r,  # ['<', 1, 2]
-    '>': lambda l, r: l > r,  # ['>', 1, 2]
+    '<': lambda l, r: float(l) < float(r),  # ['<', 1, 2]
+    '>': lambda l, r: float(l) > float(r),  # ['>', 1, 2]
     '+': lambda l, r: l + r,  # ['+', 1, 2]
     '-': lambda l, r: l - r,  # ['-', 1, 2]
     '*': lambda l, r: l * r,  # ['*', 1, 2]
@@ -136,10 +136,10 @@ SUPPORTED_FUNCTIONS = {
     '/': lambda l, r: (l * 1.0) / r,  # ['/', 1, 2]
     '!': lambda expr: not expr,  # ['!', ['true']]
     'not': lambda val: not val,  # ['not', ['true']]
-    '&&': f_and,  # ['&&', [], [], ...]
-    'and': f_and,  # ['and', [], [], ...]
-    '::': lambda exprs: f_or,  # ['::', [], [], ...]
-    'or': lambda exprs: f_or,  # ['or', [], [], ...]
+    '&&': lambda a, b: a and b,  # ['&&', [], [], ...]
+    'and': all,  # ['and', [], [], ...]
+    '::':any,  # ['::', [], [], ...]
+    'or': any,  # ['or', [], [], ...]
     'if': lambda c, t, f: t if c else f,# ['if', 'cond', 'true', 'false']
     'true': lambda: True,  # ['true']
     'false': lambda: False,  # ['false']

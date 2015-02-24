@@ -61,3 +61,6 @@ class rules_functions(unittest.TestCase):
         self.assertTrue(SUPPORTED_FUNCTIONS['any'](['male','female'],'male'), 'Any is male')
         self.assertFalse(SUPPORTED_FUNCTIONS['any'](['female','female'],'male'), 'Nobody is male')
 
+    def test_cmp(self):
+        self.assertTrue(SUPPORTED_FUNCTIONS['<']('3', 10), '3 < 10')
+

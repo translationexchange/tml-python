@@ -64,3 +64,13 @@ class rules_functions(unittest.TestCase):
     def test_cmp(self):
         self.assertTrue(SUPPORTED_FUNCTIONS['<']('3', 10), '3 < 10')
 
+    def test_eq(self):
+        self.assertTrue(f_eq(10, '10'), '10 == "10"')
+        self.assertTrue(f_eq(10, 10), '10 == "10"')
+        self.assertTrue(f_eq('A', 'A'), '"A" == "A"')
+        self.assertFalse(f_eq(10, 'A'), '10 != "A')
+
+
+if __name__ == '__main__':
+    unittest.main()
+

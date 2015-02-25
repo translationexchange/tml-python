@@ -115,6 +115,24 @@ def build_regexp(pattern):
         return re.compile(pcre.group(1), build_flags(pcre.group(2)))
     return re.compile(pattern)
 
+def f_mod(l, r):
+    return int(l) % int(r)
+
+def f_any(*args):
+    return any(args)
+
+def f_all(*args):
+    return all(args)
+
+def f_eq(*args):
+    if any([type(arg) is int for arg in args]):
+        # convert all arguments to int if int argumnt exists
+        try: 
+            args = [int(arg) for arg in args]
+        except ValueError:
+            # can not convert argument to int <-> !=
+            return False
+    return all([args[0] == arg for arg in args])
 
 SUPPORTED_FUNCTIONS = {
     # McCarthy's Elementary S-functions and Predicates
@@ -124,22 +142,23 @@ SUPPORTED_FUNCTIONS = {
     'eq': lambda l, r: l == r,
     'atom': lambda expr: isinstance(expr, (type(None), str, int, float, bool)),
     # Tr8n Extensions
-    '=': lambda l, r: l == r,  # ['=', 1, 2]
+    '=': f_eq,  # ['=', 1, 2]
     '!=': lambda l, r: l != r,  # ['!=', 1, 2]
     '<': lambda l, r: float(l) < float(r),  # ['<', 1, 2]
     '>': lambda l, r: float(l) > float(r),  # ['>', 1, 2]
-    '+': lambda l, r: l + r,  # ['+', 1, 2]
-    '-': lambda l, r: l - r,  # ['-', 1, 2]
-    '*': lambda l, r: l * r,  # ['*', 1, 2]
-    '%': lambda l, r: l % r,  # ['%', 14, 10]
-    'mod': lambda l, r: l % r,  # ['mod', '@n', 10]
+    '+': lambda l, r: float(l) + float(r),  # ['+', 1, 2]
+    '-': lambda l, r: float(l) - float(r),  # ['-', 1, 2]
+    '*': lambda l, r: float(l) * float(r),  # ['*', 1, 2]
+    '%': f_mod,  # ['%', 14, 10]
+    'mod': f_mod,  # ['mod', '@n', 10]
     '/': lambda l, r: (l * 1.0) / r,  # ['/', 1, 2]
     '!': lambda expr: not expr,  # ['!', ['true']]
     'not': lambda val: not val,  # ['not', ['true']]
-    '&&': lambda a, b: a and b,  # ['&&', [], [], ...]
-    'and': all,  # ['and', [], [], ...]
-    '::':any,  # ['::', [], [], ...]
-    'or': any,  # ['or', [], [], ...]
+    '&&': f_all,  # ['&&', [], [], ...]
+    'and': f_all,  # ['and', [], [], ...]
+    '::': f_any,  # ['::', [], [], ...]
+    '||': f_any,
+    'or': f_any,  # ['or', [], [], ...]
     'if': lambda c, t, f: t if c else f,# ['if', 'cond', 'true', 'false']
     'true': lambda: True,  # ['true']
     'false': lambda: False,  # ['false']

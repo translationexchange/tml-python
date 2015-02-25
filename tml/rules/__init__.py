@@ -28,12 +28,12 @@ class Case(object):
         return self.engine.execute(self.default, data)
 
     @classmethod
-    def from_rules(cls, rules):
+    def from_rules(cls, rules, default = None):
         """ Build case from rules
             Args:
                 rules (dict): view API response contexts.*.rules or cases.*.rules
         """
-        ret = Case([], ['@value'])
+        ret = Case([], ['quote', default])
         for key in rules:
             rule = rules[key]
             operations = parse(rule['operations']) if 'operations' in rule else ['quote', key] # if operations is not defined - just return a key

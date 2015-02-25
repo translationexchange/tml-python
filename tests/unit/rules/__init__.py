@@ -34,8 +34,9 @@ class rules(unittest.TestCase):
                                 'another':{}})
         self.assertEquals('one', case.apply({'value': 1}))
         self.assertEquals('more_than_ten', case.apply({'value': 12}))
-        self.assertEquals('another', case.apply(3))
+        self.assertEquals('another', case.apply({'value':3}))
 
 
 if __name__ == '__main__':
     unittest.main()
+

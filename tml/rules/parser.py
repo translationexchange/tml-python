@@ -7,6 +7,8 @@ import re
 NO_EXPRESSION_PATTERN = re.compile('^\@(\w+)$')
 NO_EXPRESSION = '(quote @%s)'
 
+QUOTES = ['"',"'"]
+
 def parse(text):
     """ Parse rule 
         Args:
@@ -45,7 +47,7 @@ def parse(text):
 
     for let in text[1:-1]:
         pos = pos + 1 # calculate symbol
-        if let == '"':
+        if let in QUOTES:
             # Quotation like ("Some quoted text")
             if quote is None:
                 # Start new argument:
@@ -55,11 +57,16 @@ def parse(text):
                     raise ParseError('Unexpected quote', ParseError.INVALID_SYNTAX, text, pos)
                 argument = []
                 quote = pos
-            else:
+                quote_type = let
+            elif quote_type == let:
                 # Close argument:
                 # (upper "Any data inside^")
                 expression, argument = flush(expression, argument)
                 quote = None
+                quote_type = None
+            else:
+                # inner quote:
+                argument.append(let)
         elif not quote is None:
             # We are inside quoted argument:
             # ignore any special symbol and just push to argument

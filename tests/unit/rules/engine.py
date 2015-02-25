@@ -8,6 +8,7 @@ from tml.rules.parser import parse
 def die():
     raise Exception('Die')
 
+
 class rules_engine(unittest.TestCase):
     """ Test of rules engine """
     def setUp(self):
@@ -15,7 +16,32 @@ class rules_engine(unittest.TestCase):
         self.engine = RulesEngine({'sum': lambda a, b: int(a) + int(b),
                                    'mod': lambda a, b: int(a) % int(b),
                                    'die': die})
-    
+
+    def test_number_rules(self):
+        engine = RulesEngine(SUPPORTED_FUNCTIONS)
+        self.assertEquals(
+                        1,
+                        engine.execute(
+                                       parse('(mod @n 10)'),
+                                       {'n': 1}),
+                        '@n = 1 -> (mod @n 10)')
+        self.assertTrue(
+                        engine.execute(
+                                       parse('(= 1 @n)'),
+                                       {'n': 1}),
+                        '@n = 1 -> (= 1 @n)')
+
+        self.assertTrue(
+                        engine.execute(
+                                       parse('(= 1 (mod @n 10))'),
+                                       {'n': 1}),
+                        '@n = 1 -> (= 1 (mod @n 10))')
+
+        self.assertTrue(
+                        engine.execute(
+                                       parse('(&& (= 1 (mod @n 10)) (!= 11 (mod @n 100)))'),
+                                       {'n': 1}))
+
     def test_execution(self):
         """ Test rules engine"""
         self.assertEquals(5, self.engine.execute(['sum', '2', '3'], {}), '(sum 2 3)')

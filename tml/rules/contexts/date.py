@@ -28,6 +28,7 @@ class Date(date):
         raise NotDate(data)
 
 class NotDate(ArgumentError):
+    """ Argument is not a date """
     def __init__(self, data):
         self.data = data
 

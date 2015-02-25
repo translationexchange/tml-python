@@ -7,45 +7,117 @@ from .number import Number
 from .date import Date
 from .gender import Gender
 from .genders import Genders
+from ..options import Parser as OptionsParser
+from tml.rules.options import TokenMapping
+from tml.rules import Case as RulesCase
+from distutils.command.config import config
+
 
 class Value(object):
-    """ String value """
+    """ Value contexts """
     @classmethod
     def match(cls, data):
         return str(data)
 
-class Fetcher(object):
-    """ Class which get supported context """
-    def __init__(self, contexts):
-        """ Context fetcher
-            Args:
-                contexts (code, matcher)[]: list of contexts
-        
+    def __call___(self, data):
+        return self.match(data)
+
+
+class UnsupportedContext(BaseError):
+    pass
+
+
+SUPPORTED_CONTEXTS = [('date', Date),
+                      ('gender', Gender),
+                      ('genders', Genders),
+                      ('list', Count),
+                      ('number', Number),
+                      ('value', Value)]
+
+class Context(object):
+    """ Variable context """
+    def __init__(self, pattern, options_parser, rules, variable_name):
+        """ .ctor
+            pattern (Value): pattern for variable token
+            options_parser (OptionsParser): parser for token options
+            rules (tml.rules.Case): rules to detect what options is
+            variable_name (string): name of variable for rules
         """
+        self.pattern = pattern
+        self.options_parser = options_parser
+        self.rules = rules
+        self.variable_name = variable_name
+
+    def execute(self, token_options, value):
+        """ Execute context for value with options
+            Args:
+                token_options (string): token options like 'male: he, female: she, default: it'
+                value (mixed): value
+                options (dict): parser options
+            Raises:
+                AgrumentError: value does not match context
+            Returns:
+                string: token value after rules applyes
+        """
+        # check context for value:
+        try:
+            data = {self.variable_name: self.pattern.match(value)}
+        except ArgumentError as e:
+            raise UnsupportedContext(self, e)
+        # execute rules for tokens, get a key for data:
+        key = self.rules.apply(data)
+        # return option:
+        return self.options_parser.parse(token_options)[key]
+
+
+class Contexts(object):
+    """ List of contexts """
+    def __init__(self, contexts):
+        """ .ctor
+            Args:
+                contexts (Context[])
+        """
+        if not all([isinstance(el, Context) for el in contexts]):
+            # Check that any element is context:
+            raise ArgumentError('Contexts list contains not context object', contexts)
         self.contexts = contexts
 
-
-    def get_context(self, data):
-        """ Get context for data
+    def execute(self, token_options, value):
+        """ Execute token options for value at firs supported context
             Args:
-                data (mixed): input data
+                token_options (string): token options as 'he, she, it'
+                value: token value
             Returns:
-                (context, value in context)
+                string
         """
-        for key, context in self.contexts:
+        for context in self.contexts:
             try:
-                return (key, context.match(data))
-            except ArgumentError:
-                pass # context is not supported
-        raise ArgumentError('No context for input data')
+                return context.execute(token_options, value)
+            except UnsupportedContext:
+                pass
+        raise ArgumentError('Could not detect context for object %s' % value, value)
 
-# Default fetcher:
-_fetcher = Fetcher([('date', Date),
-                    ('gender', Gender),
-                    ('genders', Genders),
-                    ('list', Count),
-                    ('number', Number),
-                    ('value', Value)])
+    @classmethod
+    def from_dict(cls, config):
+        """ Build context from API response
+            Args:
+                config (dict): API response by key contexts
+            Return:
+                Contexts
+        """
+        ret = cls([])
+        for key, pattern in SUPPORTED_CONTEXTS:
+            # Use only supported context in define order:
+            try:
+                data = config[key]
+            except KeyError:
+                # context is not defined in config
+                continue
+            ret.contexts.append(Context(pattern,
+                                        OptionsParser(data['keys'],
+                                                     data['default_key'],
+                                                     TokenMapping.build(data['token_mapping'])),
+                                        RulesCase.from_rules(data['rules'], data['default_key']),
+                                        data['variables'][0][:1]))
+        return ret
 
-def get_context(data):
-    return _fetcher.get_context(data)

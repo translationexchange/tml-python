@@ -2,10 +2,8 @@ import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax, execute_all
 from tml.token.parser import TokenParser, IS_TOKEN
-from tests.unit.token import ReturnRuleCompiler
-
-
-RulesToken.rules_compiller = ReturnRuleCompiler()
+from tests.unit.token import FakeLanguage
+ 
 
 class TokenTest(unittest.TestCase):
     def test_parser(self):
@@ -14,7 +12,7 @@ class TokenTest(unittest.TestCase):
                                       VariableToken,
                                       RulesToken,
                                       PipeToken]))
-        tokens = p.parse('{name} give you {count||apple} for free')
+        tokens = p.parse('{name} give you {count||apple} for free', FakeLanguage())
         self.assertEquals(4, len(tokens), 'Splited to 4 tokens')
         self.assertEquals(VariableToken, tokens[0].__class__, '{name} is varible')
         self.assertEquals(TextToken, tokens[1].__class__, '"give you" is text')

@@ -2,6 +2,7 @@
 import re
 from tml.token import TokenMatcher
 
+
 IS_TOKEN = re.compile('(\{.*?\})')
 
 class TokenParser(object):
@@ -15,6 +16,6 @@ class TokenParser(object):
         self.regexp = regexp
         self.supported_tokens = supported_tokens
 
-    def parse(self, text):
-        return [self.supported_tokens.build_token(part) for part in self.regexp.split(text) if len(part)]
+    def parse(self, text, language):
+        return [self.supported_tokens.build_token(part, language) for part in self.regexp.split(text) if len(part)]
 

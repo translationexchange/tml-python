@@ -2,6 +2,7 @@
 import re
 from ..exceptions import Error 
 
+
 class AbstractToken(object):
     """ Base token class """
     @classmethod
@@ -37,8 +38,14 @@ class TextToken(AbstractToken):
         return self.text
 
     @classmethod
-    def validate(cls, text):
-        """ Validate tokenized string """
+    def validate(cls, text, language):
+        """ Validate tokenized string 
+            Args:
+                text(string): token text
+                language (Language): token language
+            Returns:
+                TextToken|None
+        """
         if text == '':
             # Empty text
             return TextToken(text)
@@ -55,7 +62,7 @@ class VariableToken(AbstractToken):
 
     IS_TOKEN = re.compile('\{(\w+)\}')
     @classmethod
-    def validate(cls, text):
+    def validate(cls, text, language):
         m = cls.IS_TOKEN.match(text)
         if m:
             return VariableToken(m.group(1))
@@ -69,27 +76,29 @@ class RulesToken(VariableToken):
         {count|token, tokens}: count = 1   -> token
                                count = 100 -> tokens 
     """
-    def __init__(self, name, rules):
+    def __init__(self, name, rules, language):
         """ .ctor
             Args:
                 name (string): variable name
                 rules (string): rules string
+                language (Language): current language
         """
         super(RulesToken, self).__init__(name)
         self.rules = rules
+        self.language = language
 
     IS_TOKEN = re.compile('^\{(\w+)\|([^\|]{1}(.*))\}$')
     """ Compiler for rules """
-    rules_compiller = None
     @classmethod
-    def validate(cls, text):
+    def validate(cls, text, language):
         m = cls.IS_TOKEN.match(text)
         if m:
-            return cls(m.group(1), m.group(2))
+            return cls(m.group(1), m.group(2), language)
 
     def execute(self, data, options):
         """ Execute token with var """
-        return RulesToken.rules_compiller.compile(self, data[self.name], options).execute()
+        return self.language.contexts.execute(self.rules, super(RulesToken, self).execute(data, options))
+
 
 class PipeToken(RulesToken):
     """ 
@@ -100,13 +109,14 @@ class PipeToken(RulesToken):
     """
     IS_TOKEN = re.compile('^\{(\w+)\|\|(.*)\}$')
 
-    def __init__(self, name, rules):
+    def __init__(self, name, rules, language):
         self.token = VariableToken(name)
-        self.rules = RulesToken(name, rules)
+        self.rules = RulesToken(name, rules, language)
 
     def execute(self, data, options):
         """ Execute token """
         return '%s %s' % (self.token.execute(data, options), self.rules.execute(data, options))
+
 
 class TokenMatcher(object):
     """ Class which select first supported token for text """
@@ -117,7 +127,7 @@ class TokenMatcher(object):
         """
         self.classes = classes
 
-    def build_token(self, text):
+    def build_token(self, text, language):
         """ Build token for text - return first matched token
             Args:
                 text (string): token text
@@ -125,7 +135,7 @@ class TokenMatcher(object):
                 AbstractToken: token object
         """
         for cls in self.classes:
-            ret = cls.validate(text)
+            ret = cls.validate(text, language)
             if ret:
                 return ret
         # No token find:
@@ -149,3 +159,4 @@ class InvalidTokenSyntax(Error):
 
     def __str__(self):
         return u'Token syntax is not supported for token "%s"' % self.text
+

@@ -1,66 +1,51 @@
-# encoding: UTF-8
-# --
-# Copyright (c) 2015, Translation Exchange, Inc.
-#
-#  _______				    _		_   _		      ______		   _
-# |__   __|				  | |     | | (_)		    |  ____|		 | |
-#    | |_ __ __ _ _ __  ___| | __ _| |_ _  ___  _ __ | |__  __  _____| |__   __ _ _ __   __ _  ___
-#    | | '__/ _` | '_ \/ __| |/ _` | __| |/ _ \| '_ \|  __| \ \/ / __| '_ \ / _` | '_ \ / _` |/ _ \
-#    | | | | (_| | | | \__ \ | (_| | |_| | (_) | | | | |____ >  < (__| | | | (_| | | | | (_| |  __/
-#    |_|_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|______/_/\_\___|_| |_|\__,_|_| |_|\__, |\___|
-#																								    __/ |
-#																								   |___/
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#++
-
+from .rules.contexts import Contexts
 __author__ = 'randell'
 
-
-class Language:
-    def __init__(self, locale):
-        # TODO
+class Language(object):
+    """ Language object """
+    def __init__(self, application, id, locale, native_name, right_to_left, contexts):
+        """ .ctor
+            Args:
+                application (Application): current application
+                id (int): language id in API
+                locale (string): language cover
+                native_name (string): languge title
+                right_to_left (boolean): rtl flag
+                contexts (.rules.contexts.Contexts): contexts
+        """
+        self.applicaton = application
+        self.id = id
         self.locale = locale
-        self.name = None
-        self.english_name = None
-        self.native_name = None
-        self.right_to_left = None
-        self.flag_url = None
+        self.native_name = native_name
+        self.right_to_left = right_to_left
+        self.contexts = contexts
 
-    #######################################################################################################
-    # Translation Methods
-    #
-    # Note - when inline translation mode is enable, cache will not be used and translators will
-    # always hit the live service to get the most recent translations
-    #
-    # Some cache adapters cache by source, others by key. Some are read-only, some are built on the fly.
-    #
-    # There are three ways to call the tr method
-    #
-    # tr(label, description = "", tokens = {}, options = {})
-    # or
-    # tr(label, tokens = {}, options = {})
-    # or
-    # tr(:label => label, :description => "", :tokens => {}, :options => {})
-    ########################################################################################################
+    @classmethod
+    def from_dict(cls, application, data):
+        """ Build language instance from API response """
+        return cls(application,
+                   data['id'],
+                   data['locale'],
+                   data['native_name'],
+                   data['right_to_left'],
+                   Contexts.from_dict(data['contexts']))
 
-    def translate(self, label, description=None, tokens={}, options={}):
-        return None
-
+    @classmethod
+    def load_by_locale(cls, application, locale):
+        """ Load language by locale 
+            Args:
+                application (Application): app instance
+                locale (string): locale code (ru|en)
+            Throws:
+                application.LanguageIsNotSupported: language is not supported by APP
+                api.client.ClientError: API error
+            Returns:
+                Language
+        """
+        # check is language supported by APP:
+        url = application.get_language_url(locale)
+        # load data by API:
+        data = application.client.get(url, {'definition': 1})
+        # create instance:
+        return cls.from_dict(application, data)
 

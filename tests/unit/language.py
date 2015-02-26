@@ -5,22 +5,15 @@ from tml.language import Language
 from os.path import dirname
 import json
 from tml.rules.contexts import Contexts
-
-class ClientMock(object):
-    def __init__(self, data = {}):
-        self.data = data
-
-    def get(self, url, params):
-        return self.data[url]
+from tests.mock import Client
 
 LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
 
 class language(unittest.TestCase):
     """ Language tests"""
     def setUp(self):
-        path = '%s/fixtures/ru.json' % dirname(dirname(__file__))
-        ru = json.loads(open(path).read())
-        self.client = ClientMock({'languages/ru': ru})
+        self.client = Client()
+        self.client.read('languages/ru')
         self.app = Application(self.client, 100, [{'locale':'ru'}])
 
     def test_load(self):

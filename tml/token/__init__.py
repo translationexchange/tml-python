@@ -141,6 +141,8 @@ class TokenMatcher(object):
         # No token find:
         raise InvalidTokenSyntax(text)
 
+data_matcher = TokenMatcher([TextToken, VariableToken, RulesToken, PipeToken])
+
 def execute_all(tokens, data, options):
     """ Execute all tokens
         Args:

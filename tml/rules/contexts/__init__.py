@@ -48,6 +48,34 @@ class Context(object):
         self.rules = rules
         self.variable_name = variable_name
 
+    def match(self, value):
+        """ Check is value match context 
+            Args:
+                value: mixed data
+            Raises:
+                AgrumentError: value does not match context
+            Returns:
+                normalized data for context
+        """
+        return self.pattern.match(value)
+
+    def option(self, value):
+        """ Get option for value
+            Args:
+                value: mixed data
+            Raises:
+                UnsupportedContext: value does not match context
+            Returns:
+                string: option after rules apply
+        """
+        # check context for value:
+        try:
+            data = {self.variable_name: self.match(value)}
+        except ArgumentError as e:
+            raise UnsupportedContext(self, e)
+        # execute rules for tokens, get a key for data:
+        return self.rules.apply(data)
+
     def execute(self, token_options, value):
         """ Execute context for value with options
             Args:
@@ -59,15 +87,8 @@ class Context(object):
             Returns:
                 string: token value after rules applyes
         """
-        # check context for value:
-        try:
-            data = {self.variable_name: self.pattern.match(value)}
-        except ArgumentError as e:
-            raise UnsupportedContext(self, e)
-        # execute rules for tokens, get a key for data:
-        key = self.rules.apply(data)
         # return option:
-        return self.options_parser.parse(token_options)[key]
+        return self.options_parser.parse(token_options)[self.option(value)]
 
 
 class Contexts(object):
@@ -97,6 +118,15 @@ class Contexts(object):
                 pass
         raise ArgumentError('Could not detect context for object %s' % value, value)
 
+    def option(self, value):
+        """ Get context option for given value """
+        for context in self.contexts:
+            try:
+                return context.option(value)
+            except UnsupportedContext:
+                pass
+        raise ArgumentError('Could not detect context for object %s' % value, value)
+
     @classmethod
     def from_dict(cls, config):
         """ Build context from API response
@@ -120,4 +150,5 @@ class Contexts(object):
                                         RulesCase.from_rules(data['rules'], data['default_key']),
                                         data['variables'][0][:1]))
         return ret
+
 

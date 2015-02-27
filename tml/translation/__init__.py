@@ -21,6 +21,5 @@ class Key(object):
     @property
     def key(self):
         """ Key property """
-        print '%s;;;%s' % (self.label, self.description)
         return md5('%s;;;%s' % (self.label, self.description)).hexdigest()
 

@@ -3,7 +3,7 @@ from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax, execute_all
 from tml.token.parser import TokenParser, IS_TOKEN
 from tests.unit.token import FakeLanguage
- 
+
 
 class TokenTest(unittest.TestCase):
     def test_parser(self):

@@ -63,11 +63,15 @@ class rules_variables(unittest.TestCase):
 
 
     def test_context(self):
+        self.assertEquals('one', self.number.option(21), 'Check option')
+        self.assertEquals('few', self.number.option(32), 'Check option')
+        self.assertEquals('many', self.number.option(40), 'Check option')
         self.assertEquals('тест', self.number.execute('тест, теста, тестов', 1), '1 тест')
         self.assertEquals('тестов', self.number.execute('тест, теста, тестов', 11), '11 тестов')
         self.assertEquals('теста', self.number.execute('тест, теста, тестов', 2), '2 теста')
-        with self.assertRaises(UnsupportedContext):
+        with self.assertRaises(ValueIsNotMatchContext) as context:
             self.number.execute('тест, теста, тестов', 'AAA')
+        self.assertEquals('AAA', context.exception.value, 'Store value')
         self.assertEquals('пошел', self.gender.execute('пошел, пошла', 'male'))
 
     def test_contexts(self):

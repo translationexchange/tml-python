@@ -27,6 +27,22 @@ class Value(object):
 class UnsupportedContext(BaseError):
     pass
 
+class ValueIsNotMatchContext(UnsupportedContext):
+    """ Raises when try to fetch option for invalid value """
+    def __init__(self, error, context, value):
+        """ .ctor
+            Args:
+                error (Exception): why value does not supports context
+                context (Context): context instance
+                value (mixed): value
+        """
+        self.error = error
+        self.context = context
+        self.value = value
+
+    def __str__(self, *args, **kwargs):
+        return 'Value is not match context %s. Unsupported %s "%s"' % (str(self.context), type(self.value).__name__, self.value)
+
 
 SUPPORTED_CONTEXTS = [('date', Date),
                       ('gender', Gender),
@@ -73,9 +89,12 @@ class Context(object):
         try:
             data = {self.variable_name: self.match(value)}
         except ArgumentError as e:
-            raise UnsupportedContext(self, e)
+            raise ValueIsNotMatchContext(error = e, context = self, value = value)
         # execute rules for tokens, get a key for data:
         return self.rules.apply(data)
+
+    def __str__(self):
+        return self.pattern.__name__
 
     def execute(self, token_options, value):
         """ Execute context for value with options

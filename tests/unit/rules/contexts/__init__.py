@@ -78,6 +78,8 @@ class rules_variables(unittest.TestCase):
     def test_fetcher(self):
         contexts = Contexts.from_dict(self.api_response)
         self.assertEquals(2, len(contexts.contexts), 'Only gender and number')
+        self.assertEquals('gender', contexts.contexts[0].variable_name, 'Test variable name for gender')
+        self.assertEquals('n', contexts.contexts[1].variable_name, 'Test variable name fro number')
 
 
 if __name__ == '__main__':

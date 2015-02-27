@@ -148,7 +148,7 @@ class Contexts(object):
                                                      data['default_key'],
                                                      TokenMapping.build(data['token_mapping'])),
                                         RulesCase.from_rules(data['rules'], data['default_key']),
-                                        data['variables'][0][:1]))
+                                        data['variables'][0][1:]))
         return ret
 
 

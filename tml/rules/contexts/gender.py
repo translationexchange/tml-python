@@ -11,6 +11,18 @@ class Gender(object):
         self.value = value
         self.gender = Gender.supported_gender(gender)
 
+    @classmethod
+    def male(cls, value):
+        return cls(Gender.MALE, value)
+
+    @classmethod
+    def female(cls, value):
+        return cls(Gender.FEMALE, value)
+
+    @classmethod
+    def other(cls, value):
+        return cls(Gender.OTHER, value)
+
     def __str__(self, *args, **kwargs):
         return self.value
 

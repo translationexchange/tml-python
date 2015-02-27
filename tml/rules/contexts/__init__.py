@@ -11,6 +11,7 @@ from ..options import Parser as OptionsParser
 from tml.rules.options import TokenMapping
 from tml.rules import Case as RulesCase
 from distutils.command.config import config
+from ...exceptions import Error
 
 
 class Value(object):
@@ -90,18 +91,34 @@ class Context(object):
         # return option:
         return self.options_parser.parse(token_options)[self.option(value)]
 
+    @classmethod
+    def from_data(cls, data, pattern):
+        """ Build context from API response
+            Args:
+                data (dict): API data
+                pattern (Value): pattern for variable token
+            Returns:
+                context
+        """
+        return Context(pattern,
+                       OptionsParser(data['keys'], data['default_key'], TokenMapping.build(data['token_mapping'])),
+                       RulesCase.from_rules(data['rules'], data['default_key']),
+                       data['variables'][0][1:])
 
 class Contexts(object):
     """ List of contexts """
-    def __init__(self, contexts):
+    def __init__(self, contexts, index = {}):
         """ .ctor
             Args:
                 contexts (Context[])
+                index (dict): search index (key - context code, value - context index)
         """
         if not all([isinstance(el, Context) for el in contexts]):
             # Check that any element is context:
             raise ArgumentError('Contexts list contains not context object', contexts)
         self.contexts = contexts
+        self.index = index
+
 
     def execute(self, token_options, value):
         """ Execute token options for value at firs supported context
@@ -127,6 +144,20 @@ class Contexts(object):
                 pass
         raise ArgumentError('Could not detect context for object %s' % value, value)
 
+    def find_by_code(self, code):
+        """ Find context by code
+            Args:
+                code (string)
+            Raises:
+                KeyError (context not found)
+            Returns:
+                Context
+        """
+        try:
+            return self.contexts[self.index[code]]
+        except KeyError:
+            raise ContextNotFound(code, self)
+
     @classmethod
     def from_dict(cls, config):
         """ Build context from API response
@@ -139,16 +170,20 @@ class Contexts(object):
         for key, pattern in SUPPORTED_CONTEXTS:
             # Use only supported context in define order:
             try:
-                data = config[key]
+                ret.contexts.append(Context.from_data(config[key], pattern))
+                ret.index[key] = len(ret.contexts)-1
             except KeyError:
                 # context is not defined in config
                 continue
-            ret.contexts.append(Context(pattern,
-                                        OptionsParser(data['keys'],
-                                                     data['default_key'],
-                                                     TokenMapping.build(data['token_mapping'])),
-                                        RulesCase.from_rules(data['rules'], data['default_key']),
-                                        data['variables'][0][1:]))
+
         return ret
 
+
+class ContextNotFound(Error):
+    def __init__(self, code, contexts):
+        self.code = code
+        self.contexts = contexts
+
+    def __str__(self, *args, **kwargs):
+        return 'Context \'%s\' not supported' % self.code
 

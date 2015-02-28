@@ -54,11 +54,22 @@ class TextToken(AbstractToken):
 
 class VariableToken(AbstractToken):
     """ Token for variabel {name} """
+    USE_KEYS = ['name','title','text']
+    
     def __init__(self, name):
+        """
+            Args:
+                name (string): variable name
+        """
         self.name = name
 
     def execute(self, data, options):
-        return unicode(data[self.name])
+        ret = data[self.name]
+        if type(ret) is dict:
+            for key in self.USE_KEYS:
+                if key in ret:
+                    return ret[key]
+        return unicode(ret)
 
     IS_TOKEN = re.compile('\{(\w+)\}')
     @classmethod

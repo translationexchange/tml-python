@@ -1,6 +1,7 @@
 import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax
+from tml.rules.contexts.gender import Gender
 
 class FakeLanguage(object):
     def __init__(self):
@@ -17,6 +18,7 @@ class ContextsMock(object):
 
     def execute(self, rules, data):
         return data.__class__.__name__
+
 
 class TokenTest(unittest.TestCase):
     def setUp(self):
@@ -83,6 +85,13 @@ class TokenTest(unittest.TestCase):
         with self.assertRaises(InvalidTokenSyntax) as context:
             m.build_token('{invalid~token}', self.language)
         self.assertEquals('Token syntax is not supported for token "{invalid~token}"', str(context.exception), 'Check exception message')
+
+    def test_variable_token(self):
+        token = VariableToken(name = 'user')
+        self.assertEquals('John', token.execute({'user':'John'}, {}), 'Pass string')
+        self.assertEquals('John', token.execute({'user': Gender.male('John')}, {}), 'Pass Gender')
+        self.assertEquals('John', token.execute({'user': {'name':'John'}},{}), 'Pass dict')
+        self.assertEquals('John', token.execute({'user': {'title':'John'}},{}), 'Pass string')
 
     def test_rules_token(self):
         cm = ContextsMock()

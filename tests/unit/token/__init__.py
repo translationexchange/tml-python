@@ -9,6 +9,14 @@ class FakeLanguage(object):
     def execute(self, rule, value):
         return rule
 
+class ContextsMock(object):
+    """ Stupid class to test context matching """
+    @property
+    def contexts(self):
+        return self
+
+    def execute(self, rules, data):
+        return data.__class__.__name__
 
 class TokenTest(unittest.TestCase):
     def setUp(self):
@@ -76,6 +84,10 @@ class TokenTest(unittest.TestCase):
             m.build_token('{invalid~token}', self.language)
         self.assertEquals('Token syntax is not supported for token "{invalid~token}"', str(context.exception), 'Check exception message')
 
+    def test_rules_token(self):
+        cm = ContextsMock()
+        token = RulesToken(name = 'obj', rules = None, language = ContextsMock())
+        self.assertEquals(cm.execute(None, cm), token.execute({'obj': cm}, {}), 'Test object passed to RulesToken')
 
 if __name__=='__main__':
     unittest.main()

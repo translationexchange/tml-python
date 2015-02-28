@@ -97,7 +97,7 @@ class RulesToken(VariableToken):
 
     def execute(self, data, options):
         """ Execute token with var """
-        return self.language.contexts.execute(self.rules, super(RulesToken, self).execute(data, options))
+        return self.language.contexts.execute(self.rules, data[self.name])
 
 
 class PipeToken(RulesToken):

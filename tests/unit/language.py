@@ -13,7 +13,7 @@ class language(unittest.TestCase):
     """ Language tests"""
     def setUp(self):
         self.client = Client()
-        self.client.read('languages/ru')
+        self.client.read('languages/ru', {'definition':1})
         self.app = Application(self.client, 100, [{'locale':'ru'}])
 
     def test_load(self):

@@ -9,8 +9,8 @@ class application(unittest.TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.client.read('applications/current')
-        self.client.read('applications/2')
+        self.client.read('applications/current', {'definition':1})
+        self.client.read('applications/2', {'definition':1})
 
 
     def test_instance(self):

@@ -49,7 +49,7 @@ SUPPORTED_CONTEXTS = [('date', Date),
                       ('genders', Genders),
                       ('list', Count),
                       ('number', Number),
-                      ('value', Value)]
+                      ('variables', Value)]
 
 class Context(object):
     """ Variable context """

@@ -1,5 +1,6 @@
 # encoding: UTF-8
 from tml.rules.contexts import ContextNotFound
+from ..exceptions import RequiredArgumentIsNotPassed
 
 
 class Context(object):
@@ -25,7 +26,11 @@ class Context(object):
             # check any rule:
             for type_code in self.rules[key]:
                 expected = self.rules[key][type_code]
-                actual = language.contexts.find_by_code(type_code).option(data[key])
+                try:
+                    value = data[key]
+                except KeyError:
+                    raise RequiredArgumentIsNotPassed(key, data)
+                actual = language.contexts.find_by_code(type_code).option(value)
                 if expected != actual:
                     # Variable is not supported by context
                     return False

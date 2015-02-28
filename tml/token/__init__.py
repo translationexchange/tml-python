@@ -1,6 +1,6 @@
 # encoding: UTF-8
 import re
-from ..exceptions import Error 
+from ..exceptions import Error, RequiredArgumentIsNotPassed
 
 
 class AbstractToken(object):
@@ -52,7 +52,18 @@ class TextToken(AbstractToken):
         if text[0]!='{':
             return TextToken(text)
 
-class VariableToken(AbstractToken):
+class AbstractVariableToken(AbstractToken):
+    def __init__(self, name):
+        self.name = name
+
+    def fetch(self, data):
+        try:
+            return data[self.name]
+        except KeyError:
+            raise RequiredArgumentIsNotPassed(self.name, data)
+
+
+class VariableToken(AbstractVariableToken):
     """ Token for variabel {name} """
     USE_KEYS = ['name','title','text']
     
@@ -64,7 +75,7 @@ class VariableToken(AbstractToken):
         self.name = name
 
     def execute(self, data, options):
-        ret = data[self.name]
+        ret = self.fetch(data)
         if type(ret) is dict:
             for key in self.USE_KEYS:
                 if key in ret:
@@ -108,7 +119,7 @@ class RulesToken(VariableToken):
 
     def execute(self, data, options):
         """ Execute token with var """
-        return self.language.contexts.execute(self.rules, data[self.name])
+        return self.language.contexts.execute(self.rules, self.fetch(data))
 
 
 class PipeToken(RulesToken):

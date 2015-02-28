@@ -108,7 +108,8 @@ class Context(object):
                 string: token value after rules applyes
         """
         # return option:
-        return self.options_parser.parse(token_options)[self.option(value)]
+        option = self.option(value)
+        return self.options_parser.parse(token_options)[option]
 
     @classmethod
     def from_data(cls, data, pattern):

@@ -78,6 +78,7 @@ class rules_variables(unittest.TestCase):
         contexts = Contexts([self.gender, self.number])
         self.assertEquals('тест', contexts.execute('тест, теста, тестов', 1), '1 тест')
         self.assertEquals('пошел', contexts.execute('пошел, пошла', 'male'))
+        self.assertEquals('яблока', contexts.execute('one: яблоко, few: яблока, many: яблок', 22),'Check last option')
 
     def test_fetcher(self):
         contexts = Contexts.from_dict(self.api_response)

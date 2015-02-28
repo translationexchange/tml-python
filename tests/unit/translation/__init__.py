@@ -1,12 +1,13 @@
 # encoding: UTF-8
 from tests.mock import Client
-from tml.translation import Key
+from tml.translation import Key, TranslationOption, OptionIsNotSupported
 from tml.translation.context import Context
 import unittest
 from tml import Application
 from tml.language import Language
 from tml.rules.contexts.gender import Gender
 from tml.rules.contexts import ValueIsNotMatchContext
+from tml.exceptions import RequiredArgumentIsNotPassed
 
 
 class translation_test(unittest.TestCase):
@@ -45,6 +46,18 @@ class translation_test(unittest.TestCase):
         c = Context({})
         self.assertTrue(c.check({'count':100}, {}, self.lang), 'Empty context - right anyway')
 
+    def test_options(self):
+        t = TranslationOption('{name||дал, дала, дало} тебе {count} яблоко', self.lang, {'count':{'number':'one'}})
+        self.assertEquals('Вася дал тебе 21 яблоко', t.execute({'name': Gender.male('Вася'),'count': 21}, {}))
+        self.assertEquals('Лена дала тебе 21 яблоко', t.execute({'name': Gender.female('Лена'),'count': 21}, {}))
+        with self.assertRaises(OptionIsNotSupported):
+            t.execute({'name': Gender.male('John'),'count': 2}, {})
+        with self.assertRaises(RequiredArgumentIsNotPassed):
+            t.execute({}, {})
+        with self.assertRaises(RequiredArgumentIsNotPassed):
+            t.execute({'count': 1}, {})
+        t = TranslationOption('Anyway', self.lang, {})
+        self.assertEquals('Anyway', t.execute({}, {}), 'Anyway execute')
 
 if  __name__ == '__main__':
     unittest.main()

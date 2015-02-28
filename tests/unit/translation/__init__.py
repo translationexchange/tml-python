@@ -1,6 +1,7 @@
 # encoding: UTF-8
 from tests.mock import Client
-from tml.translation import Key, TranslationOption, OptionIsNotSupported
+from tml.translation import Key, TranslationOption, OptionIsNotSupported,\
+    Translation
 from tml.translation.context import Context
 import unittest
 from tml import Application
@@ -58,6 +59,20 @@ class translation_test(unittest.TestCase):
             t.execute({'count': 1}, {})
         t = TranslationOption('Anyway', self.lang, {})
         self.assertEquals('Anyway', t.execute({}, {}), 'Anyway execute')
+
+    def test_tranlation(self):
+        url = 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations'
+        self.client.read(url)
+        key = Key(label = '{actor} give you {count} apples',
+                  language = self.lang)
+        t = Translation.from_data(key,
+                                  self.client.get(url, {})['results'])
+        self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
+        self.assertEquals('Вася дал тебе всего 1 яблоко, мужик!', t.execute({'actor':{'gender':'male','name':'Вася'},'count':1}, {}), 'Male one')
+        self.assertEquals('Вася дал тебе 5 яблок', t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')
+        
+        t = Translation(key, [])
+        self.assertEquals('John give you 5 apples', t.execute({'actor':{'gender':'male','name':'John'},'count':5}, {}), 'Use label by default')
 
 if  __name__ == '__main__':
     unittest.main()

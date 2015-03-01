@@ -26,6 +26,10 @@ class Key(object):
         """ Key property """
         return md5('%s;;;%s' % (self.label, self.description)).hexdigest()
 
+    @property
+    def client(self):
+        return self.language.client
+
 
 class TranslationOption(Context):
     """ Translation option with context """

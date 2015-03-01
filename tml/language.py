@@ -49,3 +49,6 @@ class Language(object):
         # create instance:
         return cls.from_dict(application, data)
 
+    @property
+    def client(self):
+        return self.applicaton.client

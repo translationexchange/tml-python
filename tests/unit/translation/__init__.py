@@ -21,10 +21,11 @@ class translation_test(unittest.TestCase):
         self.lang = Language.load_by_locale(self.app, 'ru')
 
     def test_key(self):
-        k = Key(label = '{name} give you {count} apples', description = 'apple', language= self.lang)
+        k = Key(label = '{name} give you {count} apples', description = 'apple', language= self.lang, level = 5)
         self.assertEquals('{name} give you {count} apples', k.label, 'label')
         self.assertEquals('apple', k.description, 'description')
         self.assertEquals(self.lang.locale, k.language.locale, 'language')
+        self.assertEquals({'locale':'ru', 'level':5,'description':'apple','label':'{name} give you {count} apples'}, k.as_dict, 'As dict function')
 
     def test_key_hash(self):
         """ Test translation key """

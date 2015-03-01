@@ -9,7 +9,7 @@ from ..token.parser import default_parser
 
 class Key(object):
     """ Translation key """
-    def __init__(self, language, label, description = ''):
+    def __init__(self, language, label, description = '', level = 0):
         """ .ctor
             Args:
                 label (string): tranlated string f.ex. "{name} take me {count||apple, apples}"
@@ -19,7 +19,15 @@ class Key(object):
         self.label = label
         self.description = description
         self.language = language
+        self.level = level
 
+    @property
+    def as_dict(self):
+        return {'label':self.label, 'description': self.description, 'locale': self.locale, 'level': self.level}
+
+    @property
+    def locale(self):
+        return str(self.language.locale)
 
     @property
     def key(self):

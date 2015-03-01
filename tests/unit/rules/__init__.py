@@ -8,7 +8,7 @@ from unittest import case
 class rules(unittest.TestCase):
     """ Test for rules case """
     def test_conditions(self):
-        case = Case([
+        case = ContextRules([
                      (['=','@value','a'],['quote','A']), # if value = a return A
                      (['=','@value','b'],['quote','B'])], # if value == b return B
                     ['quote','@value']) # return value
@@ -17,7 +17,7 @@ class rules(unittest.TestCase):
         self.assertEquals('c', case.apply({'value':'c'}),'else return value')
 
     def test_rules_operations(self): 
-        case = Case.from_rules({'good_morning':{'conditions':'(&& (< @time 12) (> @time 3))',
+        case = ContextRules.from_rules({'good_morning':{'conditions':'(&& (< @time 12) (> @time 3))',
                                                'operations':'(quote "Good morning")'},
                                'good_evening':{'conditions':'(&& (< @time 24) (> @time 16))',
                                                'operations':'(quote  "Good evening")'},
@@ -28,7 +28,7 @@ class rules(unittest.TestCase):
         self.assertEquals('Hello', case.apply({'time': 1}),'Hello by default')
 
     def test_select(self):
-        case = Case.from_rules({'one':{'conditions':'(= @value 1)'},
+        case = ContextRules.from_rules({'one':{'conditions':'(= @value 1)'},
                                 'two':{'conditions':'(= @value 2)'},
                                 'more_than_ten':{'conditions':'(> @value 10)'},
                                 'another':{}})

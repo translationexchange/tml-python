@@ -9,7 +9,7 @@ from .gender import Gender
 from .genders import Genders
 from ..options import Parser as OptionsParser
 from tml.rules.options import TokenMapping
-from tml.rules import Case as RulesCase
+from tml.rules import ContextRules
 from distutils.command.config import config
 from ...exceptions import Error
 
@@ -122,7 +122,7 @@ class Context(object):
         """
         return Context(pattern,
                        OptionsParser(data['keys'], data['default_key'], TokenMapping.build(data['token_mapping'])),
-                       RulesCase.from_rules(data['rules'], data['default_key']),
+                       ContextRules.from_rules(data['rules'], data['default_key']),
                        data['variables'][0][1:])
 
 class Contexts(object):

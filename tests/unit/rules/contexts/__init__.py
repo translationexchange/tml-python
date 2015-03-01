@@ -31,7 +31,7 @@ class rules_variables(unittest.TestCase):
                               OptionsParser(number_options,
                                             number_default_option,
                                             TokenMapping.build(number_token_mapping)),
-                                            RulesCase.from_rules(number_rules, number_default_rule),
+                                            ContextRules.from_rules(number_rules, number_default_rule),
                               number_variable_name)
         gender_options = ['male','female','other']
         gender_default_option = 'other'
@@ -47,7 +47,7 @@ class rules_variables(unittest.TestCase):
                       OptionsParser(gender_options,
                                     gender_default_option,
                                     TokenMapping.build(gender_token_mapping)),
-                                    RulesCase.from_rules(gender_rules, gender_default_rule),
+                                    ContextRules.from_rules(gender_rules, gender_default_rule),
                       gender_variable_name)
         self.api_response = {'number':{'default_key': number_default_option,
                                        'keys': number_options,

@@ -7,7 +7,8 @@ from tests.unit import rules
 
 default_engine = RulesEngine(SUPPORTED_FUNCTIONS) # default engine
 
-class Case(object):
+
+class ContextRules(object):
     """ Case of rules """
     def __init__(self, choices, default, engine = default_engine):
         """ .ctor
@@ -33,7 +34,7 @@ class Case(object):
             Args:
                 rules (dict): view API response contexts.*.rules or cases.*.rules
         """
-        ret = Case([], ['quote', default])
+        ret = ContextRules([], ['quote', default])
         for key in rules:
             rule = rules[key]
             operations = parse(rule['operations']) if 'operations' in rule else ['quote', key] # if operations is not defined - just return a key

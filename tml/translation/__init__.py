@@ -95,7 +95,7 @@ class Translation(object):
             except OptionIsNotSupported:
                 pass
         # by default use key label:
-        return self.default.execute(data, option)
+        return self.default.execute(data, options)
 
 class OptionIsNotSupported(Error):
     pass

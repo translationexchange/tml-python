@@ -35,7 +35,7 @@ class RequestMock(object):
         """
         self.response = response
 
-    def get(self, url, params):
+    def request(self, method, url, params, **kwargs):
         """ Stub for get request
             Args:
                 url (string): URL
@@ -43,8 +43,10 @@ class RequestMock(object):
             Returns:
                 dict: mocked data
         """
+        self.method = method
         self.url = url
         self.params = params
+        self.response.url = url
         return self.response
 
 
@@ -53,7 +55,7 @@ class RequestFault(object):
     def __init__(self, exception):
         self.exception = exception
 
-    def get(self, url, params):
+    def request(self, method, url, params):
         raise self.exception
 
 class ClientTest(unittest.TestCase):
@@ -69,10 +71,10 @@ class ClientTest(unittest.TestCase):
         self.assertEquals(expected, resp, 'Return response')
         # check url and query building:
         self.assertEquals('https://api.translationexchange.com/v1/test', client.requests.url, 'Call URL')
-        self.assertEquals({'token':'qwerty', 'param': 'value'}, client.requests.params, 'Token sent as GET parameter')
+        self.assertEquals({'access_token':'qwerty', 'param': 'value'}, client.requests.params, 'Token sent as GET parameter')
         # check call with no params:
         resp = c.get('test')
-        self.assertEquals({'token':'qwerty'}, client.requests.params, 'Call with no params')
+        self.assertEquals({'access_token':'qwerty'}, client.requests.params, 'Call with no params')
         # check string response:
         expected = 'Hello world'
         client.requests = RequestMock(RequestMockResponse(expected))
@@ -99,15 +101,8 @@ class ClientTest(unittest.TestCase):
         expected = {'error':'Error message'}
         client.requests = RequestMock(RequestMockResponse(expected))
         c = client.Client('qwerty')
-        resp = c.get('test', {'param':'value'})
-        self.assertEquals(expected, resp, 'Return response')
         with self.assertRaises(client.APIError) as context:
             c.get('test', {'param':'value'})
-
-        self.assertEquals(
-                          'TML API call fault to https://api.translationexchange.com/v1/test with API error: Error message',
-                          str(context.exception),
-                          'Check exception message')
         self.assertEquals('Error message', context.exception.error, 'Check API error')
 
 

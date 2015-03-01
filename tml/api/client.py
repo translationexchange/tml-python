@@ -49,19 +49,54 @@ class Client(object):
         self.token = token
 
     def get(self, url, params = {}):
-        """ Call API method """
+        """ GET request to API 
+            Args:
+                url (string): URL
+                params (dict): params
+            Raises:
+                HttpError: something wrong with connection
+                APIError: API returns error
+            Returns:
+                dict: response
+        """
+        return self.call(url, 'get', params)
+
+    def post(self, url, params):
+        """ POST request to API 
+            Args:
+                url (string): URL
+                params (dict): params
+            Raises:
+                HttpError: something wrong with connection
+                APIError: API returns error
+            Returns:
+                dict: response
+        """
+        return self.call(url, 'post', params)
+
+    def call(self, url, method, params = {}):
+        """ Make request to API 
+            Args:
+                url (string): URL
+                method (string): HTTP method (get|post|put|delete)
+                params (dict): params
+            Raises:
+                HttpError: something wrong with connection
+                APIError: API returns error
+            Returns:
+                dict: response
+        """
+        resp = None
         try:
             url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
-            params.update({'token': self.token})
-            resp = requests.get(url, params)
-            resp.raise_for_status() # check http status
+            params.update({'access_token': self.token})
+            resp = requests.request(method, url, params = params)
             ret = resp.json()
-            if 'error' in ret:
-                raise APIError(ret['error'], url = url, client = self)
-            return ret
         except Exception as e:
-            raise HttpError(e, url = url, client = self)
-
+            raise HttpError(e, url = resp.url if resp is not None else url, client = self)
+        if 'error' in ret:
+            raise APIError(ret['error'], url = resp.url, client = self)
+        return ret
 
 class ClientError(Error):
     """ Abstract API error """
@@ -91,9 +126,9 @@ class HttpError(ClientError):
 
 class APIError(ClientError):
     def __init__(self, error, url, client):
-        super(HttpError, self).__init__(url, client)
+        super(APIError, self).__init__(url, client)
         self.error = error
 
     def __str__(self):
-        return '%s with API error: %s' % (super(HttpError, self).__str__(), self.error)
+        return '%s with API error: %s' % (super(APIError, self).__str__(), self.error)
 

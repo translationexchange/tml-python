@@ -13,15 +13,36 @@ class Client(object):
     def build_url(self, url, params):
         return '%s?%s' % (url, urlencode(params))
 
-    def get(self, url, params = None):
+    def request(self, method, url, params):
+        self.method = method
+        self.url = url
+        self.params = params
         try:
-            return self.data[self.build_url(url, params)]
+            url = self.build_url(url, params) if method == 'get' else url 
+            return self.data[url]
         except KeyError as e:
             raise HttpError(e, url, self)
 
-    def read(self, url, params, path = None):
+    def get(self, url, params = None):
+        return self.request('get', url, params)
+
+    def post(self, url, params = None):
+        """ POST data """
+        return self.request('post', url, params)
+
+    def read(self, url, params = {}, path = None):
+        """ Read response
+            Args:
+                url (string): for URL
+                params (dict): with params
+                path (string): from file (url.json - by default)
+            Returns:
+                Client
+        """
         path = path if path else '%s.json' % url
         if path[0] != '/':
             # relative path:
             path = '%s/%s' % (FIXTURES_PATH, path)
-        self.data[self.build_url(url, params)] = loads(open(path).read())
+        url = self.build_url(url, params) if params is not None else url
+        self.data[url] = loads(open(path).read())
+        return self

@@ -27,3 +27,24 @@ class AbstactDictionary(object):
     def fetch(self, key):
         raise NotImplemented()
 
+
+class Hashtable(AbstactDictionary):
+    """ Dictionary with translation store in hash """
+    def __init__(self, tranlations = None, missed_keys = []):
+        """ .ctor
+            Args:
+                tranlations (dict): key- tranlation code, value - tranlation options
+        """
+        self.tranlations = tranlations
+        super(Hashtable, self).__init__(missed_keys)
+
+    """ Hash dictionary """
+    def fetch(self, key):
+        """ Tranlate key 
+            Args:
+                key (Key): translated key
+            Returns:
+                Tranlation
+        """
+        return Translation.from_data(key, self.tranlations[key.key])
+

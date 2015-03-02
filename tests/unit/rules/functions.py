@@ -2,8 +2,11 @@
 """ Test rules built-in functions """
 import unittest
 from tml.rules.functions import *
+from tml.rules.engine import RulesEngine
+from json import loads
 import re
-
+from tml.rules.parser import parse
+default_engine = RulesEngine(SUPPORTED_FUNCTIONS) # default engine
 
 class rules_functions(unittest.TestCase):
     def test_to_int(self):
@@ -77,7 +80,9 @@ class rules_functions(unittest.TestCase):
         self.assertTrue(SUPPORTED_FUNCTIONS['match']('/test/i', 'TEST'), 'Test pcre flags')
         self.assertEquals('1ooo', SUPPORTED_FUNCTIONS['replace']('0', 'o', '1000'), 'Test replace')
         self.assertEquals('100o', SUPPORTED_FUNCTIONS['replace']('0$', 'o', '1000'), 'Test preg replace')
-
+        srule = loads('{"test":"(match \'/а$/\' @value)"}')
+        rule = parse(srule['test'])
+        self.assertTrue(default_engine.execute(rule, {'value':'Маша'}), 'Re supports json encoding')
 
 if __name__ == '__main__':
     unittest.main()

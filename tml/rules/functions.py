@@ -120,7 +120,7 @@ def build_regexp(pattern, flags = None):
     if pcre:
         pattern = pcre.group(1)
         flags = flags | build_flags(pcre.group(2))
-    return re.compile(pattern, flags)
+    return re.compile(pattern.encode('utf-8'), flags)
 
 def f_mod(l, r):
     return int(l) % int(r)

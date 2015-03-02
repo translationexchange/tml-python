@@ -24,6 +24,26 @@ class Case(ContextRules):
         """
         ret = cls([], ['quote', '@value'])
         for rule in rules:
-            ret.choices.append((parse(rule['conditions']), parse(rule['operations'])))
+            ret.choices.append((parse(rule['conditions']),
+                                parse(rule['operations'])))
         return ret
 
+    @classmethod
+    def from_data(cls, data, safe = False):
+        """ Build cases from API response
+            Args:
+                data (dict): look cases in language API respons
+                safe (boolean): handle errror
+            Return:
+                (dict, dict): list of rules, list of errors
+        
+        """
+        catch = Exception if safe else None
+        ret = {}
+        errors = {}
+        for key in data:
+            try:
+                ret[key] = cls.from_rules(data[key]['rules'])
+            except catch as e:
+                errors[key] = e
+        return (ret, errors)

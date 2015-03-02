@@ -22,6 +22,7 @@ class AbstractToken(object):
         """
         raise NotImplementedError()
 
+
 class TextToken(AbstractToken):
     """ Plain text """
     def __init__(self, text):
@@ -52,6 +53,7 @@ class TextToken(AbstractToken):
         if text[0]!='{':
             return TextToken(text)
 
+
 class AbstractVariableToken(AbstractToken):
     def __init__(self, name):
         self.name = name
@@ -65,8 +67,8 @@ class AbstractVariableToken(AbstractToken):
 
 class VariableToken(AbstractVariableToken):
     """ Token for variabel {name} """
-    USE_KEYS = ['name','title','text']
-    
+    USE_KEYS = ['name','title','text'] # Keys in dict to fetch printable value
+    IS_TOKEN = re.compile('\{(\w+)\}') # Regext to check objects
     def __init__(self, name):
         """
             Args:
@@ -75,14 +77,56 @@ class VariableToken(AbstractVariableToken):
         self.name = name
 
     def execute(self, data, options):
+        """ Fetch and escape variable from data
+            Args:
+                data (dict): input data
+                options (dict): translation options
+            Returns:
+                string
+        """
         ret = self.fetch(data)
         if type(ret) is dict:
             for key in self.USE_KEYS:
                 if key in ret:
                     return ret[key]
-        return unicode(ret)
+        return self.escape_if_needed(data[self.name], options)
 
-    IS_TOKEN = re.compile('\{(\w+)\}')
+    def escape_if_needed(self, text, options):
+        """ Escape string if it needed
+            Agrs:
+                text (string): text to escape
+                options (dict): tranlation options (if key safe is True - do not escape)
+            Returns:
+                text
+        """
+        text = unicode(text)
+        if self.need_to_escape(options):
+            return self.escape(text)
+        return text
+
+    def escape(self, text):
+        """ Escape text 
+            Args:
+                text: input text
+            Returns:
+                (string): escaped HTML
+        """
+        return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
+
+    def need_to_escape(self, options):
+        """ Need escape string
+            Args:
+                options (dict): translation options
+            Returns:
+                boolean
+        """
+        try:
+            # Use "safe" option to not escape valiable data:
+            return not options['safe']
+        except KeyError:
+            # Escape by default:
+            return True
+
     @classmethod
     def validate(cls, text, language):
         m = cls.IS_TOKEN.match(text)
@@ -91,6 +135,7 @@ class VariableToken(AbstractVariableToken):
 
     def __str__(self):
         return '{%s}' % self.name
+
 
 class RulesToken(VariableToken):
     """ 
@@ -132,7 +177,7 @@ class CaseToken(RulesToken):
 
     def execute(self, data, options):
         """ Execute with rules options """
-        return self.case.execute(self.fetch(data))
+        return self.escape_if_needed(self.case.execute(self.fetch(data)), options)
 
 
 class UnsupportedCase(Error):

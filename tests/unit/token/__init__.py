@@ -47,7 +47,16 @@ class TokenTest(unittest.TestCase):
         class Hello(object):
             def __str__(self, *args, **kwargs):
                 return 'Hello'
-        self.assertEquals(u'Hello', v.execute({'name':Hello()}, {}), 'Fetch name')
+        self.assertEquals(u'Hello', 
+                          v.execute({'name':Hello()}, {}),
+                          'Fetch name')
+        escape_me = '<John & "qouted\'>'
+        self.assertEquals(u'&lt;John &amp; &quot;qouted&#39;&gt;',
+                          v.execute({'name': escape_me}, {}),
+                          'Escape data')
+        self.assertEquals(escape_me,
+                  v.execute({'name': escape_me}, {'safe': True}),
+                  'Check safe')
 
     def test_parse_variable(self):
         """ Test variable token parsing """

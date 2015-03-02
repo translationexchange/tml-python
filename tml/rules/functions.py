@@ -4,6 +4,9 @@ import re
 from _ctypes import ArgumentError
 from datetime import date, datetime
 import re
+from calendar import prcal
+from re import search
+from idlelib.ReplaceDialog import replace
 
 
 INT_REGEXP = '(0|[1-9]\d*)'
@@ -98,22 +101,26 @@ def build_flags(flags):
             int:
     """
     ret = 0
+    if flags is None:
+        return ret
     flags = flags.upper()
     for flag in ('A','I','L','M','S'):
         if flag in flags:
             ret |= getattr(re, flag)
     return ret
 
-def build_regexp(pattern):
+def build_regexp(pattern, flags = None):
     """ Build regexp:
             pattern (string): pattern as python regular expression in PCRE (/pattern/flags)
         Returns:
             _sre.SRE_Pattern
     """
+    flags = build_flags(flags)
     pcre = IS_PCRE.match(pattern)
     if pcre:
-        return re.compile(pcre.group(1), build_flags(pcre.group(2)))
-    return re.compile(pattern)
+        pattern = pcre.group(1)
+        flags = flags | build_flags(pcre.group(2))
+    return re.compile(pattern, flags)
 
 def f_mod(l, r):
     return int(l) % int(r)
@@ -168,10 +175,10 @@ SUPPORTED_FUNCTIONS = {
     'now': lambda: date.now(),  # ['now']
     'append': lambda l, r: str(r) + str(l),  # ['append', 'world', 'hello ']
     'prepend': lambda l, r: str(l) + str(r),  # ['prepend', 'hello  ', 'world']
-    'match': lambda pattern, string, flags = None: re.match(build_regexp(pattern), string, flags),  # ['match', /a/, 'abc']
+    'match': lambda pattern, string, flags = None:  re.search(build_regexp(pattern, flags), str(string)),  # ['match', /a/, 'abc']
     'in': in_f,  # ['in', '1,2,3,5..10,20..24', '@n']
     'within': within_f,  # ['within', '0..3', '@n']
-    'replace': lambda search, replace, subject: replace()(search, replace, subject),
+    'replace': lambda search, replace, subject: build_regexp(search).sub(replace, subject),
     'count': len,  # ['count', '@genders']
     'all': lambda of, value: all([el == value for el in of]),  # ['all', '@genders', 'male']
     'any': lambda of, value: any([el == value for el in of])  # ['any', '@genders', 'female']

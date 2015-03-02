@@ -70,6 +70,14 @@ class rules_functions(unittest.TestCase):
         self.assertTrue(f_eq('A', 'A'), '"A" == "A"')
         self.assertFalse(f_eq(10, 'A'), '10 != "A')
 
+    def test_regexp(self):
+        self.assertFalse(SUPPORTED_FUNCTIONS['match']('/(Лев)$/','Маша'))
+        self.assertTrue(SUPPORTED_FUNCTIONS['match']('/(ша)$/','Маша'))
+        self.assertTrue(SUPPORTED_FUNCTIONS['match']('/(\d+)$/', 100))
+        self.assertTrue(SUPPORTED_FUNCTIONS['match']('/test/i', 'TEST'), 'Test pcre flags')
+        self.assertEquals('1ooo', SUPPORTED_FUNCTIONS['replace']('0', 'o', '1000'), 'Test replace')
+        self.assertEquals('100o', SUPPORTED_FUNCTIONS['replace']('0$', 'o', '1000'), 'Test preg replace')
+
 
 if __name__ == '__main__':
     unittest.main()

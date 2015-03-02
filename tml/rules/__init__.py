@@ -34,15 +34,15 @@ class ContextRules(object):
             Args:
                 rules (dict): view API response contexts.*.rules or cases.*.rules
         """
-        ret = ContextRules([], ['quote', default])
+        ret = cls([], ['quote', default])
         for key in rules:
             rule = rules[key]
-            operations = parse(rule['operations']) if 'operations' in rule else ['quote', key] # if operations is not defined - just return a key
+            operation = ['quote', key]
             if 'conditions' in rule:
                 # has conditions:
-                ret.choices.append((parse(rule['conditions']), operations))
+                ret.choices.append((parse(rules[key]['conditions']), operation))
             else:
                 # no conditions - default:
-                ret.default = operations
+                ret.default = operation
         return ret
 

@@ -1,9 +1,13 @@
 from .rules.contexts import Contexts
-__author__ = 'randell'
+from .rules import ContextRules
+from .rules.case import Case
+
+
+__author__ = 'a@toukmanov.ru'
 
 class Language(object):
     """ Language object """
-    def __init__(self, application, id, locale, native_name, right_to_left, contexts):
+    def __init__(self, application, id, locale, native_name, right_to_left, contexts, cases):
         """ .ctor
             Args:
                 application (Application): current application
@@ -19,16 +23,21 @@ class Language(object):
         self.native_name = native_name
         self.right_to_left = right_to_left
         self.contexts = contexts
+        self.cases = cases
 
     @classmethod
-    def from_dict(cls, application, data):
+    def from_dict(cls, application, data, safe = True):
         """ Build language instance from API response """
+        cases, case_errors = Case.from_data(data['cases'], safe = True)
+        if len(case_errors) and not safe:
+            raise Exception('Language contains invalid cases', case_errors)
         return cls(application,
                    data['id'],
                    data['locale'],
                    data['native_name'],
                    data['right_to_left'],
-                   Contexts.from_dict(data['contexts']))
+                   Contexts.from_dict(data['contexts']),
+                   cases)
 
     @classmethod
     def load_by_locale(cls, application, locale):

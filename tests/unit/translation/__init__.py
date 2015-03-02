@@ -48,9 +48,9 @@ class translation_test(unittest.TestCase):
         self.assertTrue(c.check({'count':100}, {}, self.lang), 'Empty context - right anyway')
 
     def test_options(self):
-        t = TranslationOption('{name||дал, дала, дало} тебе {count} яблоко', self.lang, {'count':{'number':'one'}})
-        self.assertEquals('Вася дал тебе 21 яблоко', t.execute({'name': Gender.male('Вася'),'count': 21}, {}))
-        self.assertEquals('Лена дала тебе 21 яблоко', t.execute({'name': Gender.female('Лена'),'count': 21}, {}))
+        t = TranslationOption('{name||дал, дала, дало} {to::dat} {count} яблоко', self.lang, {'count':{'number':'one'}})
+        self.assertEquals(u'Вася дал Маше 21 яблоко', t.execute({'name': Gender.male('Вася'), 'to': Gender.female('Маша'), 'count': 21}, {}))
+        self.assertEquals(u'Лена дала Льву 21 яблоко', t.execute({'name': Gender.female('Лена'), 'to': Gender.male('Лев'), 'count': 21}, {}))
         with self.assertRaises(OptionIsNotSupported):
             t.execute({'name': Gender.male('John'),'count': 2}, {})
         with self.assertRaises(RequiredArgumentIsNotPassed):

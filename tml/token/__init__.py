@@ -121,6 +121,28 @@ class RulesToken(VariableToken):
         """ Execute token with var """
         return self.language.contexts.execute(self.rules, self.fetch(data))
 
+class CaseToken(RulesToken):
+    """ Language keys {name::nom} """
+    IS_TOKEN = re.compile('^\{(\w+)\:\:(.*)\}$')
+
+    def __init__(self, name, case, language):
+        super(RulesToken, self).__init__(name)
+        self.case = language.cases[case]
+
+
+    def execute(self, data, options):
+        """ Execute with rules options """
+        return self.case.execute(self.fetch(data))
+
+
+class UnsupportedCase(Error):
+    def __init__(self, language, case):
+        self.language = language
+        self.case = case
+
+    def __str__(self):
+        return 'Language does not support case %s for locale %s' % (self.case, self.language.locale)
+
 
 class PipeToken(RulesToken):
     """ 
@@ -163,7 +185,7 @@ class TokenMatcher(object):
         # No token find:
         raise InvalidTokenSyntax(text)
 
-data_matcher = TokenMatcher([TextToken, VariableToken, RulesToken, PipeToken])
+data_matcher = TokenMatcher([TextToken, VariableToken, RulesToken, PipeToken, CaseToken])
 
 def execute_all(tokens, data, options):
     """ Execute all tokens

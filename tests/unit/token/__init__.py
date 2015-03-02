@@ -1,11 +1,12 @@
 import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
-    TokenMatcher, InvalidTokenSyntax
+    TokenMatcher, InvalidTokenSyntax, CaseToken
 from tml.rules.contexts.gender import Gender
 
 class FakeLanguage(object):
     def __init__(self):
         self.contexts = self
+        self.cases = {'upper': CaseMock()}
 
     def execute(self, rule, value):
         return rule
@@ -18,6 +19,10 @@ class ContextsMock(object):
 
     def execute(self, rules, data):
         return data.__class__.__name__
+
+class CaseMock(object):
+    def execute(self, data):
+        return data.upper()
 
 
 class TokenTest(unittest.TestCase):
@@ -77,11 +82,12 @@ class TokenTest(unittest.TestCase):
 
     def test_token_matcher(self):
         """ Token matcher """
-        m = TokenMatcher([TextToken, VariableToken, PipeToken, RulesToken])
+        m = TokenMatcher([TextToken, VariableToken, PipeToken, RulesToken, CaseToken])
         self.assertEquals(TextToken, m.build_token('Hello', self.language).__class__, 'Test plain text')
         self.assertEquals(VariableToken, m.build_token('{name}', self.language).__class__, 'Test {name}')
         self.assertEquals(RulesToken, m.build_token('{name|rule}', self.language).__class__, 'Test {name|rule}')
         self.assertEquals(PipeToken, m.build_token('{name||rule}', self.language).__class__, 'Test {name||rule}')
+        self.assertEquals(CaseToken, m.build_token('{name::upper}', self.language).__class__, 'Test {name::rule}')
         with self.assertRaises(InvalidTokenSyntax) as context:
             m.build_token('{invalid~token}', self.language)
         self.assertEquals('Token syntax is not supported for token "{invalid~token}"', str(context.exception), 'Check exception message')
@@ -97,6 +103,10 @@ class TokenTest(unittest.TestCase):
         cm = ContextsMock()
         token = RulesToken(name = 'obj', rules = None, language = ContextsMock())
         self.assertEquals(cm.execute(None, cm), token.execute({'obj': cm}, {}), 'Test object passed to RulesToken')
+
+    def test_case_token(self):
+        token = CaseToken(name = 'obj', case = 'upper', language = self.language)
+        self.assertEquals('HELLO', token.execute({'obj':'Hello'}, {}), 'Test case token')
 
 if __name__=='__main__':
     unittest.main()

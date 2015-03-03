@@ -1,7 +1,7 @@
 # encoding: UTF-8
 from json import dumps
 
-class MissedKey(object):
+class MissedKeys(object):
     """ Object append missed key"""
     def __init__(self, client):
         self.client = client
@@ -26,7 +26,7 @@ class MissedKey(object):
         pass
 
 
-class MissedKeysLazy(MissedKey):
+class MissedKeysLazy(MissedKeys):
     """ Submit all missed keys once """
     keys = []
     def append(self, key):

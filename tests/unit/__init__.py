@@ -29,5 +29,53 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
+from tml.dictionary.language import LanguageDictionary
+from tml.dictionary.translations import Dictionary
+from tml import configure, tr, context, Context, Gender, ContextNotConfigured, submit_missed
+from tests.mock import Client as ClientMock
+import unittest
+from tml import MissedKeys
+from tml.translation.missed import MissedKeysLazy
 
-__author__ = 'randell'
+__author__ = 'a@toukamnov.ru'
+
+
+class api_test(unittest.TestCase):
+    """ Test configuration """
+    def setUp(self):
+        self.client = ClientMock.read_all()
+        self.client.read('applications/2/translations', {'locale':'ru','page':1}, 'applications/1/translations.json')
+
+    def test_configure_first(self):
+        context = Context() # reset context
+        with self.assertRaises(ContextNotConfigured):
+            tr('Hello')
+        with self.assertRaises(ContextNotConfigured):
+            submit_missed()
+
+    def test_configure(self):
+        c = Context()
+        c.configure(None, client = self.client)
+
+        self.assertEquals('en', c.language.locale, 'Load app defaults')
+        self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
+        self.assertEquals(MissedKeys, c.missed_keys.__class__, 'Missed keys by default')
+
+        c.configure(None, locale = 'ru', application_id = 2, preload = True, flush_missed = False, client = self.client)
+        self.assertEquals('ru', c.language.locale, 'Custom locale')
+        self.assertEquals(MissedKeysLazy, type(c.missed_keys), 'Lazy missed keys')
+        self.assertEquals(2, c.language.application.id, 'Custom application id')
+        self.assertEquals(LanguageDictionary, type(c.dict), 'Language dict')
+
+
+    def test_configure_globals(self):
+        configure(token = None, locale = 'ru', application_id = None, preload = True, flush_missed = True, client = self.client)
+        self.assertEquals('ru', context.language.locale)
+        self.assertEquals(1, context.language.application.id, 'Load default application')
+        self.assertEquals(type(context.dict), LanguageDictionary, 'Preload data')
+        self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple'))
+
+
+if __name__ == '__main__':
+    unittest.main()
+

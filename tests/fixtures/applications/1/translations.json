@@ -1,5 +1,5 @@
 {"results":{
-    "8ad5a7fe0a12729764e31a1e3ca80059":[
+    "87fd78d7ae71e4ad0528c1a469c1e292":[
         {
             "label":"{actor} любезно дала тебе {count||яблоко, яблока, яблок}",
             "context":{"actor":{"gender":"female"}}
@@ -7,6 +7,10 @@
         {
             "label":"{actor} дал тебе всего {count} яблоко, мужик!",
             "context":{"actor":{"gender":"male"},"count":{"number":"one"}}
+        },
+        {
+            "label":"{actor||дал,дала,дало} тебе всего {count||яблоко, яблока, яблок} яблоко, мужик!",
+            "context":{}
         }
     ],
     "799b44f2ceec7634e4ee1c1122bc1c1a":[],

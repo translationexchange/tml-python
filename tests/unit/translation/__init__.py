@@ -4,7 +4,7 @@ from tml.translation import Key, TranslationOption, OptionIsNotSupported,\
     Translation
 from tml.translation.context import Context
 import unittest
-from tml import Application
+from tml.application import Application
 from tml.language import Language
 from tml.rules.contexts.gender import Gender
 from tml.rules.contexts import ValueIsNotMatchContext

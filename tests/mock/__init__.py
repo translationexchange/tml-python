@@ -12,7 +12,7 @@ URLS = [('applications/current', {'definition': 1}),
         ('languages/en', {'definition': 1}),
         ('applications/1/translations', {'locale':'ru'}),
         ('sources/register_keys', None),
-        ('tranlation_keys/translation', {'locale':'ru'})]
+        ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru'})]
 
 class Client(object):
     def __init__(self, data = {}):

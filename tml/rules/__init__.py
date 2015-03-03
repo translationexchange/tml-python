@@ -2,7 +2,6 @@
 from .engine import RulesEngine, Error as EngineError
 from .functions import SUPPORTED_FUNCTIONS
 from .parser import parse
-from tests.unit import rules
 
 
 default_engine = RulesEngine(SUPPORTED_FUNCTIONS) # default engine

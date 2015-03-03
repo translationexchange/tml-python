@@ -9,6 +9,7 @@ FIXTURES_PATH = '%s/fixtures' % dirname(dirname(__file__))
 URLS = [('applications/current', {'definition': 1}),
         ('applications/2', {'definition': 1}),
         ('languages/ru', {'definition': 1}),
+        ('languages/en', {'definition': 1}),
         ('applications/1/translations', {'locale':'ru'}),
         ('sources/register_keys', None),
         ('tranlation_keys/translation', {'locale':'ru'})]

@@ -9,6 +9,7 @@ from tml.language import Language
 from tml.rules.contexts.gender import Gender
 from tml.rules.contexts import ValueIsNotMatchContext
 from tml.exceptions import RequiredArgumentIsNotPassed
+from json import loads
 
 
 class translation_test(unittest.TestCase):
@@ -70,7 +71,9 @@ class translation_test(unittest.TestCase):
         self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
         self.assertEquals('Вася дал тебе всего 1 яблоко, мужик!', t.execute({'actor':{'gender':'male','name':'Вася'},'count':1}, {}), 'Male one')
         self.assertEquals('Вася дал тебе 5 яблок', t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')
-        
+        t = Translation.from_data(key, [{"label":"{to::dat}"}])
+        sdata = '{"to":{"gender":"male","name":"Вася"}}'
+        self.assertEquals("Васе", t.execute(loads(sdata), {}), 'Васе')
         t = Translation(key, [])
         self.assertEquals('John give you 5 apples', t.execute({'actor':{'gender':'male','name':'John'},'count':5}, {}), 'Use label by default')
 

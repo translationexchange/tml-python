@@ -175,10 +175,10 @@ SUPPORTED_FUNCTIONS = {
     'now': lambda: date.now(),  # ['now']
     'append': lambda l, r: str(r) + str(l),  # ['append', 'world', 'hello ']
     'prepend': lambda l, r: str(l) + str(r),  # ['prepend', 'hello  ', 'world']
-    'match': lambda pattern, string, flags = None:  re.search(build_regexp(pattern, flags), str(string)),  # ['match', /a/, 'abc']
+    'match': lambda pattern, string, flags = None:  re.search(build_regexp(pattern, flags), str(string).encode('utf-8')),  # ['match', /a/, 'abc']
     'in': in_f,  # ['in', '1,2,3,5..10,20..24', '@n']
     'within': within_f,  # ['within', '0..3', '@n']
-    'replace': lambda search, replace, subject: build_regexp(search).sub(replace, subject),
+    'replace': lambda search, replace, subject: build_regexp(search).sub(replace, str(subject).encode('utf-8')),
     'count': len,  # ['count', '@genders']
     'all': lambda of, value: all([el == value for el in of]),  # ['all', '@genders', 'male']
     'any': lambda of, value: any([el == value for el in of])  # ['any', '@genders', 'female']

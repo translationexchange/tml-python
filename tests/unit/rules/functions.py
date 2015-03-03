@@ -80,9 +80,11 @@ class rules_functions(unittest.TestCase):
         self.assertTrue(SUPPORTED_FUNCTIONS['match']('/test/i', 'TEST'), 'Test pcre flags')
         self.assertEquals('1ooo', SUPPORTED_FUNCTIONS['replace']('0', 'o', '1000'), 'Test replace')
         self.assertEquals('100o', SUPPORTED_FUNCTIONS['replace']('0$', 'o', '1000'), 'Test preg replace')
-        srule = loads('{"test":"(match \'/а$/\' @value)"}')
+        srule = loads('{"test":"(match \'/а$/\' @value)","replace":"(replace \'/а$/\' \'е\' @value)"}')
+        sdata = loads('{"value":"Маша"}')
         rule = parse(srule['test'])
-        self.assertTrue(default_engine.execute(rule, {'value':'Маша'}), 'Re supports json encoding')
+        self.assertTrue(default_engine.execute(rule, sdata), 'Re supports json encoding')
+        self.assertEquals("Маше", default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
 
 if __name__ == '__main__':
     unittest.main()

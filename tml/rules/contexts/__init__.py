@@ -18,6 +18,10 @@ class Value(object):
     """ Value contexts """
     @classmethod
     def match(cls, data):
+        if type(data) is dict:
+            for key in ('name','title','text'):
+                if key in data:
+                    return str(data[key])
         return str(data)
 
     def __call___(self, data):

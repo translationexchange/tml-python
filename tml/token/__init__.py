@@ -1,7 +1,7 @@
 # encoding: UTF-8
 import re
 from ..exceptions import Error, RequiredArgumentIsNotPassed
-
+from ..rules.contexts import Value
 
 class AbstractToken(object):
     """ Base token class """
@@ -84,12 +84,7 @@ class VariableToken(AbstractVariableToken):
             Returns:
                 string
         """
-        ret = self.fetch(data)
-        if type(ret) is dict:
-            for key in self.USE_KEYS:
-                if key in ret:
-                    return ret[key]
-        return self.escape_if_needed(data[self.name], options)
+        return self.escape_if_needed(Value.match(self.fetch(data)), options)
 
     def escape_if_needed(self, text, options):
         """ Escape string if it needed

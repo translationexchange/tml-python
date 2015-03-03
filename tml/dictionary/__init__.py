@@ -8,7 +8,7 @@ class AbstactDictionary(object):
             Args:
                 missed_keys (list): list of missed keys or object with append method
         """
-        self.missend_keys = missed_keys
+        self.missed_keys = missed_keys
 
     def translate(self, key):
         """ Get key tranlation
@@ -20,7 +20,7 @@ class AbstactDictionary(object):
         try:
             return self.fetch(key)
         except Exception as e:
-            self.missend_keys.append(key)
+            self.missed_keys.append(key)
             # Returns empty translation:
             return Translation(key, [])
 

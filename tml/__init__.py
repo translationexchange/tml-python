@@ -36,10 +36,10 @@ class Context(object):
                                                                    self.build_client(token, client)))
         if flush_missed:
             # flush missed immediate
-            self.missed_keys = MissedKeys(client)
+            self.missed_keys = MissedKeys(self.language.client)
         else:
             # flush missed with flush_missed
-            self.missed_keys = MissedKeysLazy(client)
+            self.missed_keys = MissedKeysLazy(self.language.client)
         if preload:
             # Preload all translations for languge:
             self.dict = LanguageDictionary(self.language, self.missed_keys)

@@ -6,6 +6,13 @@ from urllib import urlencode
 
 FIXTURES_PATH = '%s/fixtures' % dirname(dirname(__file__))
 
+URLS = [('applications/current', {'definition': 1}),
+        ('applications/2', {'definition': 1}),
+        ('languages/ru', {'definition': 1}),
+        ('applications/1/translations', {'locale':'ru'}),
+        ('sources/register_keys', None),
+        ('tranlation_keys/translation', {'locale':'ru'})]
+
 class Client(object):
     def __init__(self, data = {}):
         self.data = data
@@ -46,3 +53,10 @@ class Client(object):
         url = self.build_url(url, params) if params is not None else url
         self.data[url] = loads(open(path).read())
         return self
+
+    @classmethod
+    def read_all(cls):
+        ret = cls()
+        for url, params in URLS:
+            ret.read(url, params)
+        return ret

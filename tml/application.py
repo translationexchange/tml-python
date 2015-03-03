@@ -5,7 +5,7 @@ from .exceptions import Error
 
 class Application(object):
     """ TML application """
-    def __init__(self, client, id, languages):
+    def __init__(self, client, id, languages, default_locale):
         """ .ctor
             Args:
                 client (api.client.Client): API client
@@ -15,6 +15,8 @@ class Application(object):
         self.client = client
         self.id = id
         self.languages = languages
+        self.default_locale = default_locale
+
 
     @classmethod
     def from_dict(cls, client, data):
@@ -25,7 +27,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return Application(client, data['id'], data['languages'])
+        return Application(client, data['id'], data['languages'], data['default_locale'])
 
 
     @classmethod

@@ -8,19 +8,17 @@ LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
 class application(unittest.TestCase):
 
     def setUp(self):
-        self.client = Client()
-        self.client.read('applications/current', {'definition':1})
-        self.client.read('applications/2', {'definition':1})
-
+        self.client = Client.read_all()
 
     def test_instance(self):
-        app = Application.from_dict(self.client, {'id':100, 'languages': LANGUAGES})
+        app = Application.from_dict(self.client, {'id':100, 'languages': LANGUAGES, 'default_locale':'en'})
         self.assertEquals(100, app.id, 'id getter')
         self.assertEquals(LANGUAGES, app.languages, 'Check languages')
+        self.assertEquals('en', app.default_locale, 'Default locale')
 
 
     def test_language(self):
-        app = Application(self.client, 100, LANGUAGES)
+        app = Application(self.client, 100, LANGUAGES, 'en')
         self.assertEquals('languages/ru', app.get_language_url('ru'), 'URL for ru')
         self.assertEquals('languages/en', app.get_language_url('en'), 'URL for en')
         with self.assertRaises(LanguageNotSupported):

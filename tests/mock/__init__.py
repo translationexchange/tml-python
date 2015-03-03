@@ -10,7 +10,7 @@ URLS = [('applications/current', {'definition': 1}),
         ('applications/2', {'definition': 1}),
         ('languages/ru', {'definition': 1}),
         ('languages/en', {'definition': 1}),
-        ('applications/1/translations', {'locale':'ru'}),
+        ('applications/1/translations', {'locale':'ru','page':1}),
         ('sources/register_keys', None),
         ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru'})]
 

@@ -1,6 +1,6 @@
 # encoding: UTF-8
 import unittest
-from tml import Application, LanguageNotSupported
+from tml.application import Application, LanguageNotSupported
 from tests.mock import Client
 
 LANGUAGES = [{'locale':'ru'},{'locale':'en'}]

@@ -21,6 +21,10 @@ class MissedKey(object):
         """
         return self.client.post('sources/register_keys',{'source_keys': dumps(missed_keys)})
 
+    def submit_all(self):
+        """ Stub for submit all method call """
+        pass
+
 
 class MissedKeysLazy(MissedKey):
     """ Submit all missed keys once """
@@ -33,6 +37,7 @@ class MissedKeysLazy(MissedKey):
         self.keys.append(key)
 
     def submit_all(self):
+        """ Submit all missed keys to server """
         if len(self.keys) == 0:
             return
         missed_keys = [{'keys':[key.as_dict for key in self.keys]}]

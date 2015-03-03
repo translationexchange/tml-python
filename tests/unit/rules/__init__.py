@@ -23,9 +23,10 @@ class rules(unittest.TestCase):
                                                'operations':'(quote  "Good evening")'},
                                'hello':{'operations':'(quote Hello)'}})
 
-        self.assertEquals('Good morning', case.apply({'time': 8}),'Good morning at 8AM')
-        self.assertEquals('Good evening', case.apply({'time': 19}),'Good evening at 7PM')
-        self.assertEquals('Hello', case.apply({'time': 1}),'Hello by default')
+        print case.apply({'time': 8})
+        self.assertEquals('good_morning', case.apply({'time': 8}),'Good morning at 8AM')
+        self.assertEquals('good_evening', case.apply({'time': 19}),'Good evening at 7PM')
+        self.assertEquals('hello', case.apply({'time': 1}),'Hello by default')
 
     def test_select(self):
         case = ContextRules.from_rules({'one':{'conditions':'(= @value 1)'},

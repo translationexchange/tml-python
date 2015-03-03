@@ -23,6 +23,7 @@ class language(unittest.TestCase):
         self.assertEquals('ru', lang.locale, 'locale')
         self.assertFalse(lang.right_to_left, 'right_to_left')
         self.assertTrue(isinstance(lang.contexts, Contexts), 'Contexts fetched')
+        self.assertEquals(self.app, lang.application, 'test application')
         with self.assertRaises(LanguageNotSupported):
             Language.load_by_locale(self.app, 'de')
 

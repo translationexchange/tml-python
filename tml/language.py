@@ -17,7 +17,7 @@ class Language(object):
                 right_to_left (boolean): rtl flag
                 contexts (.rules.contexts.Contexts): contexts
         """
-        self.applicaton = application
+        self.application = application
         self.id = id
         self.locale = locale
         self.native_name = native_name
@@ -60,5 +60,5 @@ class Language(object):
 
     @property
     def client(self):
-        return self.applicaton.client
+        return self.application.client
 

@@ -11,7 +11,7 @@ class LanguageDictionary(Hashtable):
                 lang (Language): language
                 missed_keys (list): list for missed keys
         """
-        url = 'applications/%d/translations' % lang.applicaton.id
+        url = 'applications/%d/translations' % lang.application.id
         super(LanguageDictionary, self).__init__(allpages(lang.client,
                                                           url,
                                                           {'locale': lang.locale}),

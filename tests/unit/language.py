@@ -1,6 +1,6 @@
 # encoding: UTF-8
 import unittest
-from tml import Application, LanguageNotSupported
+from tml.application import Application, LanguageNotSupported
 from tml.language import Language
 from os.path import dirname
 import json
@@ -14,7 +14,7 @@ class language(unittest.TestCase):
     def setUp(self):
         self.client = Client()
         self.client.read('languages/ru', {'definition':1})
-        self.app = Application(self.client, 100, [{'locale':'ru'}])
+        self.app = Application(self.client, 100, [{'locale':'ru'}], 'en')
 
     def test_load(self):
         """ Load language """

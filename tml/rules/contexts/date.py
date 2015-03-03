@@ -19,7 +19,7 @@ class Date(date):
             return data.date()
         elif isinstance(data, date):
             return data
-        elif type(data) is str:
+        elif type(data) is str or type(data) is unicode:
             for format in cls.supported_formats:
                 try:
                     return datetime.strptime(data, format).date()

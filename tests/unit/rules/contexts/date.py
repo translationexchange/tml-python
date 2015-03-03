@@ -3,6 +3,7 @@
 import unittest
 from datetime import date, datetime
 from tml.rules.contexts.date import Date, NotDate
+from json import loads
 
 class date_test(unittest.TestCase):
     """ Test date context """
@@ -19,6 +20,7 @@ class date_test(unittest.TestCase):
 
     def test_date_string(self):
         self.assertEquals(self.d, Date.match('2015-02-23'), 'date in sql format')
+        self.assertEquals(self.d, Date.match(loads('{"date":"2015-02-23"}')['date']), 'date encoding')
 
     def test_datetime_string(self):
         self.assertEquals(self.d, Date.match('2015-02-23 17:05:00'), 'datetime in sql format')

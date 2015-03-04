@@ -1,0 +1,66 @@
+<html>
+    <head>
+        <title>tranlationexchange python sdk demo</title>
+        <style>
+            fieldset li {margin-top: 0.5em;}
+            fieldset li label {display: block;}
+            fieldset li input, fieldset li textarea {width: 100%;}
+            textarea {height: 10em;}
+            #locale {width: 5em;}
+            #label {font-size: 1.5em;}
+            #result {font-size: 1.5em; margin-bottom: 2em;}
+        </style>
+    </head>
+    <body>
+        <h1>Tranlationexchange python sdk demo</h1>
+        <section id="done">
+            {% if result %}
+                <h2>Result</h2>
+                <div id="result">{{result}}</div>
+            {% endif %}
+            {% if error %}
+                <h2>Error</h2>
+                <dl class="error">
+                    <dt>Class</dt>
+                    <dd>{{error_class}}</dd>
+                    <dt>Message</dt>
+                    <dd>{{error}}</dd>
+                </dl>
+            {% endif %}
+        </section>
+        <form method="post" action="/translate#done">
+            <fieldset>
+                <h2>System settings</h2>
+                <ul>
+                    <li>
+                        <label for="token">API token:</label>
+                        <input type="text" value="{{token}}" name="token" id="token"/>
+                    </li>
+                    <li>
+                        <label>Locale</label>
+                        <input type="text" value="{{locale}}" name="locale" id="locale"/></label>
+                    </li>
+                </ul>
+                <h2>Tranlate</h2>
+                <ul>
+                    <li>
+                        <label for="label">Label</label>
+                        <input type="text" name="label" value="{{label}}" id="label"/>
+                    </li>   
+                    <li>
+                        <label for="description">Description</label>
+                        <input type="text" name="description" value="{{description}}" id="description"/>
+                    </li>
+                    <li>
+                        <label for="data">Data</label>
+                        <textarea name="data" id="data">{{data}}</textarea>
+                        <small>In JSON format</small>
+                        <pre>custom variables: {"user":{"name":"Вася","gender":"male"},"date":"2015-01-01"}</pre>
+                    </li>
+                </ul>
+                <button type="submit">Translate</button>
+            </fieldset>
+        </form>
+
+    </body>
+</html>

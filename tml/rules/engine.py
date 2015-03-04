@@ -101,6 +101,9 @@ class InnerExpressionCallFault(Error):
         super(InnerExpressionCallFault, self).__init__(rule, data, part_number)
         self.exception = exception
 
+    def __str__(self):
+        return str(self.exception)
+
     @property
     def parent_error(self):
         return self.exception

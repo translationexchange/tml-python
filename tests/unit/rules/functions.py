@@ -65,7 +65,8 @@ class rules_functions(unittest.TestCase):
         self.assertFalse(SUPPORTED_FUNCTIONS['any'](['female','female'],'male'), 'Nobody is male')
 
     def test_cmp(self):
-        self.assertTrue(SUPPORTED_FUNCTIONS['<']('3', 10), '3 < 10')
+        self.assertTrue(SUPPORTED_FUNCTIONS['<']('3', 10), '"3" < 10')
+        self.assertFalse(SUPPORTED_FUNCTIONS['>'](date(2015, 01, 20), date(2015, 02, 22)), 'Cmp dates')
 
     def test_eq(self):
         self.assertTrue(f_eq(10, '10'), '10 == "10"')
@@ -85,6 +86,7 @@ class rules_functions(unittest.TestCase):
         rule = parse(srule['test'])
         self.assertTrue(default_engine.execute(rule, sdata), 'Re supports json encoding')
         self.assertEquals("Маше", default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
+
 
 if __name__ == '__main__':
     unittest.main()

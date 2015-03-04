@@ -141,6 +141,19 @@ def f_eq(*args):
             return False
     return all([args[0] == arg for arg in args])
 
+def cmp(arg1, arg2):
+    if type(arg1) is date and type(arg2) is date:
+        pass
+    else:
+        arg1 = float(arg1)
+        arg2 = float(arg2)
+    if arg1 == arg2:
+        return '='
+    elif arg1 > arg2:
+        return '>'
+    else:
+        return '<'
+
 SUPPORTED_FUNCTIONS = {
     # McCarthy's Elementary S-functions and Predicates
     'quote': lambda expr: expr,
@@ -150,9 +163,9 @@ SUPPORTED_FUNCTIONS = {
     'atom': lambda expr: isinstance(expr, (type(None), str, int, float, bool)),
     # Tr8n Extensions
     '=': f_eq,  # ['=', 1, 2]
-    '!=': lambda l, r: l != r,  # ['!=', 1, 2]
-    '<': lambda l, r: float(l) < float(r),  # ['<', 1, 2]
-    '>': lambda l, r: float(l) > float(r),  # ['>', 1, 2]
+    '!=': lambda l, r: '=' != cmp(l, r),  # ['!=', 1, 2]
+    '<': lambda l, r: '<' == cmp(l, r),  # ['<', 1, 2]
+    '>': lambda l, r: '>' == cmp(l, r),  # ['>', 1, 2]
     '+': lambda l, r: float(l) + float(r),  # ['+', 1, 2]
     '-': lambda l, r: float(l) - float(r),  # ['-', 1, 2]
     '*': lambda l, r: float(l) * float(r),  # ['*', 1, 2]
@@ -170,7 +183,7 @@ SUPPORTED_FUNCTIONS = {
     'true': lambda: True,  # ['true']
     'false': lambda: False,  # ['false']
     'date': lambda date: date.strptime(date, '%Y-%m-%d'),# ['date', '2010-01-01']
-    'today': lambda: date.now().today(),  # ['today']
+    'today': lambda: date.today(),  # ['today']
     'time': lambda time: date.strptime(time, '%Y-%m-%d %H:%M:%S'),  # ['time', '2010-01-01 10:10:05']
     'now': lambda: date.now(),  # ['now']
     'append': lambda l, r: str(r) + str(l),  # ['append', 'world', 'hello ']

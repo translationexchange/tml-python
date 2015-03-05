@@ -4,9 +4,7 @@ import re
 from _ctypes import ArgumentError
 from datetime import date, datetime
 import re
-from calendar import prcal
 from re import search
-from idlelib.ReplaceDialog import replace
 
 
 INT_REGEXP = '(0|[1-9]\d*)'

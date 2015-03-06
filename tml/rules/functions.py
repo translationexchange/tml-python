@@ -163,7 +163,10 @@ def f_match (pattern, string, flags = None):
         Return:
             boolean
     """
-    return build_regexp(pattern, flags).search(to_string(string))
+    
+    if build_regexp(pattern, flags).search(string):
+        return True
+    return False
   
 def f_replace(search, replace, subject):
     """ Match function 
@@ -174,9 +177,11 @@ def f_replace(search, replace, subject):
         Return:
             boolean
     """
-    return build_regexp(search).sub(
-                             to_string(replace),
-                             to_string(subject))
+    ret = build_regexp(search).sub(
+                             replace,
+                             subject)
+    return to_string(ret)
+    
     
 
 SUPPORTED_FUNCTIONS = {

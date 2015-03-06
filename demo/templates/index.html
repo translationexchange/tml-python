@@ -1,66 +1,137 @@
 <html>
     <head>
-        <title>tranlationexchange python sdk demo</title>
+        <title>TML Python SDK</title>
+        <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
         <style>
-            fieldset li {margin-top: 0.5em;}
-            fieldset li label {display: block;}
-            fieldset li input, fieldset li textarea {width: 100%;}
-            textarea {height: 10em;}
-            #locale {width: 5em;}
-            #label {font-size: 1.5em;}
-            #result {font-size: 1.5em; margin-bottom: 2em;}
+            .result {padding: 1em; border: 1px solid #888; margin: 1em 0;}
+            .result p {font-size: 1.2em; margin-bottom: 0px;}
+            .result dl {margin-bottom: 0px;}
+            .result dl dt {font-size:0.6em; color:#888;}
+            .result dl dd {font-size:0.8em; color:#555;}
         </style>
     </head>
     <body>
-        <h1>Tranlationexchange python sdk demo</h1>
-        <section id="done">
-            {% if result %}
-                <h2>Result</h2>
-                <div id="result">{{result}}</div>
-            {% endif %}
-            {% if error %}
-                <h2>Error</h2>
-                <dl class="error">
-                    <dt>Class</dt>
-                    <dd>{{error_class}}</dd>
-                    <dt>Message</dt>
-                    <dd>{{error}}</dd>
-                </dl>
-            {% endif %}
-        </section>
-        <form method="post" action="/translate#done">
-            <fieldset>
-                <h2>System settings</h2>
-                <ul>
-                    <li>
-                        <label for="token">API token:</label>
-                        <input type="text" value="{{token}}" name="token" id="token"/>
-                    </li>
-                    <li>
-                        <label>Locale</label>
-                        <input type="text" value="{{locale}}" name="locale" id="locale"/></label>
-                    </li>
-                </ul>
-                <h2>Tranlate</h2>
-                <ul>
-                    <li>
-                        <label for="label">Label</label>
-                        <input type="text" name="label" value="{{label}}" id="label"/>
-                    </li>   
-                    <li>
-                        <label for="description">Description</label>
-                        <input type="text" name="description" value="{{description}}" id="description"/>
-                    </li>
-                    <li>
-                        <label for="data">Data</label>
-                        <textarea name="data" id="data">{{data}}</textarea>
-                        <small>In JSON format</small>
-                        <pre>custom variables: {"user":{"name":"Вася","gender":"male"},"date":"2015-01-01"}</pre>
-                    </li>
-                </ul>
-                <button type="submit">Translate</button>
-            </fieldset>
-        </form>
+    <form method="post" action="/translate" style="padding-bottom: 3em;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="pagetitile">TML Python SDK</h1>
+                </div>
+                <div class="col-md-6">
+                    
+                        <div class="form-group">
+                            <label for="label">Label</label>
+                            <input type="text" class="form-control" name="label" value="{{label}}" id="label"/>
+                            <p class="help-block" id="label-example">
+                                {date|уже,сегодня,еще не} {user||дал,дала,дало} {to::dat} {count|яблоко, яблока, яблок}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" name="description" value="{{description}}" id="description" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="data">Data</label>
+                            <textarea style="height: 12em;" class="form-control" name="data" id="data">{{data}}</textarea>
+                            <small>In JSON format</small>
+                            <pre class="help-block" id="data-example">
+    {
+        "user":{
+            "name":"Вася",
+            "gender":"male"},
+        "to":{
+            "name":"Маша",
+            "gender":"female"
+        },
+        "date":"2015-01-01",
+        "count":5
+    }
+                            </pre>
+                        </div>
+                        <div class="form-group">
+                            <label for="token">API token:</label>
+                            <input type="text" value="{{token}}" name="token" id="token" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Locale</label>
+                            <input type="text" value="{{locale}}" name="locale" id="locale" class="form-control"/></label>
+                        </div>
+                </div>
+                <div class="col-md-6">
+                    <div id="result">
+                        {% if result %}
+                        <div class="result">
+                            <p>{{result}}</p>
+                            <dl>
+                                <dd>label</dd>
+                                <dd>{{label}}</dd>
+                                <dt>data</dt>
+                                <dd>{{data}}</dd>
+                                <dt>description</dt>
+                                <dd>{{description}}</dd>
+                            </dl>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="background: green; position: fixed; padding: 1em; bottom: 0px; width: 100%;">
+            <div class="container">
+                <button class="btn btn-default" type="submit">Tranlate</button>
+            </div>
+        </div>
+    </form>
 
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script>
+            $(function(){
+                $('#data-example').click(function(){
+                    $('#data').val($.trim(this.innerHTML));
+                });
+                $('#label-example').click(function(){
+                    $('#label').val($.trim(this.innerHTML));
+                });
+                var $form = $('form');
+                var forceSubmit = false;
+                $form.submit(function(){
+                    if (forceSubmit){
+                        //something wrong - submit data:
+                        return true;
+                    }
+                    var label = $('#label').val();
+                    var data = $('#data').val();
+                    var settings = 
+                        '<dl class="settings">'+
+                            '<dt>label</dt>'+
+                            '<dd>'+$('#label').val()+'</dd>'+
+                            '<dt>data</dt>'+
+                            '<dd>'+$('#data').val()+'</dd>'+
+                            '<dt>description</dt>'+
+                            '<dd>'+$('#description').val()+'</dd>'+
+                        '</dl>';
+                    $form.find('button').attr('disabled', true);
+                    $.ajax(
+                        $form.attr('action'),
+                        {
+                            data: $form.serialize(),
+                            type: 'POST',
+                            dataType: 'json',
+                            success: function(resp){
+                                $form.find('button').removeAttr('disabled');
+                                $('#result').html(
+                                    '<div class="result"><p>'+resp.result+'</p>'+settings+'</div>'+
+                                    $('#result').html()
+                                );
+                            },
+                            error: function(){
+                                forceSubmit = true;
+                                $form.submit();
+                            }
+                        });
+                    return false;
+                });
+            })
+        </script>
     </body>
 </html>

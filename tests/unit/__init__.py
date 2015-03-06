@@ -32,6 +32,7 @@
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
 from tml import configure, tr, context, Context, Gender, ContextNotConfigured, submit_missed
+import tml
 from tests.mock import Client as ClientMock
 import unittest
 from tml import MissedKeys
@@ -47,7 +48,7 @@ class api_test(unittest.TestCase):
         self.client.read('applications/2/translations', {'locale':'ru','page':1}, 'applications/1/translations.json')
 
     def test_configure_first(self):
-        context = Context() # reset context
+        tml.context = Context() # reset context
         with self.assertRaises(ContextNotConfigured):
             tr('Hello')
         with self.assertRaises(ContextNotConfigured):
@@ -70,9 +71,9 @@ class api_test(unittest.TestCase):
 
     def test_configure_globals(self):
         configure(token = None, locale = 'ru', application_id = None, preload = True, flush_missed = True, client = self.client)
-        self.assertEquals('ru', context.language.locale)
-        self.assertEquals(1, context.language.application.id, 'Load default application')
-        self.assertEquals(type(context.dict), LanguageDictionary, 'Preload data')
+        self.assertEquals('ru', tml.context.language.locale)
+        self.assertEquals(1, tml.context.language.application.id, 'Load default application')
+        self.assertEquals(type(tml.context.dict), LanguageDictionary, 'Preload data')
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple'))
 
 

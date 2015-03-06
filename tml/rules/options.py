@@ -55,6 +55,7 @@ def apply_mapping_rule(rule, args):
             args (list): list of args
     """
     i = 0
+    rule = rule.encode('utf-8')
     for arg in args:
         rule = rule.replace('{$%d}' % i, arg)
         i = i + 1

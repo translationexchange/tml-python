@@ -2,6 +2,7 @@
 import re
 from ..exceptions import Error, RequiredArgumentIsNotPassed
 from ..rules.contexts import Value
+from tml.strings import to_string
 
 class AbstractToken(object):
     """ Base token class """
@@ -94,7 +95,7 @@ class VariableToken(AbstractVariableToken):
             Returns:
                 text
         """
-        text = text.encode('utf-8')
+        text = to_string(text)
         if self.need_to_escape(options):
             return self.escape(text)
         return text
@@ -236,7 +237,7 @@ def execute_all(tokens, data, options):
         Returns:
             string: executed tokens
     """
-    return ''.join([token.execute(data, options) for token in tokens])
+    return ''.join([to_string(token.execute(data, options)) for token in tokens])
 
 class InvalidTokenSyntax(Error):
     """ Unsupported token syntax """

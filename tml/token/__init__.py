@@ -94,7 +94,7 @@ class VariableToken(AbstractVariableToken):
             Returns:
                 text
         """
-        text = unicode(text)
+        text = text.encode('utf-8')
         if self.need_to_escape(options):
             return self.escape(text)
         return text

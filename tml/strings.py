@@ -8,6 +8,6 @@ def to_string(text):
     """
     if type(text) is unicode:
         return text
-    return unicode(text.decode('utf-8'))
+    return unicode(str(text).decode('utf-8'))
 
 

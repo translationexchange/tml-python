@@ -200,7 +200,7 @@ class PipeToken(RulesToken):
 
     def execute(self, data, options):
         """ Execute token """
-        return '%s %s' % (self.token.execute(data, options), self.rules.execute(data, options))
+        return to_string(self.token.execute(data, options))+' '+to_string(self.rules.execute(data, options))
 
 
 class TokenMatcher(object):

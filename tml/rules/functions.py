@@ -115,11 +115,12 @@ def build_regexp(pattern, flags = None):
             _sre.SRE_Pattern
     """
     flags = build_flags(flags)
+    pattern = to_string(pattern)
     pcre = IS_PCRE.match(pattern)
     if pcre:
         pattern = pcre.group(1)
         flags = flags | build_flags(pcre.group(2))
-    return re.compile(pattern.encode('utf-8'), flags)
+    return re.compile(pattern, flags)
 
 def f_mod(l, r):
     return int(l) % int(r)
@@ -163,8 +164,7 @@ def f_match (pattern, string, flags = None):
         Return:
             boolean
     """
-    
-    if build_regexp(pattern, flags).search(string):
+    if build_regexp(pattern, flags).search(to_string(string)):
         return True
     return False
   
@@ -181,8 +181,7 @@ def f_replace(search, replace, subject):
                              replace,
                              subject)
     return to_string(ret)
-    
-    
+
 
 SUPPORTED_FUNCTIONS = {
     # McCarthy's Elementary S-functions and Predicates

@@ -12,7 +12,7 @@ from tml.rules.options import TokenMapping
 from tml.rules import ContextRules
 from distutils.command.config import config
 from ...exceptions import Error
-
+from ...strings import to_string
 
 class Value(object):
     """ Value contexts """
@@ -21,8 +21,8 @@ class Value(object):
         if type(data) is dict:
             for key in ('name','title','text'):
                 if key in data:
-                    return str(data[key])
-        return str(data)
+                    return to_string(data[key])
+        return to_string(data)
 
     def __call___(self, data):
         return self.match(data)

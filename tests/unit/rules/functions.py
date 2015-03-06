@@ -51,10 +51,10 @@ class rules_functions(unittest.TestCase):
     def test_build_preg(self):
         self.assertEqual(re.I, build_flags('i'), 'Regexp i flag')
         self.assertEqual(re.I|re.M, build_flags('mi'), 'Regexp im flag')
-        self.assertEquals(re.compile('\d+'), build_regexp('\d+'), '\d+')
-        self.assertEquals(re.compile('[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
-        self.assertEquals(re.compile('[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
-        self.assertEquals(re.compile('[a-z]+'), build_regexp('/[a-z]+/'), '/[a-z]+/')
+        self.assertEquals(re.compile(u'\d+'), build_regexp('\d+'), '\d+')
+        self.assertEquals(re.compile(u'[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
+        self.assertEquals(re.compile(u'[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
+        self.assertEquals(re.compile(u'[a-z]+'), build_regexp('/[a-z]+/'), '/[a-z]+/')
 
     def test_all(self):
         self.assertTrue(SUPPORTED_FUNCTIONS['all'](['male','male','male'], 'male'),'All is male')
@@ -85,7 +85,7 @@ class rules_functions(unittest.TestCase):
         sdata = loads('{"value":"Маша"}')
         rule = parse(srule['test'])
         self.assertTrue(default_engine.execute(rule, sdata), 'Re supports json encoding')
-        self.assertEquals("Маше", default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
+        self.assertEquals(u"Маше", default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
 
 
 if __name__ == '__main__':

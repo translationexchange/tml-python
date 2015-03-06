@@ -152,6 +152,40 @@ def cmp(arg1, arg2):
     else:
         return '<'
 
+def to_string(string):
+    if type(string) is str:
+        return string.encode('utf-8')
+    elif type(string) is unicode:
+        return string.encode('utf-8')
+    else:
+        return to_string(str(string))
+
+
+def f_match (pattern, string, flags = None):
+    """ Match function 
+        Args:
+            pattern (string): regexp (pattern|/pattern/flags)
+            string (string): tested string
+            flags (int): regexp flage
+        Return:
+            boolean
+    """
+    return build_regexp(pattern, flags).search(to_string(string))
+  
+def f_replace(search, replace, subject):
+    """ Match function 
+        Args:
+            search (string): search regexp (pattern|/pattern/flags)
+            replace (string): replacement
+            subject (string): text to replace
+        Return:
+            boolean
+    """
+    return build_regexp(search).sub(
+                             to_string(replace),
+                             to_string(subject))
+    
+
 SUPPORTED_FUNCTIONS = {
     # McCarthy's Elementary S-functions and Predicates
     'quote': lambda expr: expr,
@@ -186,10 +220,10 @@ SUPPORTED_FUNCTIONS = {
     'now': lambda: date.now(),  # ['now']
     'append': lambda l, r: str(r) + str(l),  # ['append', 'world', 'hello ']
     'prepend': lambda l, r: str(l) + str(r),  # ['prepend', 'hello  ', 'world']
-    'match': lambda pattern, string, flags = None:  re.search(build_regexp(pattern, flags), str(string).encode('utf-8')),  # ['match', /a/, 'abc']
+    'match': f_match, # ['match', /a/, 'abc']
     'in': in_f,  # ['in', '1,2,3,5..10,20..24', '@n']
     'within': within_f,  # ['within', '0..3', '@n']
-    'replace': lambda search, replace, subject: build_regexp(search).sub(replace, str(subject).encode('utf-8')),
+    'replace': f_replace,
     'count': len,  # ['count', '@genders']
     'all': lambda of, value: all([el == value for el in of]),  # ['all', '@genders', 'male']
     'any': lambda of, value: any([el == value for el in of])  # ['any', '@genders', 'female']

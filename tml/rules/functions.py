@@ -5,6 +5,7 @@ from _ctypes import ArgumentError
 from datetime import date, datetime
 import re
 from re import search
+from tml.strings import to_string
 
 
 INT_REGEXP = '(0|[1-9]\d*)'
@@ -71,8 +72,8 @@ def in_f(set, find):
     """
     find = str(find).strip()
     for e in set.split(','):
-        e = e.strip()
-        if find == e:
+        e = to_string(e.strip())
+        if to_string(find) == to_string(e):
             # find == set element
             return True
         elif IS_RANGE.match(e):
@@ -151,14 +152,6 @@ def cmp(arg1, arg2):
         return '>'
     else:
         return '<'
-
-def to_string(string):
-    if type(string) is str:
-        return string.encode('utf-8')
-    elif type(string) is unicode:
-        return string.encode('utf-8')
-    else:
-        return to_string(str(string))
 
 
 def f_match (pattern, string, flags = None):

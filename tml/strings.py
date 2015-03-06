@@ -6,7 +6,8 @@ def to_string(text):
         Returns:
             str
     """
-    if text is unicode:
-        return text.encode('utf-8')
-    return text
+    if type(text) is unicode:
+        return text
+    return unicode(text.decode('utf-8'))
+
 

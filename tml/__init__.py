@@ -8,11 +8,15 @@ from .dictionary.translations import Dictionary
 from .translation.missed import MissedKeys, MissedKeysLazy
 from .translation import Key
 from .rules.contexts.gender import Gender
+from .decoration import system_tags as system_decoration_tags
+from .decoration.parser import parse as parse_decoration
 
 __author__ = 'a@toukmanov.ru'
 
+
 class ContextNotConfigured(Error):
     pass
+
 
 class Context(object):
     """ Execution context """
@@ -21,7 +25,8 @@ class Context(object):
         self.missed_keys = None
         self.dict = None
 
-    def configure(self, token, locale = None, application_id = None, preload = False, flush_missed = True, client = None):
+
+    def configure(self, token, locale = None, application_id = None, preload = False, flush_missed = True, client = None, decoration_tags = None):
         """ Configure tranlation
             Args:
                 token (string): API token
@@ -30,6 +35,7 @@ class Context(object):
                 preload (boolean): preload all tranlations
                 flush_missed (boolean): flush missed immediatly (if false - keys flushed with flush_keys)
                 client (Client): custom API client
+                decoration_tags (TagsFactory): custom decoration tags
         """
         self.language = self.build_language(locale,
                                             self.build_application(application_id,
@@ -46,6 +52,9 @@ class Context(object):
         else:
             # Load tranlations on demand: 
             self.dict = Dictionary(self.missed_keys)
+        # Init decoration tags:
+        self.decoration_tags = decoration_tags or system_decoration_tags
+
 
     def build_language(self, locale, app):
         """ Build application from configuration
@@ -94,11 +103,14 @@ class Context(object):
                 options (dict): options 
                 language (Language):
         """
-
         if self.dict is None:
             raise ContextNotConfigured('Translation is not configured')
+        # Translate data:
         t = self.dict.translate(Key(label = label, description = description, language = self.language))
-        return t.execute(data, options)
+        # Apply tokens:
+        ret = t.execute(data, options)
+        # Apply decoration:
+        return parse_decoration(ret).render(options)
 
     def submit_missed(self):
         """ Submit missed key to server after app is executed """
@@ -109,8 +121,10 @@ class Context(object):
 
 context = Context()
 
+
 def configure(**kwargs):
     return context.configure(**kwargs)
+
 
 def tr(label, data = {}, description = '', options = {}):
     """ Tranlate data
@@ -122,6 +136,7 @@ def tr(label, data = {}, description = '', options = {}):
             options (dict): options 
     """
     return context.tr(label, data, description, options)
+
 
 def submit_missed():
     return context.submit_missed()

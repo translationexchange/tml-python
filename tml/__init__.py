@@ -118,6 +118,14 @@ class Context(object):
             raise ContextNotConfigured('Translation is not configured')
         self.missed_keys.submit_all()
 
+    @property
+    def locale(self):
+        return self.language.locale
+
+    @property
+    def application(self):
+        return self.language.application
+
 
 context = Context()
 

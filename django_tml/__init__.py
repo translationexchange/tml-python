@@ -5,13 +5,20 @@ from django.utils.translation.trans_real import to_locale, get_language_from_req
 from tml import Context
 from collections import OrderedDict
 from tml.application import LanguageNotSupported
+import re
 
 
 def to_str(fn):
     def tmp(*args, **kwargs):
         return fn(*args, **kwargs).encode('utf-8')
-    return tmp 
+    return tmp
 
+def fallback_locale(locale):
+    exploded = locale.split('-')
+    if 2==len(exploded):
+        return exploded[0]
+    else:
+        return None
 
 class Tranlator(object):
     """ Basic tranlator class """
@@ -27,12 +34,14 @@ class Tranlator(object):
             Returns:
                 Context
         """
-	ret = Context()
-	try:
-    	    ret.configure(token = settings.TML.get('token', None), locale = locale)
-	except LanguageNotSupported:
-	    ret.configure(token = settings.TML.get('token', None), locale = None)
-	return ret
+        ret = Context()
+        try:
+            ret.configure(token = settings.TML.get('token', None), locale = locale)
+        except LanguageNotSupported:
+            # If locale like en-us is not found, try to found en locale
+            # If simplae locale not found- use default language
+            return self.build_context(fallback_locale(locale))
+        return ret
 
     def get_language(self):
         """ getter to current language """
@@ -44,9 +53,9 @@ class Tranlator(object):
     def activate(self, language):
         """ Activate selected language """
         if not language in self.contexts:
+            # create context
             self.contexts[language] = self.build_context(language)
         self.context = self.contexts[language]
-	print self.context
 
     def deactivate(self):
         self.context = self.default

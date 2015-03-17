@@ -20,10 +20,12 @@ class ContextNotConfigured(Error):
 
 class Context(object):
     """ Execution context """
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.language = None
         self.missed_keys = None
         self.dict = None
+        if len(kwargs):
+            self.configure(**kwargs)
 
 
     def configure(self, token, locale = None, application_id = None, preload = False, flush_missed = True, client = None, decoration_tags = None):
@@ -54,7 +56,7 @@ class Context(object):
             self.dict = Dictionary(self.missed_keys)
         # Init decoration tags:
         self.decoration_tags = decoration_tags or system_decoration_tags
-
+        return self
 
     def build_language(self, locale, app):
         """ Build application from configuration

@@ -6,6 +6,12 @@ from tml import Context
 from collections import OrderedDict
 
 
+def to_str(fn):
+    def tmp(*args, **kwargs):
+        return fn(*args, **kwargs).encode('utf-8')
+    return tmp 
+
+
 class Tranlator(object):
     """ Basic tranlator class """
     def __init__(self):
@@ -96,12 +102,6 @@ class Tranlator(object):
     
     def deactivate_all(self):
         return deactivate_all()
-
-
-def to_str(fn):
-    def tmp(*args, **kwargs):
-        return fn(*args, **kwargs).encode('utf-8')
-    return tmp 
 
 if settings.TML.get('monkeypatch', False):
     translation._trans = Tranlator()

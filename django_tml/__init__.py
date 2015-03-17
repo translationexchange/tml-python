@@ -34,14 +34,12 @@ class Tranlator(object):
             Returns:
                 Context
         """
-        ret = Context()
         try:
-            ret.configure(token = settings.TML.get('token', None), locale = locale)
+            return Context(token = settings.TML.get('token', None), locale = locale)
         except LanguageNotSupported:
             # If locale like en-us is not found, try to found en locale
             # If simplae locale not found- use default language
             return self.build_context(fallback_locale(locale))
-        return ret
 
     def get_language(self):
         """ getter to current language """

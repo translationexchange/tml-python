@@ -1,7 +1,7 @@
 # encoding: UTF-8
 from django.conf import settings
 from django.utils import translation
-from django.utils.trans_real import to_locale, get_language_from_request, get_language_from_request, get_language_from_path, _supported 
+from django.utils.translation.trans_real import to_locale, get_language_from_request, get_language_from_path, _supported, templatize, deactivate_all 
 from tml import Context
 from collections import OrderedDict
 
@@ -20,7 +20,7 @@ class Tranlator(object):
             Returns:
                 Context
         """
-        return Context(token = settings.TML.get('token', None), locale = language)
+        return Context(token = settings.TML.get('token', None), locale = locale)
 
     def get_language(self):
         """ getter to current language """
@@ -32,7 +32,7 @@ class Tranlator(object):
     def activate(self, language):
         """ Activate selected language """
         if not language in self.contexts:
-            self.contexts[language] = self.build_context(locale)
+            self.contexts[language] = self.build_context(language)
         self.context = self.contexts[language]
 
     def deactivate(self):
@@ -70,34 +70,32 @@ class Tranlator(object):
         else:
             return self.tr(plural, {'number': number}, context)
 
-    def get_language(self):
-        return self.context.language.locale
 
     def get_language_bidi(self):
         return self.context.language.right_to_left
 
-    def check_for_language(self):
+    def check_for_language(self, lang_code):
         try:
             return True if not self.context.language.application.get_language_url(lang_code) is None else False
         except Exception:
             return False
 
-    def to_locale(language):
+    def to_locale(self, language):
         return to_locale(language)
 
-    def get_language_from_request(request, check_path=False):
+    def get_language_from_request(self, request, check_path=False):
         return get_language_from_request(request, check_path)
     
     
-    def get_language_from_path(path):
+    def get_language_from_path(self, path):
         return get_language_from_path(path)
 
-    def templatize(src, origin=None):
-        return _trans.templatize(src, origin)
+    def templatize(self, src, origin=None):
+        return templatize(src, origin)
     
     
-    def deactivate_all():
-        return _trans.deactivate_all()
+    def deactivate_all(self):
+        return deactivate_all()
 
 
 def to_str(fn):
@@ -108,3 +106,4 @@ def to_str(fn):
 if settings.TML.get('monkeypatch', False):
     translation._trans = Tranlator()
     _supported = OrderedDict
+

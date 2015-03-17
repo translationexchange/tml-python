@@ -64,7 +64,6 @@ class Tranlator(object):
         return self.ungettext(singular, plural, number)
 
     def ugettext(self, message):
-	print self.context.language.locale
         return self.context.tr(message)
 
     def ungettext(self, singular, plural, number):
@@ -99,19 +98,17 @@ class Tranlator(object):
 
     def get_language_from_request(self, request, check_path=False):
         return get_language_from_request(request, check_path)
-    
-    
+
     def get_language_from_path(self, path):
         return get_language_from_path(path)
 
     def templatize(self, src, origin=None):
         return templatize(src, origin)
-    
-    
+
     def deactivate_all(self):
         return deactivate_all()
 
 if settings.TML.get('monkeypatch', False):
     translation._trans = Tranlator()
-    _supported = OrderedDict
+    _supported = [(lang['locale'], lang['native_name']) for lang in translation._trans.default.application.languages]
 

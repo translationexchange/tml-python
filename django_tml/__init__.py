@@ -4,6 +4,7 @@ from django.utils import translation
 from django.utils.translation.trans_real import to_locale, get_language_from_request, get_language_from_path, _supported, templatize, deactivate_all 
 from tml import Context
 from collections import OrderedDict
+from tml.application import LanguageNotSupported
 
 
 def to_str(fn):
@@ -26,12 +27,17 @@ class Tranlator(object):
             Returns:
                 Context
         """
-        return Context(token = settings.TML.get('token', None), locale = locale)
+	ret = Context()
+	try:
+    	    ret.configure(token = settings.TML.get('token', None), locale = locale)
+	except LanguageNotSupported:
+	    ret.configure(token = settings.TML.get('token', None), locale = None)
+	return ret
 
     def get_language(self):
         """ getter to current language """
         if self.context:
-            return self.context.locale
+            return self.context.language.locale
         else:
             return settings.LANGUAGE_CODE
 
@@ -40,6 +46,7 @@ class Tranlator(object):
         if not language in self.contexts:
             self.contexts[language] = self.build_context(language)
         self.context = self.contexts[language]
+	print self.context
 
     def deactivate(self):
         self.context = self.default
@@ -57,6 +64,7 @@ class Tranlator(object):
         return self.ungettext(singular, plural, number)
 
     def ugettext(self, message):
+	print self.context.language.locale
         return self.context.tr(message)
 
     def ungettext(self, singular, plural, number):

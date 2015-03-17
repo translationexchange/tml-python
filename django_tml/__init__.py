@@ -115,7 +115,22 @@ class Tranlator(object):
     def deactivate_all(self):
         return deactivate_all()
 
+_tranlator = Tranlator()
+
+def tr(label, data = {}, description = '', options = {}):
+    """ Tranlate data
+        Args:
+            label (string): tranlation label
+            data (dict): user data
+            description (string): tranlation description
+            language (Language):
+            options (dict): options 
+    """
+    global _tranlator
+    return _tranlator.context.tr(label, data, description, options)
+
+
 if settings.TML.get('monkeypatch', False):
-    translation._trans = Tranlator()
+    translation._trans = _tranlator
     _supported = [(lang['locale'], lang['native_name']) for lang in translation._trans.default.application.languages]
 

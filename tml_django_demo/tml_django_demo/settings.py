@@ -94,4 +94,4 @@ STATIC_URL = '/static/'
 
 TML = {
 'token':'4cb7cf6bf7cd64120661ae7da67759076d9b08f233ae510012fc6c3e819b93b8',
-'monkeypath':True}
+'monkeypatch':True}

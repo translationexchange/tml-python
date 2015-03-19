@@ -11,6 +11,8 @@
             .result dl dt {font-size:0.6em; color:#888;}
             .result dl dd {font-size:0.8em; color:#555;}
             .examples td {padding: 0 1em; vertical-align: bottom;}
+            .examples td {padding-top: 0.8em}
+            .examples td small {display: block; margin-bottom: 0.5em;}
             .examples td:first-child {width: 40%;}
             .examples td:last-child {padding-bottom: 20px;}
         </style>
@@ -21,13 +23,13 @@
             <div class="templatetags row">
                 <div class="col-md-12">
                     <h2>Configure</h2>
-                    <pre>
-                        TML = {
-                            'token': 'API token value',
-                            'monkeypatch': True,
-                            'cache': 'cache_backend'
-                        }
-                    </pre>
+<pre>
+TML = {
+    'token': 'API token value',
+    'monkeypatch': True,
+    'cache': 'cache_backend'
+}
+</pre>
                     <dl>
                         <dt>token</dt>
                         <dd>Translationexchange API token</dd>
@@ -37,32 +39,28 @@
                         <dd>Name of <a href="">django cache backend</a></dd>
                     </dl>
                     <h2>Select language</h2>
-                    <pre>
-                        language = translation.get_language_from_request(request, True)
-                        translation.activate(language)
-                    </pre>
+                    <pre>language = translation.get_language_from_request(request, True)
+translation.activate(language)</pre>
                     <small>Selected language is <b>{{language}}</b></small>
                     <h2>Use tr function</h2>
                     <pre>
-                        print tr(
-                            label = '{user} give {to:dat} {count} apples', 
-                            data = {
-                                'user':{'gender':'male', 'name':'Вася'},
-                                'to': {'gender':'female','name':'Маша'},
-                                'count': 5
-                            },
-                            decription = 'apple present'
-                        )
-                    </pre>
+print tr(
+    label = '{user} give {to:dat} {count} apples', 
+    data = {
+        'user':{'gender':'male', 'name':'Вася'},
+        'to': {'gender':'female','name':'Маша'},
+        'count': 5
+    },
+    decription = 'apple present'
+)</pre>
                     <h2>Use template tags</h2>
-                    <pre>
-                        {&shy;% tr %&shy;}Text to translation{&shy;% tr %&shy;}
-                    </pre>
-                    <table class="examples">
-                        {% load tml %}
 
+                    <table class="examples">
                         <tr>
                             <td>
+                            <small>
+                                Use standart i18n template tags
+                            </small>
 <pre>{&shy;% load i18n %&shy;}
 {&shy;% trans "Test" %&shy;}</pre>
                             </td>
@@ -103,6 +101,7 @@
                         
                         <tr>
                             <td>
+                                <small>Синтаксис, аналогичный <a href="https://docs.djangoproject.com/en/1.7/topics/i18n/translation/#blocktrans-template-tag">blocktrans</a></small>
                                 <pre>{&shy;% tr with name="John" %&shy;}Hello {name}{&shy;% endtr %&shy;}</pre>
                             </td>
                             <td>
@@ -111,6 +110,7 @@
                         </tr>
                         <tr>
                             <td>
+                                <small>Поддержка всех фич движка</small>
                                 <pre>{&shy;% tr %&shy;}{user} give to {to} {count} apples{&shy;% endtr %&shy;}</pre>
                             </td>
                             <td>

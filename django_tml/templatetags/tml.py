@@ -7,8 +7,9 @@ from django.utils import six, translation
 import sys
 from django.utils.translation.trans_real import trim_whitespace
 from django_tml import Translator
-from tml.token.legacy import suggest_label
+from tml import legacy
 from django.templatetags.i18n import BlockTranslateNode as BaseBlockTranslateNode
+from tml.translation import Key
 
 
 register = Library()
@@ -61,6 +62,20 @@ class BlockTranslateNode(BaseBlockTranslateNode):
     def translate(self, label, data, description):
         return Translator.instance().tr(label, data, description)
 
+class LegacyBlockTranlationNode(BlockTranslateNode):
+    """ Tranlation with back support """
+    def tranlate(self, label, data, description):
+        tranlation = self.fetch(label, description)
+
+    def translate(self, label, data, description):
+        """ Fetch tranlation
+            Args:
+                label (string): label in format for sprintf
+                description (string)
+            Return:
+                tranlation
+        """
+        return legacy.translate(Translator.instance().context, label, data, description, {})
 
 @register.tag("tr")
 def do_block_translate(parser, token, legacy = False):
@@ -98,7 +113,7 @@ def do_block_translate(parser, token, legacy = False):
     (u)gettext/(u)ngettext.
     """
     bits = token.split_contents()
-
+    close_token = 'endblocktrans' if legacy else 'endtr'
     options = {}
     remaining_bits = bits[1:]
     while remaining_bits:
@@ -161,9 +176,14 @@ def do_block_translate(parser, token, legacy = False):
                 plural.append(token)
             else:
                 break
-    if token.contents.strip() != 'endtr':
+    if token.contents.strip() != close_token:
         raise TemplateSyntaxError("'tr' doesn't allow other block tags (seen %r) inside it" % token.contents)
 
-    return BlockTranslateNode(extra_context, singular, plural, countervar,
+    cls = LegacyBlockTranlationNode if legacy else BlockTranslateNode
+    return cls(extra_context, singular, plural, countervar,
                               counter, message_context, trimmed = trimmed, legacy = legacy)
 
+
+@register.tag("blocktrans")
+def do_block_translate_legacy(parser, token):
+    return do_block_translate(parser, token, True)

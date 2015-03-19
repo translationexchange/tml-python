@@ -2,7 +2,9 @@
 from tml.token.parser import default_parser
 from tml.token import TextToken, VariableToken, RulesToken, CaseToken, PipeToken
 from tml.rules.options import fetch_default_arg
+from tml.translation import Key
 import re
+
 
 def render_token(token):
     """ Render token to sprinf """
@@ -36,3 +38,31 @@ LEGACY_TOKENS = re.compile('\%\((\w+?)\)s')
 def suggest_label(text):
     return re.sub(LEGACY_TOKENS, '{\\1}', text)
 
+def translate(context, label, data, description, options):
+    """ Tranlate with legacy
+        Args:
+            context (Context): current context
+            label (str): tranlation label
+            data (dict): user data
+            options (dict): tranlation options
+        Returns:
+            string
+    """
+    t = fetch(context, label, description)
+    o = t.fetch_option(data, options)
+    # support %(name)s -> {name}
+    o.label = suggest_label(o.label)
+    return o.apply(data, options)
+
+
+def fetch(context, label, description):
+    suggested_key = Key(label = suggest_label(label), description = description, language = context.language)
+    print description
+    try:
+        return context.dict.fetch(suggested_key)
+    except Exception:
+        key = Key(label = label, description = description, language = context.language)
+        if key.key != suggested_key.key:
+            return context.dict.translate(key)
+        else:
+            return context.fallback(key)

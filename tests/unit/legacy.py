@@ -1,7 +1,12 @@
 # encoding: UTF-8
 import unittest
-from tml.token.legacy import text_to_sprintf, suggest_label
-
+from tml.legacy import text_to_sprintf, suggest_label, translate
+from tml import Context
+from tests.mock import Client
+from tml.language import Language
+from tml.application import Application
+from tml.dictionary import Hashtable
+from tml.dictionary.language import LanguageDictionary
 
 class FakeLanguage(object):
     def __init__(self):
@@ -39,6 +44,16 @@ class TokenTest(unittest.TestCase):
         label = suggest_label('%(greeting)s %(name)s')
         self.assertEquals('{greeting} {name}', label, 'Suggest token')
 
+    def test_translate(self):
+        """ Support legacy """
+        c = Client.read_all()
+        context = Context()
+        context.language = Language.load_by_locale(Application.load_default(c), 'ru')
+        context.dict = LanguageDictionary(context.language, [])
+        self.assertEquals('Хелло Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
+        # Check old response syntax:
+        context.dict.translations['8a7c891aa103e45e904a173f218cab9a'][0]['label'] = 'Привет %(name)s'
+        self.assertEquals('Привет Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
 
 if __name__ == '__main__':
     unittest.main()

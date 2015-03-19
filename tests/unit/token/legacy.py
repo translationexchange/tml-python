@@ -27,9 +27,9 @@ class CaseMock(object):
 
 class TokenTest(unittest.TestCase):
     def test_legacy(self):
+        label = '{name||дал,дала,дал(а)} {to::dat} {count} {count|one:яблоко,few:яблока,many:яблок}'
+        expected = '%(name)s дал(а) %(to)s %(count)s яблок'
         format = text_to_sprintf(label, FakeLanguage())
-        print expected
-        print format
         self.assertEquals(expected, format, 'Check legacy')
 
     def test_suggest_label(self):

@@ -31,8 +31,8 @@ def to_sprintf(tokens):
 def text_to_sprintf(text, language):
     return to_sprintf(default_parser.parse(text, language))
 
-IS_LABEL = re.compile('\%\((\w+?)\)s')
+LEGACY_TOKENS = re.compile('\%\((\w+?)\)s')
 
 def suggest_label(text):
-    return re.sub(IS_LABEL, '{\\1}', text)
+    return re.sub(LEGACY_TOKENS, '{\\1}', text)
 

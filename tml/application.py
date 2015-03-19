@@ -40,6 +40,14 @@ class Application(object):
         """
         return cls.from_dict(client, client.get('applications/current', {'definition': 1}))
 
+    @property
+    def supported_locales(self):
+        """ List of locales supported by app
+            Returns:
+                list
+        """
+        return [lang['locale'] for lang in self.languages]
+
     @classmethod
     def load_by_id(cls, client, id):
         """ Load application by id

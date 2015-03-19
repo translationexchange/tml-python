@@ -1,3 +1,4 @@
+# encoding: UTF-8
 import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax, CaseToken

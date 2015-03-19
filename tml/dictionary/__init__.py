@@ -1,14 +1,27 @@
 # encoding: UTF-8
-from tml.translation import Translation
+from ..translation import Translation
+from ..exceptions import Error
+
+
+def return_label_fallback(key):
+    """ Fallaback tranlation
+        Args:
+            key (Key): translated key
+        Returns:
+            Translation
+    """
+    return Translation(key, [])
+
 
 class AbstactDictionary(object):
     """ Dictionary """
-    def __init__(self, missed_keys):
+    def __init__(self, missed_keys, fallback):
         """ Dictionary .ctor
             Args:
                 missed_keys (list): list of missed keys or object with append method
         """
         self.missed_keys = missed_keys
+        self.fallback = fallback if fallback else return_label_fallback
 
     def translate(self, key):
         """ Get key tranlation
@@ -19,10 +32,9 @@ class AbstactDictionary(object):
         """
         try:
             return self.fetch(key)
-        except Exception as e:
+        except Error as e:
             self.missed_keys.append(key)
-            # Returns empty translation:
-            return Translation(key, [])
+            return self.fallback(key)
 
     def fetch(self, key):
         raise NotImplemented()

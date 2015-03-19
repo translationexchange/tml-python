@@ -5,6 +5,7 @@ from hashlib import md5
 from .context import Context
 from ..exceptions import Error
 from ..token.parser import default_parser
+from tml.exceptions import RequiredArgumentIsNotPassed
 
 
 
@@ -54,20 +55,34 @@ class TranslationOption(Context):
                 context (dict): context rules
         """
         super(TranslationOption, self).__init__(context)
-        self.tokens = default_parser.parse(label, language)
+        self.label = label
         self.language = language
+
+    def check(self, data, options):
+        """ Check is option supported
+            Args:
+                data (dict): user data
+                options (dict): execution options
+            Raises:
+                OptionIsNotSupported
+            Returns:
+                TranslationOption
+        """
+        if super(TranslationOption, self).check(data, options, self.language):
+            return self
+        else:
+            raise OptionIsNotSupported(self, data, self.language)
 
     def execute(self, data, options = {}):
         """ Execute translation with given data if it is supported
             Args:
                 data (dict): user data
-                options (dict): exectution options
-                language (language.Language): language
+                options (dict): execution options
         """
-        if not self.check(data, options, self.language):
-            # Validation fault:
-            raise OptionIsNotSupported(self, data, self.language)
-        return execute_all(self.tokens, data, options) # execute with data
+        return self.check(data, options).apply(data, options)
+
+    def apply(self, data, options = {}):
+        return execute_all(default_parser.parse(self.label, self.language), data, options) # execute with data
 
 
 class Translation(object):
@@ -100,16 +115,19 @@ class Translation(object):
         """
         return TranslationOption(self.key.label, self.key.language, {})
 
-    def execute(self, data, options):
-        """ Execute translation """
+    def fetch_option(self, data, options):
         for option in self.options:
             try:
-                # return result of first supported option:
-                return option.execute(data, options)
+                return option.check(data, options)
             except OptionIsNotSupported:
                 pass
-        # by default use key label:
-        return self.default.execute(data, options)
+            except RequiredArgumentIsNotPassed:
+                pass
+        return self.default 
+
+    def execute(self, data, options):
+        """ Execute translation """
+        return self.fetch_option(data, options).execute(data, options)
 
 class OptionIsNotSupported(Error):
     pass

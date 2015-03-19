@@ -68,8 +68,18 @@ class translation_test(unittest.TestCase):
                   language = self.lang)
         t = Translation.from_data(key,
                                   self.client.get(url, {'locale':'ru'})['results'])
+
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
-        self.assertEquals(u'Вася дал тебе всего 1 яблоко, мужик!', t.execute({'actor':{'gender':'male','name':'Вася'},'count':1}, {}), 'Male one')
+        male_one = {'actor':{'gender':'male','name':'Вася'},'count':1}
+        self.assertEquals(u'Вася дал тебе всего 1 яблоко, мужик!',
+                          t.execute(male_one, {}),
+                          'Male one')
+        self.assertEquals('{actor} дал тебе всего {count} яблоко, мужик!',
+                          t.fetch_option(male_one, {}).label,
+                          'Check fetch')
+        self.assertEquals('{actor||дал, дала, дало} тебе {count||one: яблоко, few: яблока, many: яблок}',
+                  t.fetch_option({}, {}).label,
+                  'fetch default')
         self.assertEquals(u'Вася дал тебе 5 яблок', t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')
         t = Translation.from_data(key, [{"label":"{to::dat}"}])
         sdata = '{"to":{"gender":"male","name":"Вася"}}'

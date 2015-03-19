@@ -75,14 +75,23 @@ def parse_args(text):
     kwargs = {}
     args = []
     for part in text.split(','):
-        part = part.strip()
-        m = IS_KWARG.match(part)
-        if m:
-            kwargs[m.group(1)] = m.group(2).strip()
-        else:
+        key, value = parse_kwarg(part)
+        if key is None:
             args.append(part)
+        else:
+            kwargs[key] = value
+
     return (args, kwargs)
 
+def fetch_default_arg(text):
+    return parse_kwarg(text.split(',')[-1])[1]
+
+def parse_kwarg(part):
+    m = IS_KWARG.match(part)
+    if m:
+        return (m.group(1), m.group(2).strip())
+    else:
+        return (None, part.strip())
 
 class Parser(object):
     """ Parser for options """

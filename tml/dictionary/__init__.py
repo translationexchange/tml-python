@@ -15,7 +15,7 @@ def return_label_fallback(key):
 
 class AbstactDictionary(object):
     """ Dictionary """
-    def __init__(self, missed_keys, fallback):
+    def __init__(self, missed_keys, fallback = None):
         """ Dictionary .ctor
             Args:
                 missed_keys (list): list of missed keys or object with append method

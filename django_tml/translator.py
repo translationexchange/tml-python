@@ -74,7 +74,6 @@ class Translator(object):
         self.context = self.contexts[language]
 
     def deactivate(self):
-        print 'deactivate?'
         self.context = self.default
 
     def gettext_noop(self, message):

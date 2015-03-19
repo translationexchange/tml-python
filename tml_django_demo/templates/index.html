@@ -85,10 +85,8 @@
                         </tr>
                         <tr>
                             <td>
-                                <pre>
-                                    {&shy;% load i18n %&shy;}
-                                    {&shy;% blocktrans with name="John" %&shy;}Hello {{name}}{&shy;% endblocktrans %&shy;}
-                                </pre>
+                                <pre>{&shy;% load i18n %&shy;}
+{&shy;% blocktrans with name="John" %&shy;}Hello {&shy;{name}&shy;}{&shy;% endblocktrans %&shy;}</pre>
                             </td>
                             <td>
                                 {% blocktrans with name="John" %}Hello {{name}}{% endblocktrans %}
@@ -96,10 +94,8 @@
                         </tr>
                         <tr>
                             <td>
-                                <pre>
-                                    {&shy;% load i18n %&shy;}
-                                    {&shy;% trans "Test" %&shy;}
-                                </pre>
+<pre>{&shy;% load i18n %&shy;}
+{&shy;% trans "Test" %&shy;}</pre>
                             </td>
                             <td>
                                 {% trans "Test" %}

@@ -2,9 +2,9 @@
 from django.shortcuts import redirect, render_to_response
 from django.utils import translation
 from django.http import HttpResponse
-from json import dumps
+from json import dumps, loads
 from django.views.decorators.csrf import csrf_exempt
-from django_tml import tr
+from django_tml import tr, activate
 
 
 def home(request):
@@ -19,8 +19,10 @@ def home(request):
 @csrf_exempt
 def translate(request):
     label = request.POST.get('label')
+    description = request.POST.get('description')
     locale = request.POST.get('locale')
-    translation.activate(locale)
-    result = translation.ugettext(label)
+    data = loads(request.POST.get('data','{}'))
+    activate(locale)
+    result = tr(label, data, description)
     return HttpResponse(dumps({'result': result}))
 

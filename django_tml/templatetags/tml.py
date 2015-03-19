@@ -3,10 +3,10 @@ from django.template import (Node, Variable, TemplateSyntaxError,
 from django.template.base import render_value_in_context
 from django.template.defaulttags import token_kwargs
 from ..__init__ import tr
-from django.utils import six
-from django.utils import six
+from django.utils import six, translation
 import sys
 from django.utils.translation.trans_real import trim_whitespace
+from django_tml import Translator
 
 register = Library()
 
@@ -16,6 +16,8 @@ class BlockTranslateNode(Node):
         self.extra_context = extra_context
         self.message_context = message_context
         self.content = content
+        self.trimmed = trimmed
+
 
     def render_token_list(self, tokens):
         result = []
@@ -25,11 +27,11 @@ class BlockTranslateNode(Node):
                 result.append(token.contents.replace('%', '%%'))
             elif token.token_type == TOKEN_VAR:
                 result.append('{%s}' % token.contents)
-                vars.append(token.contents)
+
         msg = ''.join(result)
         if self.trimmed:
             msg = trim_whitespace(msg)
-        return msg, vars
+        return msg
 
     def render(self, context, nested=False):
         if self.message_context:
@@ -42,7 +44,7 @@ class BlockTranslateNode(Node):
         # Update() works like a push(), so corresponding context.pop() is at
         # the end of function
         context.update(tmp_context)
-        return tr(label = self.content, data = context, description = message_context)
+        print Translator.instance().tr(label = self.render_token_list(self.content), data = context, description = message_context)
 
 
 @register.tag("tr")

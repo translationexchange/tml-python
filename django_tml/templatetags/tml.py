@@ -44,7 +44,7 @@ class BlockTranslateNode(Node):
         # Update() works like a push(), so corresponding context.pop() is at
         # the end of function
         context.update(tmp_context)
-        print Translator.instance().tr(label = self.render_token_list(self.content), data = context, description = message_context)
+        return Translator.instance().tr(label = self.render_token_list(self.content), data = context, description = message_context)
 
 
 @register.tag("tr")

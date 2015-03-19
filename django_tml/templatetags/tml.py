@@ -1,54 +1,69 @@
+from __future__ import absolute_import
 from django.template import (Node, Variable, TemplateSyntaxError,
     TokenParser, Library, TOKEN_TEXT, TOKEN_VAR)
 from django.template.base import render_value_in_context
 from django.template.defaulttags import token_kwargs
-from ..__init__ import tr
 from django.utils import six, translation
 import sys
 from django.utils.translation.trans_real import trim_whitespace
 from django_tml import Translator
+from tml.token.legacy import suggest_label
+from django.templatetags.i18n import BlockTranslateNode as BaseBlockTranslateNode
+
 
 register = Library()
 
-class BlockTranslateNode(Node):
+class BlockTranslateNode(BaseBlockTranslateNode):
 
-    def __init__(self, extra_context, content, message_context=None, trimmed=False):
+    def __init__(self, extra_context, singular, plural, countervar, counter, description, trimmed, legacy = False):
+        """ Block for {% tr %} {% endtr %}
+            extra_context (dict): block with params
+            singular (string): label for singular
+            plural (string): label for plural
+            message_context (string): key description
+            contervar (string): variable for counter
+            trimmed (boolean): trim context
+            legacy (boolean): supports legacy e.c. allow {{name}} syntax in label and %(name)s syntax in response
+        """
         self.extra_context = extra_context
-        self.message_context = message_context
-        self.content = content
+        self.description = description
+        self.singular = singular
+        self.plural = plural
+        self.countervar = countervar
+        self.counter = counter
         self.trimmed = trimmed
 
 
-    def render_token_list(self, tokens):
-        result = []
-        vars = []
-        for token in tokens:
-            if token.token_type == TOKEN_TEXT:
-                result.append(token.contents.replace('%', '%%'))
-            elif token.token_type == TOKEN_VAR:
-                result.append('{%s}' % token.contents)
-
-        msg = ''.join(result)
-        if self.trimmed:
-            msg = trim_whitespace(msg)
-        return msg
-
-    def render(self, context, nested=False):
-        if self.message_context:
-            message_context = self.message_context.resolve(context)
+    def render(self, data, nested=False):
+        """ Render result """
+        if self.description:
+            description = self.description.resolve(data)
         else:
-            message_context = None
-        tmp_context = {}
+            description = ''
+ 
+        custom_data = {}
         for var, val in self.extra_context.items():
-            tmp_context[var] = val.resolve(context)
-        # Update() works like a push(), so corresponding context.pop() is at
-        # the end of function
-        context.update(tmp_context)
-        return Translator.instance().tr(label = self.render_token_list(self.content), data = context, description = message_context)
+            custom_data[var] = val.resolve(data)
+        data.update(custom_data)
+
+        if self.plural and self.countervar and self.counter:
+            # Plural:
+            count = self.counter.resolve(data)
+            data[self.countervar] = count
+            if count == 1:
+                label, void = self.render_token_list(self.singular)
+            else:
+                label, void = self.render_token_list(self.plural)
+        else:
+            label, void = self.render_token_list(self.singular)
+        return self.translate(label, data, description)
+
+    def translate(self, label, data, description):
+        return Translator.instance().tr(label, data, description)
 
 
 @register.tag("tr")
-def do_block_translate(parser, token):
+def do_block_translate(parser, token, legacy = False):
     """
     This will translate a block of text with parameters.
 
@@ -58,17 +73,26 @@ def do_block_translate(parser, token):
         This is {{ bar }} and {{ boo }}.
         {% endtr %}
 
+    Additionally, this supports pluralization::
+
+        {% tr count count=var|length %}
+        There is {{ count }} object.
+        {% plural %}
+        There are {{ count }} objects.
+        {% endtr %}
+
+    This is much like ngettext, only in template syntax.
 
     The "var as value" legacy format is still supported::
 
-        {% blocktrans with foo|filter as bar and baz|filter as boo %}
-        {% blocktrans count var|length as count %}
+        {% tr with foo|filter as bar and baz|filter as boo %}
+        {% tr count var|length as count %}
 
     Contextual translations are supported::
 
-        {% blocktrans with bar=foo|filter context "greeting" %}
+        {% tr with bar=foo|filter context "greeting" %}
             This is {{ bar }}.
-        {% endblocktrans %}
+        {% endtr %}
 
     This is equivalent to calling pgettext/npgettext instead of
     (u)gettext/(u)ngettext.
@@ -87,6 +111,11 @@ def do_block_translate(parser, token):
             if not value:
                 raise TemplateSyntaxError('"with" in %r tag needs at least '
                                           'one keyword argument.' % bits[0])
+        elif option == 'count':
+            value = token_kwargs(remaining_bits, parser, support_legacy=True)
+            if len(value) != 1:
+                raise TemplateSyntaxError('"count" in %r tag expected exactly '
+                                          'one keyword argument.' % bits[0])
         elif option == "context":
             try:
                 value = remaining_bits.pop(0)
@@ -103,6 +132,10 @@ def do_block_translate(parser, token):
                                       (bits[0], option))
         options[option] = value
 
+    if 'count' in options:
+        countervar, counter = list(six.iteritems(options['count']))[0]
+    else:
+        countervar, counter = None, None
     if 'context' in options:
         message_context = options['context']
     else:
@@ -111,16 +144,26 @@ def do_block_translate(parser, token):
 
     trimmed = options.get("trimmed", False)
 
-    content = []
+    singular = []
+    plural = []
     while parser.tokens:
         token = parser.next_token()
         if token.token_type in (TOKEN_VAR, TOKEN_TEXT):
-            content.append(token)
+            singular.append(token)
         else:
             break
-
+    if countervar and counter:
+        if token.contents.strip() != 'plural':
+            raise TemplateSyntaxError("'tr' doesn't allow other block tags inside it")
+        while parser.tokens:
+            token = parser.next_token()
+            if token.token_type in (TOKEN_VAR, TOKEN_TEXT):
+                plural.append(token)
+            else:
+                break
     if token.contents.strip() != 'endtr':
         raise TemplateSyntaxError("'tr' doesn't allow other block tags (seen %r) inside it" % token.contents)
 
-    return BlockTranslateNode(extra_context, content, message_context, trimmed=trimmed)
+    return BlockTranslateNode(extra_context, singular, plural, countervar,
+                              counter, message_context, trimmed = trimmed, legacy = legacy)
 

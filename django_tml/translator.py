@@ -9,7 +9,7 @@ from django_tml.cache import CachedClient
 from tml import Key
 from tml.translation import TranslationOption
 from django.utils.translation import LANGUAGE_SESSION_KEY
-from tml.token.legacy import text_to_sprintf, suggest_label
+from tml.legacy import text_to_sprintf, suggest_label
 
 def to_str(fn):
     def tmp(*args, **kwargs):

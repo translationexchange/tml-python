@@ -42,12 +42,12 @@ class AbstactDictionary(object):
 
 class Hashtable(AbstactDictionary):
     """ Dictionary with translation store in hash """
-    def __init__(self, tranlations = None, missed_keys = []):
+    def __init__(self, translations = None, missed_keys = []):
         """ .ctor
             Args:
                 tranlations (dict): key- tranlation code, value - tranlation options
         """
-        self.tranlations = tranlations
+        self.translations = translations
         super(Hashtable, self).__init__(missed_keys)
 
     """ Hash dictionary """
@@ -58,5 +58,5 @@ class Hashtable(AbstactDictionary):
             Returns:
                 Tranlation
         """
-        return Translation.from_data(key, self.tranlations[key.key])
+        return Translation.from_data(key, self.translations[key.key])
 

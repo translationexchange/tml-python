@@ -9,6 +9,7 @@ from django_tml.cache import CachedClient
 from tml import Key
 from tml.translation import TranslationOption
 from django.utils.translation import LANGUAGE_SESSION_KEY
+from tml.token.legacy import text_to_sprintf, suggest_label
 
 def to_str(fn):
     def tmp(*args, **kwargs):
@@ -88,24 +89,30 @@ class Translator(object):
         return self.ungettext(singular, plural, number)
 
     def ugettext(self, message):
-        return self.tr(message)
+        return self.translate(message)
 
     def ungettext(self, singular, plural, number):
         if number == 1:
-            return self.tr(singular, {'number': number})
+            return self.translate(singular, {'number': number})
         else:
-            return self.tr(plural, {'number': number})
+            return self.translate(plural, {'number': number})
 
     @to_str
     def pgettext(self, context, message):
-        return self.tr(message, description = context)
+        return self.translate(message, description = context)
 
     @to_str
     def npgettext(self, context, singular, plural, number):
         if number == 1:
-            return self.tr(singular, {'number': number}, context)
+            return self.translate(singular, {'number': number}, context)
         else:
-            return self.tr(plural, {'number': number}, context)
+            return self.translate(plural, {'number': number}, context)
+
+    def translate(self, label, data = {}, description = None):
+        key = Key(label = suggest_label(label), description= description, language = self.context.language)
+        translation = self.context.dict.translate(key)
+        ret = text_to_sprintf(translation.fetch_option(data, {}).label, self.context.language)
+        return ret
 
 
     def get_language_bidi(self):

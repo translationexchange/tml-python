@@ -160,7 +160,7 @@ class RulesToken(VariableToken):
 
     def execute(self, data, options):
         """ Execute token with var """
-        return self.language.contexts.execute(self.rules, self.fetch(data))
+        return self.language.contexts.execute(self.rules, self.fetch(data)).strip()
 
 class CaseToken(RulesToken):
     """ Language keys {name::nom} """
@@ -168,7 +168,7 @@ class CaseToken(RulesToken):
 
     def __init__(self, name, case, language):
         super(RulesToken, self).__init__(name)
-        self.case = language.cases[case]
+        self.case = language.cases[str(case)]
 
 
     def execute(self, data, options):

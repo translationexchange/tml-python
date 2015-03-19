@@ -7,6 +7,7 @@ from ..exceptions import Error
 from ..token.parser import default_parser
 
 
+
 class Key(object):
     """ Translation key """
     def __init__(self, language, label, description = '', level = 0):
@@ -32,7 +33,13 @@ class Key(object):
     @property
     def key(self):
         """ Key property """
-        return md5('%s;;;%s' % (self.label, self.description)).hexdigest()
+        if self.description:
+            description = self.description
+        else:
+            description = ''
+        ret = md5('%s;;;%s' % (self.label, description)).hexdigest()
+        print '%s %s -> %s' % (self.label, description, ret)
+        return ret
 
     @property
     def client(self):
@@ -41,7 +48,7 @@ class Key(object):
 
 class TranslationOption(Context):
     """ Translation option with context """
-    def __init__(self, label, language, context):
+    def __init__(self, label, language, context = {}):
         """ .ctor
             Args:
                 text (string): translation text

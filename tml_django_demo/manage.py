@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import os
 import sys
+try:
+    import env
+except ImportError:
+    pass
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tml_django_demo.settings")

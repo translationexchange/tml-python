@@ -1,5 +1,5 @@
-{% load tml %}
 {% load i18n %}
+{% load tml %}
 <html>
     <head>
         <title>TML Python SDK</title>
@@ -10,7 +10,9 @@
             .result dl {margin-bottom: 0px;}
             .result dl dt {font-size:0.6em; color:#888;}
             .result dl dd {font-size:0.8em; color:#555;}
-            .examples td {padding: 0 1em; vertical-align: middle;}
+            .examples td {padding: 0 1em; vertical-align: bottom;}
+            .examples td:first-child {width: 40%;}
+            .examples td:last-child {padding-bottom: 20px;}
         </style>
     </head>
     <body>
@@ -54,12 +56,44 @@
                     </pre>
                     <h2>Use template tags</h2>
                     <pre>
-                        {&shy;% load tml %&shy;}
                         {&shy;% tr %&shy;}Text to translation{&shy;% tr %&shy;}
                     </pre>
                     <table class="examples">
+                        {% load tml %}
+
                         <tr>
                             <td>
+<pre>{&shy;% load i18n %&shy;}
+{&shy;% trans "Test" %&shy;}</pre>
+                            </td>
+                            <td>
+                                {% trans "Test" %}
+                            </td>
+                        </tr>
+                        {% include "blocktrans.html" %}
+                        <tr>
+                            <td>
+                                 <small>
+                                     При подгрузке в шаблон tml, blocktrans - перегружается, он работает в режиме совместимости:
+                                     <ul>
+                                         <li>
+                                             разрешены {&shy;{двойные скобки}&shy;}
+                                         </li>
+                                         <li>
+                                             %(python)s синтаксис форматирования в переводе&mdash; вы можете просто импортировать существующие переводы без изменений
+                                         </li>
+                                     </ul>
+
+                                 </small>
+                                 <pre>{&shy;% load tml %&shy;}{&shy;% blocktrans %&shy;}{&shy;{user}&shy;} give to {&shy;{to}&shy;} {&shy;{count}&shy;} apples{&shy;% endblocktrans %&shy;}</pre>
+                            </td>
+                            <td>
+                                 {% blocktrans %}{{user}} give to {{to}} {{count}} apples{% endblocktrans %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <small>tr - нативный тег, для перевода.</small>
                                 <pre>{&shy;% tr %&shy;}Test{&shy;% endtr %&shy;}</pre>
                             </td>
                             <td>
@@ -81,24 +115,6 @@
                             </td>
                             <td>
                                 {% tr %}{user} give to {to} {count} apples{% endtr %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <pre>{&shy;% load i18n %&shy;}
-{&shy;% blocktrans with name="John" %&shy;}Hello {&shy;{name}&shy;}{&shy;% endblocktrans %&shy;}</pre>
-                            </td>
-                            <td>
-                                {% blocktrans with name="John" %}Hello {{name}}{% endblocktrans %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-<pre>{&shy;% load i18n %&shy;}
-{&shy;% trans "Test" %&shy;}</pre>
-                            </td>
-                            <td>
-                                {% trans "Test" %}
                             </td>
                         </tr>
                     </table>

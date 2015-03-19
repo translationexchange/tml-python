@@ -92,6 +92,15 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': BASE_DIR + '/tmp/',
+    }
+}
+
 TML = {
-'token':'4cb7cf6bf7cd64120661ae7da67759076d9b08f233ae510012fc6c3e819b93b8',
-'monkeypatch':True}
+    'token': '4cb7cf6bf7cd64120661ae7da67759076d9b08f233ae510012fc6c3e819b93b8',
+    'monkeypatch': True,
+    'cache': 'default',
+}

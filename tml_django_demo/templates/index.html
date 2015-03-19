@@ -1,3 +1,4 @@
+{% load tml %}
 <html>
     <head>
         <title>TML Python SDK</title>
@@ -8,11 +9,90 @@
             .result dl {margin-bottom: 0px;}
             .result dl dt {font-size:0.6em; color:#888;}
             .result dl dd {font-size:0.8em; color:#555;}
+            .examples td {padding: 0 1em; vertical-align: middle;}
         </style>
     </head>
     <body>
     <form method="post" action="/translate" style="padding-bottom: 3em;">
         <div class="container">
+            <div class="templatetags row">
+                <div class="col-md-12">
+                    <h2>Configure</h2>
+                    <pre>
+                        TML = {
+                            'token': 'API token value',
+                            'monkeypatch': True,
+                            'cache': 'cache_backend'
+                        }
+                    </pre>
+                    <dl>
+                        <dt>token</dt>
+                        <dd>Translationexchange API token</dd>
+                        <dt>monkeypatch</dt>
+                        <dd>Override <a href="https://docs.djangoproject.com/en/1.7/topics/i18n/translation/">django.utils.translation</a> functions</dd>
+                        <dt>cache</dt>
+                        <dd>Name of <a href="">django cache backend</a></dd>
+                    </dl>
+                    <h2>Select language</h2>
+                    <pre>
+                        language = translation.get_language_from_request(request, True)
+                        translation.activate(language)
+                    </pre>
+                    <small>Selected language is <b>{{language}}</b></small>
+                    <h2>Use tr function</h2>
+                    <pre>
+                        print tr(
+                            label = '{user} give {to:dat} {count} apples', 
+                            data = {
+                                'user':{'gender':'male', 'name':'Вася'},
+                                'to': {'gender':'female','name':'Маша'},
+                                'count': 5
+                            },
+                            decription = 'apple present'
+                        )
+                    </pre>
+                    <h2>Use template tags</h2>
+                    <pre>
+                        {&shy;% load tml %&shy;}
+                        {&shy;% tr %&shy;}Text to translation{&shy;% tr %&shy;}
+                    </pre>
+                    <table class="examples">
+                        <tr>
+                            <td>
+                                <pre>{&shy;% tr %&shy;}Test{&shy;% endtr %&shy;}</pre>
+                            </td>
+                            <td>
+                                {% tr %}Test{% endtr %}
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>
+                                <pre>{&shy;% tr with name="John" %&shy;}Hello {name}{&shy;% endtr %&shy;}</pre>
+                            </td>
+                            <td>
+                                {% tr with name="John" %}Hello {name}{% endtr %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <pre>{&shy;% tr %&shy;}{user} give to {to} {count} apples{&shy;% endtr %&shy;}</pre>
+                            </td>
+                            <td>
+                                {% tr %}{user} give to {to} {count} apples{% endtr %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <pre>{&shy;% blocktrans with name="John" %&shy;}Hello {name}{&shy;% endblocktrans %&shy;}</pre>
+                            </td>
+                            <td>
+                                
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-12">
                     <h1 class="pagetitile">TML Python SDK</h1>
@@ -47,10 +127,6 @@
         "count":5
     }
                             </pre>
-                        </div>
-                        <div class="form-group">
-                            <label for="token">API token:</label>
-                            <input type="text" value="{{token}}" name="token" id="token" class="form-control"/>
                         </div>
                         <div class="form-group">
                             <label>Locale</label>

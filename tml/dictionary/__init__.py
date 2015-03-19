@@ -32,7 +32,7 @@ class AbstactDictionary(object):
         """
         try:
             return self.fetch(key)
-        except Error as e:
+        except Exception as e:
             self.missed_keys.append(key)
             return self.fallback(key)
 

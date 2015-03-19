@@ -38,7 +38,6 @@ class Key(object):
         else:
             description = ''
         ret = md5('%s;;;%s' % (self.label, description)).hexdigest()
-        print '%s %s -> %s' % (self.label, description, ret)
         return ret
 
     @property

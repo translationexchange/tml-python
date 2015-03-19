@@ -34,7 +34,6 @@ class Translator(object):
                 Translator
         """
         if cls._instance is None:
-            print 'instance of %s' % cls
             cls._instance = cls()
         return cls._instance
 
@@ -73,8 +72,6 @@ class Translator(object):
             # create context
             self.contexts[language] = self.build_context(language)
         self.context = self.contexts[language]
-        print 'activate %s and get %s' % (language, self.context.locale)
-        print self
 
     def deactivate(self):
         print 'deactivate?'

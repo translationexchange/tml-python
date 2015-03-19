@@ -87,11 +87,12 @@ def fetch_default_arg(text):
     return parse_kwarg(text.split(',')[-1])[1]
 
 def parse_kwarg(part):
+    part = part.strip()
     m = IS_KWARG.match(part)
     if m:
-        return (m.group(1), m.group(2).strip())
+        return (m.group(1).strip(), m.group(2).strip())
     else:
-        return (None, part.strip())
+        return (None, part)
 
 class Parser(object):
     """ Parser for options """

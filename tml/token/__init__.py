@@ -198,6 +198,10 @@ class PipeToken(RulesToken):
         self.token = VariableToken(name)
         self.rules = RulesToken(name, rules, language)
 
+    @property
+    def name(self):
+        return self.token.name
+
     def execute(self, data, options):
         """ Execute token """
         return to_string(self.token.execute(data, options))+' '+to_string(self.rules.execute(data, options))

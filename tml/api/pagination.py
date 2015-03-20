@@ -22,5 +22,8 @@ def allpages(client, url, params):
             ret.update(resp['results'])
         else:
             raise Exception('Results with type %s can not be used in pagination' % type(resp['results']))
-        total_pages = resp['pagination']['total_pages']
+        try:
+            total_pages = resp['pagination']['total_pages']
+        except KeyError:
+            pass
     return ret

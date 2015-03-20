@@ -5,9 +5,17 @@ import unittest
 from tml import Application
 from tml.language import Language
 from tml.translation import Key
+from tml.dictionary import return_label_fallback
 from tml.dictionary.translations import Dictionary
 from tml.rules.contexts.gender import Gender
 
+class Fallback(object):
+    def __init__(self):
+        self.missed_keys = []
+
+    def __call__(self, key):
+        self.missed_keys.append(key)
+        return return_label_fallback(key)
 
 class translations(unittest.TestCase):
     """ Test loading tranlations over API """
@@ -22,23 +30,23 @@ class translations(unittest.TestCase):
 
 
     def test_translate(self):
-        missed_keys = []
-        dict = Dictionary(missed_keys)
+        f = Fallback()
+        dict = Dictionary(f)
         t = dict.translate(Key(label = '{actor||give} you {count||apples}',
                               description = 'somebody give you few apples',
                               language = self.lang))
-        self.assertEquals(0, len(missed_keys),'No missing keys')
         self.assertEquals(3, len(t.options), 'All options loaded')
+        self.assertEquals(0, len(f.missed_keys), 'No missed keys')
         self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
 
     def test_default(self):
-        missed_keys = []
-        dict = Dictionary(missed_keys)
+        f = Fallback()
+        dict = Dictionary(f)
         label = 'No translation'
         key = Key(label = label, language = self.lang)
         t = dict.translate(key)
-        self.assertEquals(1, len(missed_keys), 'Key marked as missed')
-        self.assertEquals(key, missed_keys[0], 'Key added to missed')
+        self.assertEquals(1, len(f.missed_keys), 'Key marked as missed')
+        self.assertEquals(key, f.missed_keys[0], 'Key added to missed')
         self.assertEquals(label, t.execute({}, {}), 'Use default tranlation')
 
 

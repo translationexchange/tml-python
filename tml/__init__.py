@@ -50,10 +50,10 @@ class Context(object):
             self.missed_keys = MissedKeysLazy(self.language.client)
         if preload:
             # Preload all translations for languge:
-            self.dict = LanguageDictionary(self.language, self.missed_keys)
+            self.dict = LanguageDictionary(self.language)
         else:
             # Load tranlations on demand: 
-            self.dict = Dictionary(self.missed_keys)
+            self.dict = Dictionary()
         # Init decoration tags:
         self.decoration_tags = decoration_tags or system_decoration_tags
         return self

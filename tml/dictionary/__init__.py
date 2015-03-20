@@ -15,13 +15,12 @@ def return_label_fallback(key):
 
 class AbstactDictionary(object):
     """ Dictionary """
-    def __init__(self, missed_keys, fallback = None):
+    def __init__(self, fallback = None):
         """ Dictionary .ctor
             Args:
-                missed_keys (list): list of missed keys or object with append method
+                fallback (function): function which generate tranlation if current is not found
         """
-        self.missed_keys = missed_keys
-        self.fallback = fallback if fallback else return_label_fallback
+        self._fallback = fallback if fallback else return_label_fallback
 
     def translate(self, key):
         """ Get key tranlation
@@ -33,22 +32,25 @@ class AbstactDictionary(object):
         try:
             return self.fetch(key)
         except Exception as e:
-            self.missed_keys.append(key)
             return self.fallback(key)
 
     def fetch(self, key):
         raise NotImplemented()
 
+    def fallback(self, key):
+        """ Key is not found """
+        return self._fallback(key)
+
 
 class Hashtable(AbstactDictionary):
     """ Dictionary with translation store in hash """
-    def __init__(self, translations = None, missed_keys = []):
+    def __init__(self, translations = None, fallback = None):
         """ .ctor
             Args:
                 tranlations (dict): key- tranlation code, value - tranlation options
         """
         self.translations = translations
-        super(Hashtable, self).__init__(missed_keys)
+        super(Hashtable, self).__init__(fallback)
 
     """ Hash dictionary """
     def fetch(self, key):

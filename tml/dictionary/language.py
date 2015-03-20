@@ -5,7 +5,7 @@ from tml.api.pagination import allpages
 
 class LanguageDictionary(Hashtable):
     """ Load tranlations for language """
-    def __init__(self, lang, missed_keys):
+    def __init__(self, lang, fallback = None):
         """ .ctor
             Args:
                 lang (Language): language
@@ -15,5 +15,5 @@ class LanguageDictionary(Hashtable):
         super(LanguageDictionary, self).__init__(allpages(lang.client,
                                                           url,
                                                           {'locale': lang.locale}),
-                                                 missed_keys)
+                                                 fallback)
 

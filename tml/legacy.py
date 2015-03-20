@@ -57,7 +57,6 @@ def translate(context, label, data, description, options):
 
 def fetch(context, label, description):
     suggested_key = Key(label = suggest_label(label), description = description, language = context.language)
-    print description
     try:
         return context.dict.fetch(suggested_key)
     except Exception:

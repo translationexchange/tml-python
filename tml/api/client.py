@@ -98,6 +98,10 @@ class Client(object):
             raise APIError(ret['error'], url = resp.url, client = self)
         return ret
 
+    def reload(self, *args):
+        """ Drop cache stub """
+        pass
+
 class ClientError(Error):
     """ Abstract API error """
     def __init__(self, url, client):

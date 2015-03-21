@@ -18,6 +18,9 @@ class CachedClient(object):
             return client
         return cls(client, get_cache(backend_name))
 
+    def key(self, url, params):
+        return '%s?%s' % (url, urlencode(params))
+
     def get(self, url, params = {}):
         """ GET request to API 
             Args:
@@ -29,7 +32,7 @@ class CachedClient(object):
             Returns:
                 dict: response
         """
-        key = '%s?%s' % (url, urlencode(params))
+        key = self.key(url, params)
         ret = self.backend.get(key)
         if not ret is None:
             return ret
@@ -40,3 +43,6 @@ class CachedClient(object):
     def post(self, url, params):
         self.client.post(url, params)
 
+    def reload(self, url, params):
+        """ Drop cache """
+        self.client.delete(self.key(url, params))

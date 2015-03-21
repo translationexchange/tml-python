@@ -35,8 +35,7 @@ from tml import configure, tr, context, Context, Gender, ContextNotConfigured, s
 import tml
 from tests.mock import Client as ClientMock
 import unittest
-from tml import MissedKeys
-from tml.translation.missed import MissedKeysLazy
+from tml.dictionary.source import SourceDictionary
 
 __author__ = 'a@toukamnov.ru'
 
@@ -60,20 +59,17 @@ class api_test(unittest.TestCase):
 
         self.assertEquals('en', c.language.locale, 'Load app defaults')
         self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
-        self.assertEquals(MissedKeys, c.missed_keys.__class__, 'Missed keys by default')
 
-        c.configure(None, locale = 'ru', application_id = 2, preload = True, flush_missed = False, client = self.client)
+        c.configure(None, locale = 'ru', application_id = 2, client = self.client)
         self.assertEquals('ru', c.language.locale, 'Custom locale')
-        self.assertEquals(MissedKeysLazy, type(c.missed_keys), 'Lazy missed keys')
         self.assertEquals(2, c.language.application.id, 'Custom application id')
-        self.assertEquals(LanguageDictionary, type(c.dict), 'Language dict')
 
 
     def test_configure_globals(self):
-        configure(token = None, locale = 'ru', application_id = None, preload = True, flush_missed = True, client = self.client)
-        self.assertEquals('ru', tml.context.language.locale)
+        configure(token = None, locale = 'ru', application_id = None, client = self.client)
+        self.assertEquals('ru', tml.context.locale)
         self.assertEquals(1, tml.context.language.application.id, 'Load default application')
-        self.assertEquals(type(tml.context.dict), LanguageDictionary, 'Preload data')
+        self.assertEquals(type(tml.context.dict), Dictionary, 'No preload data')
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple'))
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
 

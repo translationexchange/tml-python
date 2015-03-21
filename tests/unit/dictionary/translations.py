@@ -5,17 +5,10 @@ import unittest
 from tml import Application
 from tml.language import Language
 from tml.translation import Key
-from tml.dictionary import return_label_fallback
 from tml.dictionary.translations import Dictionary
 from tml.rules.contexts.gender import Gender
+from tests.mock.fallback import Fallback
 
-class Fallback(object):
-    def __init__(self):
-        self.missed_keys = []
-
-    def __call__(self, key):
-        self.missed_keys.append(key)
-        return return_label_fallback(key)
 
 class translations(unittest.TestCase):
     """ Test loading tranlations over API """

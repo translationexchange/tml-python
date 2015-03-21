@@ -3,8 +3,8 @@ from .exceptions import Error
 from .application import Application
 from .language import Language
 from .api.client import Client
-from .dictionary.language import LanguageDictionary
 from .dictionary.translations import Dictionary
+from .dictionary.source import SourceDictionary
 from .translation import Key
 from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
@@ -27,32 +27,23 @@ class Context(object):
             self.configure(**kwargs)
 
 
-    def configure(self, token, locale = None, application_id = None, preload = False, flush_missed = True, client = None, decoration_tags = None):
+    def configure(self, token = None, locale = None, source = None, application_id = None, client = None, decoration_tags = None):
         """ Configure tranlation
             Args:
                 token (string): API token
                 locale (string): selected locale
                 application_id (int): API application id (use default if None)
                 preload (boolean): preload all tranlations
-                flush_missed (boolean): flush missed immediatly (if false - keys flushed with flush_keys)
                 client (Client): custom API client
                 decoration_tags (TagsFactory): custom decoration tags
         """
         self.language = self.build_language(locale,
                                             self.build_application(application_id,
                                                                    self.build_client(token, client)))
-        if flush_missed:
-            # flush missed immediate
-            self.missed_keys = MissedKeys(self.language.client)
+        if source:
+            self.dict = SourceDictionary(language = self.language, source = source)
         else:
-            # flush missed with flush_missed
-            self.missed_keys = MissedKeysLazy(self.language.client)
-        if preload:
-            # Preload all translations for languge:
-            self.dict = LanguageDictionary(self.language)
-        else:
-            # Load tranlations on demand: 
-            self.dict = Dictionary()
+            self.dict = Dictionary() 
         # Init decoration tags:
         self.decoration_tags = decoration_tags or system_decoration_tags
         return self

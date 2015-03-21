@@ -41,6 +41,10 @@ class AbstactDictionary(object):
         """ Key is not found """
         return self._fallback(key)
 
+    @property
+    def fallback_function(self):
+        return self._fallback
+
 
 class Hashtable(AbstactDictionary):
     """ Dictionary with translation store in hash """

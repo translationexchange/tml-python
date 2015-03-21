@@ -12,7 +12,8 @@ URLS = [('applications/current', {'definition': 1}),
         ('languages/en', {'definition': 1}),
         ('applications/1/translations', {'locale':'ru','page':1}),
         ('sources/register_keys', None),
-        ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru'})]
+        ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru'}),
+        ('sources/6a992d5529f459a44fee58c733255e86/translations', {'locale':'ru'})]
 
 class Client(object):
     def __init__(self, data = {}):
@@ -55,9 +56,14 @@ class Client(object):
         self.data[url] = loads(open(path).read())
         return self
 
+    reloaded = []
+    def reload(self, url, params):
+        self.reloaded.append(self.build_url(url, params))
+
     @classmethod
     def read_all(cls):
         ret = cls()
         for url, params in URLS:
             ret.read(url, params)
         return ret
+

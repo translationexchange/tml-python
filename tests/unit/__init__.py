@@ -70,7 +70,7 @@ class api_test(unittest.TestCase):
         self.assertEquals('ru', tml.context.locale)
         self.assertEquals(1, tml.context.language.application.id, 'Load default application')
         self.assertEquals(type(tml.context.dict), Dictionary, 'No preload data')
-        self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple'))
+        self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
 
 if __name__ == '__main__':

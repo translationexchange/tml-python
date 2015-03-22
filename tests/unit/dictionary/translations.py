@@ -13,21 +13,20 @@ from tests.mock.fallback import Fallback
 class translations(unittest.TestCase):
     """ Test loading tranlations over API """
     def setUp(self):
-        self.client = Client()
-        self.client.read('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'page':1, 'locale':'ru'}, 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations_1.json')
-        self.client.read('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'page':2, 'locale':'ru'}, 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations_2.json')
-        self.client.read('languages/ru', {'definition': 1})
-        self.client.read('applications/current', {'definition': 1})
+        self.client = Client.read_all()
         self.app = Application.load_default(self.client)
         self.lang = Language.load_by_locale(self.app, 'ru')
+        self.client.read('translation_keys/%s/translations' % self.apples_key().key, {'page':1, 'locale':'ru'}, 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations_1.json')
+        self.client.read('translation_keys/%s/translations' % self.apples_key().key, {'page':2, 'locale':'ru'}, 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations_2.json')
+        self.client.read('applications/current', {'definition': 1})
 
+    def apples_key(self):
+        return Key(label = '{actor} give you {count} apples', description = 'apple', language = self.lang)
 
     def test_translate(self):
         f = Fallback()
         dict = Dictionary(f)
-        t = dict.translate(Key(label = '{actor||give} you {count||apples}',
-                              description = 'somebody give you few apples',
-                              language = self.lang))
+        t = dict.translate(self.apples_key())
         self.assertEquals(3, len(t.options), 'All options loaded')
         self.assertEquals(0, len(f.missed_keys), 'No missed keys')
         self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')

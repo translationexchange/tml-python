@@ -12,8 +12,9 @@ URLS = [('applications/current', {'definition': 1}),
         ('languages/en', {'definition': 1}),
         ('applications/1/translations', {'locale':'ru','page':1}),
         ('sources/register_keys', None),
-        ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru'}),
-        ('sources/6a992d5529f459a44fee58c733255e86/translations', {'locale':'ru'})]
+        ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru','page':1}),
+        ('translation_keys/bdc08159a02e7ff01ca188c03fa1323e/translations', {'locale':'ru','page':1}),
+        ('sources/6a992d5529f459a44fee58c733255e86/translations', {'locale':'ru'}),]
 
 class Client(object):
     def __init__(self, data = {}):
@@ -27,8 +28,9 @@ class Client(object):
         self.url = url
         self.params = params
         try:
-            url = self.build_url(url, params) if method == 'get' else url 
-            return self.data[url]
+            url = self.build_url(url, params) if method == 'get' else url
+            ret = self.data[url]
+            return ret
         except KeyError as e:
             raise HttpError(e, url, self)
 

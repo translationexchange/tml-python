@@ -13,7 +13,6 @@ class Dictionary(AbstactDictionary):
             Returns:
                 Translation
         """
-        print key.key
         return Translation.from_data(key,
                                      allpages(key.client,
                                               'translation_keys/%s/translations' % key.key,

@@ -5,6 +5,7 @@ from . import Hashtable
 from .translations import Dictionary
 from hashlib import md5
 from ..translation.missed import MissedKeys
+from tml.api.client import ClientError
 
 class SourceMissed(MissedKeys):
     def __init__(self, client, source):
@@ -31,6 +32,7 @@ class SourceDictionary(Hashtable):
         self.missed_keys = SourceMissed(self.language.client, source)
         data = self.language.client.get(*self.api_query)
         super(SourceDictionary, self).__init__(data['results'], fallback)
+
 
     @property
     def api_query(self):

@@ -20,5 +20,5 @@ class Client(File):
 
     @classmethod
     def read_all(cls):
-        ret = cls().readdir('')
+        return cls().readdir('')
 

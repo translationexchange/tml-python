@@ -5,7 +5,6 @@ from json import loads
 from os import listdir
 from os.path import isdir
 import re
-from test import JSON_FILE
 
 
 class Hashtable(Client):
@@ -91,7 +90,7 @@ class File(Hashtable):
 
     def readdir(self, path):
         """ Read all files from directory """
-        abspath = '%s/%s' % (self.basedir, dir)
+        abspath = '%s/%s' % (self.basedir, path)
         for f in listdir(abspath):
             is_json = self.JSON_FILE.match(f)
             if is_json:

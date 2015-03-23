@@ -74,10 +74,10 @@ class translation_test(unittest.TestCase):
         self.assertEquals(u'Вася дал тебе всего 1 яблоко, мужик!',
                           t.execute(male_one, {}),
                           'Male one')
-        self.assertEquals('{actor} дал тебе всего {count} яблоко, мужик!',
+        self.assertEquals(u'{actor} дал тебе всего {count} яблоко, мужик!',
                           t.fetch_option(male_one, {}).label,
                           'Check fetch')
-        self.assertEquals('{actor||дал, дала, дало} тебе {count||one: яблоко, few: яблока, many: яблок}',
+        self.assertEquals(u'{actor||дал, дала, дало} тебе {count||one: яблоко, few: яблока, many: яблок}',
                   t.fetch_option({}, {}).label,
                   'fetch default')
         self.assertEquals(u'Вася дал тебе 5 яблок', t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')

@@ -22,8 +22,6 @@ class rules(unittest.TestCase):
                                'good_evening':{'conditions':'(&& (< @time 24) (> @time 16))',
                                                'operations':'(quote  "Good evening")'},
                                'hello':{'operations':'(quote Hello)'}})
-
-        print case.apply({'time': 8})
         self.assertEquals('good_morning', case.apply({'time': 8}),'Good morning at 8AM')
         self.assertEquals('good_evening', case.apply({'time': 19}),'Good evening at 7PM')
         self.assertEquals('hello', case.apply({'time': 1}),'Hello by default')

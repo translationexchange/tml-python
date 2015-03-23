@@ -23,7 +23,6 @@ class EmptyStack(Error):
     pass
 
 def trace(*args):
-#    print ' '.join(args)
     pass
 
 def parse(text, tags_factory = None):

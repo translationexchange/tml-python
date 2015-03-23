@@ -1,8 +1,9 @@
 # encoding: UTF-8
-from tml.token.parser import default_parser
-from tml.token import TextToken, VariableToken, RulesToken, CaseToken, PipeToken
-from tml.rules.options import fetch_default_arg
-from tml.translation import Key
+from .token.parser import default_parser
+from .token import TextToken, VariableToken, RulesToken, CaseToken, PipeToken
+from .rules.options import fetch_default_arg
+from .translation import Key
+from .strings import to_string
 import re
 
 
@@ -31,7 +32,7 @@ def to_sprintf(tokens):
     return u''.join((render_token(token) for token in tokens))
 
 def text_to_sprintf(text, language):
-    return to_sprintf(default_parser.parse(text, language))
+    return to_sprintf(default_parser.parse(to_string(text), language))
 
 LEGACY_TOKENS = re.compile('\%\((\w+?)\)s')
 
@@ -65,3 +66,4 @@ def fetch(context, label, description):
             return context.dict.translate(key)
         else:
             return context.fallback(key)
+

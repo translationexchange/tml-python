@@ -33,7 +33,7 @@ class CaseMock(object):
 class TokenTest(unittest.TestCase):
     def test_legacy(self):
         label = '{name||дал,дала,дал(а)} {to::dat} {count} {count|one:яблоко,few:яблока,many:яблок}'
-        expected = '%(name)s дал(а) %(to)s %(count)s яблок'
+        expected = u'%(name)s дал(а) %(to)s %(count)s яблок'
         format = text_to_sprintf(label, FakeLanguage())
         self.assertEquals(expected, format, 'Check legacy')
 
@@ -50,10 +50,10 @@ class TokenTest(unittest.TestCase):
         context = Context()
         context.language = Language.load_by_locale(Application.load_default(c), 'ru')
         context.dict = LanguageDictionary(context.language, [])
-        self.assertEquals('Хелло Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
+        self.assertEquals(u'Хелло Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
         # Check old response syntax:
         context.dict.translations['8a7c891aa103e45e904a173f218cab9a'][0]['label'] = 'Привет %(name)s'
-        self.assertEquals('Привет Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
+        self.assertEquals(u'Привет Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,6 +9,13 @@ def tr(label, data = None, description = None, options = {}):
 def activate(locale):
     Translator.instance().activate(locale)
 
+def use_source(source):
+    """ Use source block
+        Args:
+            source (string): source name
+    """
+    Translator.instance().use_source(source)
+
 if settings.TML.get('monkeypatch', False):
     translation._trans = Translator.instance()
 

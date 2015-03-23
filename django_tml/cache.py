@@ -41,8 +41,8 @@ class CachedClient(object):
         return ret
 
     def post(self, url, params):
-        self.client.post(url, params)
+        return self.client.post(url, params)
 
     def reload(self, url, params):
         """ Drop cache """
-        self.client.delete(self.key(url, params))
+        self.backend.delete(self.key(url, params))

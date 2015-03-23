@@ -45,6 +45,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django_tml.middleware.SetSourceToViewMiddleware',
 )
 
 ROOT_URLCONF = 'tml_django_demo.urls'

@@ -11,5 +11,5 @@ def activate(locale):
 
 if settings.TML.get('monkeypatch', False):
     translation._trans = Translator.instance()
-    _supported = [(lang['locale'], lang['native_name']) for lang in translation._trans.default.application.languages]
+
 

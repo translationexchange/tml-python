@@ -1,15 +1,15 @@
 # encoding: UTF-8
 from django.conf import settings
-from django.utils.translation.trans_real import to_locale, _supported, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re, _BROWSERS_DEPRECATED_LOCALES 
+from django.utils.translation.trans_real import to_locale, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re, _BROWSERS_DEPRECATED_LOCALES 
 from tml import Context
-from collections import OrderedDict
-from tml.application import LanguageNotSupported
-import re
+from tml.application import LanguageNotSupported, Application
 from django_tml.cache import CachedClient
 from tml import Key
 from tml.translation import TranslationOption
 from django.utils.translation import LANGUAGE_SESSION_KEY
 from tml.legacy import text_to_sprintf, suggest_label
+from types import FunctionType
+
 
 def to_str(fn):
     def tmp(*args, **kwargs):
@@ -39,50 +39,102 @@ class Translator(object):
         return cls._instance
 
     def __init__(self):
-        self.contexts = {}
-        if settings.TML.get('token'):
-            self.default = self.build_context(None)
-        else:
-            self.default = Context()
-        self.context = self.default
+        self.locale = None
+        self.source = None
+        self._context = None
+        self._supported_locales = None
+        self._client = None
 
-    def build_context(self, locale):
+
+    def build_context(self):
         """ Build context instance for locale
             Args:
                 locale (str): locale name (en, ru)
             Returns:
                 Context
         """
-        try:
-            return Context(token = None, locale = locale, client = CachedClient.instance(), flush_missed = False)
-        except LanguageNotSupported:
-            # If locale like en-us is not found, try to found en locale
-            # If simplae locale not found- use default language
-            return self.build_context(fallback_locale(locale))
+        return Context(locale = self.locale,
+                       source = self.source,
+                       client = self.client)
+
+    @property
+    def client(self):
+        """ API client property (overrided in unit-tests)
+            Returns:
+                Client
+        """
+        if self._client is None:
+            self._client = self.build_client()
+        return self._client
+
+    def build_client(self):
+        if 'api_client' in settings.TML:
+            # Custom client:
+            custom_client = settings.TML['api_client']
+            if type(custom_client) is FunctionType:
+                # factory function:
+                return custom_client()
+            elif custom_client is str:
+                # full factory function or class name: path.to.module.function_name
+                custom_client_import = '.'.split(custom_client)
+                module = __import__('.'.join(custom_client[0, -1]))
+                return getattr(module, custom_client[-1])()
+            elif custom_client is object:
+                # custom client as is:
+                return custom_client
+        return CachedClient.instance()
+
+    @property
+    def context(self):
+        """ Current context cached property
+            Returns:
+                Context
+        """
+        if self._context is None:
+            try:
+                self._context = self.build_context()
+            except LanguageNotSupported:
+                # Activated language is not supported:
+                self.locale = None # reset locale
+                self._context = self.build_context()
+        return self._context
+
 
     def get_language(self):
         """ getter to current language """
-        if self.context:
-            return self.context.language.locale
-        else:
-            return settings.LANGUAGE_CODE
+        return self.context.language.locale
 
-    def activate(self, language):
-        """ Activate selected language """
-        if not language in self.contexts:
-            # create context
-            self.contexts[language] = self.build_context(language)
-        self.context = self.contexts[language]
+    def activate(self, locale):
+        """ Activate selected language 
+            Args:
+                locale (string): selected locale
+        """
+        self.locale = locale
+        self.reset_context()
+
+    def use_source(self, source):
+        """ Get source
+            Args:
+                source (string): source code
+        """
+        self.source = source
+        self.reset_context()
+        return self
+
+    def reset_context(self):
+        self._context = None
 
     def deactivate(self):
-        self.context = self.default
+        """ Use default locole """
+        self.locale = None
+        self.reset_context()
 
     def gettext_noop(self, message):
         return message
 
     @to_str
     def gettext(self, message):
-        return self.ugettext()
+        return self.ugettext(message)
 
     @to_str
     def ngettext(self, singular, plural, number):
@@ -125,7 +177,14 @@ class Translator(object):
             Returns:
                 boolean
         """
-        return lang_code in self.context.application.supported_locales
+        return lang_code in self.supported_locales
+
+    @property
+    def supported_locales(self):
+        if self._supported_locales is None:
+            self._supported_locales = [str(locale) for locale in Application.load_default(self.client).supported_locales]
+        return self._supported_locales
+
 
     def to_locale(self, language):
         return to_locale(language)
@@ -218,7 +277,8 @@ class Translator(object):
         return templatize(src, origin)
 
     def deactivate_all(self):
-        return deactivate_all()
+        self.locale = None
+        self.reset_context()
 
     def tr(self, label, data = {}, description = '', options = {}):
         try:

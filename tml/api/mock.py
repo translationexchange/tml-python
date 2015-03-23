@@ -40,7 +40,7 @@ class Hashtable(Client):
         try:
             try:
                 self.status = 200
-                return self.data[self.build_url(url, params)]
+                ret = self.data[self.build_url(url, params)]
             except self.handle_nostrict:
                 return self.data[url]
         except KeyError as e:

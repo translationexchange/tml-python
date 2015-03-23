@@ -34,6 +34,35 @@
             "label":"Хелло {name}"
         }
     ],
+    "90e0ac08b178550f6513762fa892a0ca": [
+        {
+            "label":"Привет {name}"
+        }
+    ],
+    "f69632cd7df28439309f1726faa1dc3e": [
+        {
+            "label":"Здорово {name}"
+        }
+    ],
+    "fec8958242a45c2a9440be9fcc84ce47": [
+        {
+            "label":"Одно яблоко"
+        }
+    ],
+    "d461a22a1dd21b14782e8a0553454612": [
+        {
+            "label":"{number} яблоко",
+            "context":{"number":{"number":"one"}}
+        },
+        {
+            "label":"{number} яблока",
+            "context":{"number":{"number":"few"}}
+        },
+        {
+            "label":"{number} яблок",
+            "context":{"number":{"number":"other"}}
+        }
+    ],
     "5174f88691edb354a9f46af6e7455bb8":[
         {
             "label":"Тест"

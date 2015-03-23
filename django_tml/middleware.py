@@ -12,4 +12,5 @@ class SetSourceToViewMiddleware(object):
     def process_response(self, request, response):
         """ Reset source and flush missed keys """
         use_source(None)
+        return response
 

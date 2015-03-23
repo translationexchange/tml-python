@@ -16,10 +16,9 @@ class pagination(unittest.TestCase):
         self.assertEquals(1324559, full_list[2]['id'], 'Check order (append to end)')
 
     def test_dict_pagination(self):
-        self.client.read('applications/1/translations', {'page':1, 'locale':'ru'}, 'applications/1/translations_1.json')
-        self.client.read('applications/1/translations', {'page':2, 'locale':'ru'}, 'applications/1/translations_2.json')
-        self.client.read('applications/1/translations', {'page':3, 'locale':'ru'}, 'applications/1/translations_3.json')
-        full_list = allpages(self.client, 'applications/1/translations',{'locale':'ru'})
+        for page in range(1, 4):
+            self.client.read('applications/2/translations', {'locale':'ru', 'page':page}, 'applications/2/translations_%d.json' % page)
+        full_list = allpages(self.client, 'applications/2/translations', {'locale':'ru'})
         self.assertEquals(5, len(full_list), 'Test paging')
         self.assertEquals("{actor} любезно дала тебе {count||яблоко, яблока, яблок}", full_list['8ad5a7fe0a12729764e31a1e3ca80059'][0]['label'], 'Check first')
         self.assertEquals("Тест", full_list['5174f88691edb354a9f46af6e7455bb8'][0]['label'], 'Check last')

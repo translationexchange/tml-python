@@ -60,7 +60,7 @@ class BlockTranslateNode(BaseBlockTranslateNode):
         return self.translate(label, data, description)
 
     def translate(self, label, data, description):
-        return Translator.instance().tr(label, data, description)
+        return Translator.instance().tr(label, data, description, {'escape': True})
 
 class LegacyBlockTranlationNode(BlockTranslateNode):
     """ Tranlation with back support """

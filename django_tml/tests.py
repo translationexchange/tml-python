@@ -2,6 +2,9 @@
 from django.test import SimpleTestCase
 from .translator import Translator
 from gettext import ngettext
+from django.template import Template
+from django.template.context import Context
+from django_tml import activate
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -57,4 +60,26 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'%(number)s яблока', t.ungettext('One apple', '{number} apples', 22), 'ungettext + 22')
         self.assertEquals(u'%(number)s яблок', t.ungettext('One apple', '{number} apples', 5), 'ungettext + 5')
         self.assertEquals('%(number)s яблок', t.ngettext('One apple', '{number} apples', 12), 'ngettext + 12')
+
+    def test_template_tags(self):
+        """ Test for template tags """
+        activate('ru')
+        t = Template('{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        c = Context({'name':'John'})
+        self.assertEquals(u'Привет John', t.render(c))
+        t = Template(
+        '''
+        {%load tml %}
+        {% tr trimmed %}
+            Hello {name}
+        {% endtr %}
+        ''')
+        self.assertEquals(u'''Привет John''', t.render(c).strip(), 'Trimmed support')
+        t = Template(u'{%load tml %}{% tr with name="Вася" %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет Вася', t.render(c), 'With syntax')
+
+        t = Template('{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет &lt;&quot;Вася&quot;&gt;', t.render(Context({'name':'<"Вася">'})))
+        t = Template(u'{%load tml %}{% tr with html|safe as name %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет <"Вася">', t.render(Context({'html':'<"Вася">'})))
 

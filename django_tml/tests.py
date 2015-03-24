@@ -4,7 +4,7 @@ from .translator import Translator
 from gettext import ngettext
 from django.template import Template
 from django.template.context import Context
-from django_tml import activate
+from django_tml import activate, use_source
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -82,4 +82,23 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'Привет &lt;&quot;Вася&quot;&gt;', t.render(Context({'name':'<"Вася">'})))
         t = Template(u'{%load tml %}{% tr with html|safe as name %}Hello {name}{% endtr %}')
         self.assertEquals(u'Привет <"Вася">', t.render(Context({'html':'<"Вася">'})))
+
+    def test_blocktrans(self):
+        activate('ru')
+        use_source('blocktrans')
+        c = Context({'name':'John'})
+
+        t = Template('{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
+        self.assertEquals(u'Привет John', t.render(c))
+
+        t = Template('{%load tml %}{% blocktrans %}Hello {{name}}{% endblocktrans %}')
+        self.assertEquals(u'Привет John', t.render(c), 'Use new tranlation')
+        
+        t = Template('{%load tml %}{% blocktrans %}Hey {{name}}{% endblocktrans %}') 
+        self.assertEquals(u'Эй John, привет John', t.render(c), 'Use old tranlation')
+
+        t = Template('{%load tml %}{% blocktrans count count=apples_count %}One apple{% plural %}{count} apples{% endblocktrans %}')
+        self.assertEquals(u'Одно яблоко', t.render(Context({'apples_count':1})),'Plural one')
+        self.assertEquals(u'2 яблока', t.render(Context({'apples_count':1})),'Plural 2')
+        self.assertEquals(u'21 яблоко', t.render(Context({'apples_count':21})),'Plural 21')
 

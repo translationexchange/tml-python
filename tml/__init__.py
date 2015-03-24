@@ -3,12 +3,14 @@ from .exceptions import Error
 from .application import Application
 from .language import Language
 from .api.client import Client
+from .dictionary import Hashtable
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
 from .translation import Key
 from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .decoration.parser import parse as parse_decoration
+
 
 __author__ = 'a@toukmanov.ru'
 
@@ -27,7 +29,7 @@ class Context(object):
             self.configure(**kwargs)
 
 
-    def configure(self, token = None, locale = None, source = None, application_id = None, client = None, decoration_tags = None):
+    def configure(self, token = None, locale = None, source = None, application_id = None, client = None, decoration_tags = None, use_fallback_dictionary = True):
         """ Configure tranlation
             Args:
                 token (string): API token
@@ -36,14 +38,19 @@ class Context(object):
                 preload (boolean): preload all tranlations
                 client (Client): custom API client
                 decoration_tags (TagsFactory): custom decoration tags
+                use_fallback_dictionary (Boolean): use fallback dictionart
         """
         self.language = self.build_language(locale,
                                             self.build_application(application_id,
                                                                    self.build_client(token, client)))
-        if source:
-            self.dict = SourceDictionary(language = self.language, source = source)
-        else:
-            self.dict = Dictionary() 
+        handle = Exception if use_fallback_dictionary else None
+        try:
+            if source:
+                self.dict = SourceDictionary(language = self.language, source = source)
+            else:
+                self.dict = Dictionary()
+        except handle:
+            self.dict = Hashtable({})
         # Init decoration tags:
         self.decoration_tags = decoration_tags or system_decoration_tags
         return self

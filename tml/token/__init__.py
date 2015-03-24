@@ -2,7 +2,7 @@
 import re
 from ..exceptions import Error, RequiredArgumentIsNotPassed
 from ..rules.contexts import Value
-from tml.strings import to_string
+from tml.strings import to_string, suggest_string
 
 class AbstractToken(object):
     """ Base token class """
@@ -85,7 +85,11 @@ class VariableToken(AbstractVariableToken):
             Returns:
                 string
         """
-        return self.escape_if_needed(Value.match(self.fetch(data)), options)
+        return self.escape_if_needed(self.fetch(data), options)
+
+    def fetch(self, data):
+        """ Fetch variable"""
+        return suggest_string(super(VariableToken, self).fetch(data))
 
     def escape_if_needed(self, text, options):
         """ Escape string if it needed
@@ -95,10 +99,12 @@ class VariableToken(AbstractVariableToken):
             Returns:
                 text
         """
-        text = to_string(text)
         if self.need_to_escape(options):
-            return self.escape(text)
-        return text
+            if hasattr(text, '__html__'):
+                # Text has escape itself:
+                return text.__html__()
+            return self.escape(to_string(text))
+        return to_string(text)
 
     def escape(self, text):
         """ Escape text 
@@ -116,12 +122,9 @@ class VariableToken(AbstractVariableToken):
             Returns:
                 boolean
         """
-        try:
-            # Use "safe" option to not escape valiable data:
-            return not options['safe']
-        except KeyError:
-            # Escape by default:
-            return True
+        if 'escape' in options:
+            return options['escape']
+        return True
 
     @classmethod
     def validate(cls, text, language):
@@ -161,6 +164,7 @@ class RulesToken(VariableToken):
     def execute(self, data, options):
         """ Execute token with var """
         return self.language.contexts.execute(self.rules, self.fetch(data)).strip()
+
 
 class CaseToken(RulesToken):
     """ Language keys {name::nom} """

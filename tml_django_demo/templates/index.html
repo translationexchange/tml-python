@@ -18,7 +18,19 @@
         </style>
     </head>
     <body>
-    <form method="post" action="/translate" style="padding-bottom: 3em;">
+    <div class="container">
+        <div class="col-md-12">
+            <form method="post" action="/inline_mode">
+                <label>
+                    <input type="checkbox" name="inline_mode" {% if inline_mode %}checked{% endif %}/>
+                    inline edit
+                </label>
+                <button type="submit">OK</button>
+            </form>
+        </div>
+    </div>
+
+    <form tr method="post" action="/translate" style="padding-bottom: 3em;">
         <div class="container">
             <div class="templatetags row">
                 <div class="col-md-12">

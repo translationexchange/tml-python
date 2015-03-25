@@ -4,7 +4,8 @@ from django.utils import translation
 from django.http import HttpResponse
 from json import dumps, loads
 from django.views.decorators.csrf import csrf_exempt
-from django_tml import tr, activate, use_source
+from django_tml import tr, activate, use_source, is_supports_inline_tranlation
+from django_tml.middleware import set_supports_inline_tranlation
 
 
 def home(request):
@@ -13,7 +14,7 @@ def home(request):
     user = {'gender': request.GET.get('user_gender','male'),'name': request.GET.get('user_name','Вася')}
     to = {'gender': request.GET.get('to_gender','female'),'name': request.GET.get('to_name','Маша')}
     count = request.GET.get('count', 5)
-    return render_to_response('index.html', {'user':user, 'to': to, 'count': count, 'language': language})
+    return render_to_response('index.html', {'user':user, 'to': to, 'count': count, 'language': language, 'inline_mode': is_supports_inline_tranlation()})
 
 
 @csrf_exempt
@@ -35,3 +36,10 @@ def translate(request):
     use_source(None) # reset source
     return HttpResponse(dumps({'result': result}))
 
+@csrf_exempt
+def inline_mode(request):
+    if request.POST.get('inline_mode', False):
+        set_supports_inline_tranlation(True)
+    else:
+        set_supports_inline_tranlation(False)
+    return redirect('/')

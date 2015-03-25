@@ -93,4 +93,5 @@ TML = {
     'token': '4cb7cf6bf7cd64120661ae7da67759076d9b08f233ae510012fc6c3e819b93b8',
     'monkeypatch': True,
     'cache': 'default',
+    'inline_wrapper_cookie': 'tml_inline_translation'
 }

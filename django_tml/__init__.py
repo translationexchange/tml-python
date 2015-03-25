@@ -16,6 +16,13 @@ def use_source(source):
     """
     Translator.instance().use_source(source)
 
+def set_supports_inline_tranlation(value = True):
+    """ Inline tranlations
+        Args:
+            value - True - enabled, False - disabled
+    """
+    Translator.instance().set_supports_inline_tranlation(value)
+
 if settings.TML.get('monkeypatch', False):
     translation._trans = Translator.instance()
 

@@ -16,7 +16,7 @@ register = Library()
 
 class BlockTranslateNode(BaseBlockTranslateNode):
 
-    def __init__(self, extra_context, singular, plural, countervar, counter, description, trimmed, legacy = False):
+    def __init__(self, extra_context, singular, plural, countervar, counter, description, trimmed, nowrap = False, legacy = False):
         """ Block for {% tr %} {% endtr %}
             extra_context (dict): block with params
             singular (string): label for singular
@@ -24,7 +24,9 @@ class BlockTranslateNode(BaseBlockTranslateNode):
             message_context (string): key description
             contervar (string): variable for counter
             trimmed (boolean): trim context
+            nowrap (boolean): no not wrap result in <tml:label> for inline tranlation
             legacy (boolean): supports legacy e.c. allow {{name}} syntax in label and %(name)s syntax in response
+
         """
         self.extra_context = extra_context
         self.description = description
@@ -33,6 +35,8 @@ class BlockTranslateNode(BaseBlockTranslateNode):
         self.countervar = countervar
         self.counter = counter
         self.trimmed = trimmed
+        self.legacy = legacy
+        self.nowrap = nowrap
 
 
     def render(self, data, nested=False):
@@ -57,10 +61,26 @@ class BlockTranslateNode(BaseBlockTranslateNode):
                 label, void = self.render_token_list(self.plural)
         else:
             label, void = self.render_token_list(self.singular)
-        return self.translate(label, data, description)
+        return self.wrap_label(self.translate(label, data, description))
 
     def translate(self, label, data, description):
-        return Translator.instance().tr(label, data, description, {'escape': True})
+        t = Translator.instance()
+        return t.tr(label, data, description, {'escape': True})
+
+
+    def wrap_label(self, ret):
+        if not Translator.instance().supports_inline_tranlation:
+            return ret
+        if self.nowrap:
+            # nowrap flag is set
+            return ret
+        if self.legacy:
+            # {% blocktrans %} - unsupported feature
+            return ret
+        if Translator.instance().supports_inline_tranlation:
+            return u'<tml:label class="tr8n_translatable tr8n_translated">%s</tml:label>' % ret
+        return ret 
+
 
 class LegacyBlockTranlationNode(BlockTranslateNode):
     """ Tranlation with back support """
@@ -142,6 +162,8 @@ def do_block_translate(parser, token, legacy = False):
                 six.reraise(TemplateSyntaxError, TemplateSyntaxError(msg), sys.exc_info()[2])
         elif option == "trimmed":
             value = True
+        elif option == "nowrap":
+            value = True
         else:
             raise TemplateSyntaxError('Unknown argument for %r tag: %r.' %
                                       (bits[0], option))
@@ -181,7 +203,7 @@ def do_block_translate(parser, token, legacy = False):
 
     cls = LegacyBlockTranlationNode if legacy else BlockTranslateNode
     return cls(extra_context, singular, plural, countervar,
-                              counter, message_context, trimmed = trimmed, legacy = legacy)
+                              counter, message_context, trimmed = trimmed, legacy = legacy, nowrap = options.get('nowrap', False))
 
 
 @register.tag("blocktrans")

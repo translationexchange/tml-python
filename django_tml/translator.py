@@ -41,6 +41,7 @@ class Translator(object):
     def __init__(self):
         self.locale = None
         self.source = None
+        self.supports_inline_tranlation = False
         self._context = None
         self._supported_locales = None
         self._client = None
@@ -56,6 +57,11 @@ class Translator(object):
         return Context(locale = self.locale,
                        source = self.source,
                        client = self.client)
+
+    def set_supports_inline_tranlation(self, value = True):
+        """ Set is flag for inline translation """
+        self.supports_inline_tranlation = value
+        return self
 
     @property
     def client(self):
@@ -278,6 +284,8 @@ class Translator(object):
 
     def deactivate_all(self):
         self.locale = None
+        self.source = None
+        self.supports_inline_tranlation = False
         self.reset_context()
 
     def tr(self, label, data = {}, description = '', options = {}):

@@ -4,10 +4,13 @@ from .translator import Translator
 from gettext import ngettext
 from django.template import Template
 from django.template.context import Context
-from django_tml import activate, use_source
+from django_tml import activate, use_source, set_supports_inline_tranlation
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
+    def setUp(self):
+        Translator._instance = None # reset settings
+
     def test_tranlator(self):
         t = Translator.instance()
         self.assertEquals(Translator, t.__class__, "Instance returns translator")
@@ -102,4 +105,29 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'2 яблока', t.render(Context({'apples_count':2})),'Plural 2')
         self.assertEquals(u'21 яблоко', t.render(Context({'apples_count':21})),'Plural 21')
 
+    def test_inline(self):
+        activate('ru')
+        set_supports_inline_tranlation()# turn on inline tranlations
+        c = Context({'name':'John'})
+        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
+
+        self.assertEquals(u'<tml:label class="tr8n_translatable tr8n_translated">Привет John</tml:label>',
+                          t.render(c),
+                          'Wrap translation')
+        t = Template(u'{%load tml %}{% tr nowrap %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет John',
+                          t.render(c),
+                          'Nowrap option')
+
+        t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
+        self.assertEquals(u'Привет John',
+                          t.render(c),
+                          'Nowrap blocktrans')
+
+        set_supports_inline_tranlation(False)
+        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
+        self.assertEquals(u'Привет John',
+                          t.render(c),
+                          'Turn off inline')
 

@@ -99,6 +99,7 @@ class DjangoTMLTestCase(SimpleTestCase):
 
         t = Template('{%load tml %}{% blocktrans count count=apples_count %}One apple{% plural %}{count} apples{% endblocktrans %}')
         self.assertEquals(u'Одно яблоко', t.render(Context({'apples_count':1})),'Plural one')
-        self.assertEquals(u'2 яблока', t.render(Context({'apples_count':1})),'Plural 2')
+        self.assertEquals(u'2 яблока', t.render(Context({'apples_count':2})),'Plural 2')
         self.assertEquals(u'21 яблоко', t.render(Context({'apples_count':21})),'Plural 21')
+
 

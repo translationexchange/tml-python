@@ -15,6 +15,8 @@
             .examples td small {display: block; margin-bottom: 0.5em;}
             .examples td:first-child {width: 40%;}
             .examples td:last-child {padding-bottom: 20px;}
+            .examples td:last-child textarea {display: block; width: 100%; margin: 0.4em 0;}
+            .examples td:last-child pre {margin-bottom: 0;}
         </style>
     </head>
     <body>
@@ -127,6 +129,21 @@ print tr(
                             </td>
                             <td>
                                 {% tr %}{user} give to {to} {count} apples{% endtr %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <small>Inline переводы включаются в cookies, но могут быть отключены свойством nowrap:</small>
+
+                                <pre>
+&lt;textarea&gt;
+{&shy;% tr %&shy;}Test{&shy;% endtr %&shy;}
+&lt;/textarea&gt;
+&lt;img alt="{&shy;% tr nowrap %&shy;}Test{&shy;% endtr %&shy;}" /&gt;</pre>
+                            </td>
+                            <td>
+                                <textarea>{% tr %}Test{% endtr %}</textarea>
+                                <pre>&lt;img alt="{% tr nowrap %}Test{% endtr %}" /&gt;</pre>
                             </td>
                         </tr>
                     </table>

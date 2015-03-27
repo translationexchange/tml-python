@@ -1,3 +1,4 @@
+# encoding: UTF-8
 from .. import inline_translations as _
 from django.conf import settings
 
@@ -25,7 +26,10 @@ class InlineTranslationsMiddleware(object):
     def process_response(self, request, response):
         """ Set/reset cookie for inline tranlations """
         if _.save:
-            response.set_signed_cookie(self.cookie_name, _.enabled)
+            if _.enabled:
+                response.set_signed_cookie(self.cookie_name, True)
+            else:
+                response.delete_cookie(self.cookie_name)
             _.save = False # reset save flag
         _.turn_off() # turn off tranlation after request executed
         return response

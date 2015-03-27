@@ -132,3 +132,26 @@ class DjangoTMLTestCase(SimpleTestCase):
                           t.render(c),
                           'Turn off inline')
 
+    def test_sources_stack(self):
+        t = Translator.instance()
+        self.assertEqual(None, t.source, 'None source by default')
+        t.use_source('index')
+        self.assertEqual('index', t.source, 'Use source')
+        t.enter_source('auth')
+        self.assertEqual('auth', t.source, 'Enter (1 level)')
+        t.enter_source('mail')
+        self.assertEqual('mail', t.source, 'Enter (2 level)')
+        t.exit_source()
+        self.assertEqual('auth', t.source, 'Exit (2 level)')
+        t.exit_source()
+        self.assertEqual('index', t.source, 'Exit (1 level)')
+        t.exit_source()
+        self.assertEqual(None, t.source, 'None source by default')
+
+        t.use_source('index')
+        t.enter_source('auth')
+        t.enter_source('mail')
+        t.use_source('inner')
+        t.exit_source()
+        self.assertEqual(None, t.source, 'Use destroys all sources stack')
+

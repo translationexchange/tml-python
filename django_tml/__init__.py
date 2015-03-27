@@ -16,6 +16,20 @@ def use_source(source):
     """
     Translator.instance().use_source(source)
 
+def enter_source(source):
+    """ Enter source block
+        Args:
+            source (string): source name
+    """
+    Translator.instance().enter_source(source)
+
+def exit_source():
+    """ Exit from source block
+        Args:
+            source (string): source name
+    """
+    Translator.instance().exit_source()
+
 
 if settings.TML.get('monkeypatch', False):
     translation._trans = Translator.instance()

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 from __future__ import absolute_import
 from django.template import (Node, Variable, TemplateSyntaxError,
     TokenParser, Library, TOKEN_TEXT, TOKEN_VAR)
@@ -9,8 +11,6 @@ from django.utils.translation.trans_real import trim_whitespace
 from django_tml import Translator
 from tml import legacy
 from django.templatetags.i18n import BlockTranslateNode as BaseBlockTranslateNode
-from tml.translation import Key
-from django.template.loader import render_to_string
 from .. import inline_translations
 
 register = Library()

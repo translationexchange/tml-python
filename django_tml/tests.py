@@ -4,7 +4,7 @@ from .translator import Translator
 from gettext import ngettext
 from django.template import Template
 from django.template.context import Context
-from django_tml import activate, use_source, set_supports_inline_tranlation
+from django_tml import activate, use_source, inline_translations
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -106,8 +106,9 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'21 яблоко', t.render(Context({'apples_count':21})),'Plural 21')
 
     def test_inline(self):
+        """ Inline tranlations wrapper """
         activate('ru')
-        set_supports_inline_tranlation()# turn on inline tranlations
+        inline_translations.turn_on()
         c = Context({'name':'John'})
         t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
 
@@ -124,7 +125,7 @@ class DjangoTMLTestCase(SimpleTestCase):
                           t.render(c),
                           'Nowrap blocktrans')
 
-        set_supports_inline_tranlation(False)
+        inline_translations.turn_off()
         t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
         t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
         self.assertEquals(u'Привет John',

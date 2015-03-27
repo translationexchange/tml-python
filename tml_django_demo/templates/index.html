@@ -22,7 +22,7 @@
         <div class="col-md-12">
             <form method="post" action="/inline_mode">
                 <label>
-                    <input type="checkbox" name="inline_mode" {% if inline_mode %}checked{% endif %}/>
+                    <input type="checkbox" name="inline_mode" {% if inline_tranlations_enabled %}checked{% endif %}/>
                     inline edit
                 </label>
                 <button type="submit">OK</button>
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <form tr method="post" action="/translate" style="padding-bottom: 3em;">
+    <form id="test_tr" method="post" action="/translate" style="padding-bottom: 3em;">
         <div class="container">
             <div class="templatetags row">
                 <div class="col-md-12">
@@ -211,7 +211,7 @@ print tr(
                 $('#label-example').click(function(){
                     $('#label').val($.trim(this.innerHTML));
                 });
-                var $form = $('form');
+                var $form = $('#test_tr');
                 var forceSubmit = false;
                 $form.submit(function(){
                     if (forceSubmit){

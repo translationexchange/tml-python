@@ -46,6 +46,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django_tml.middleware.SetSourceToViewMiddleware',
+    'django_tml.inline_translations.middleware.InlineTranslationsMiddleware'
 )
 
 ROOT_URLCONF = 'tml_django_demo.urls'

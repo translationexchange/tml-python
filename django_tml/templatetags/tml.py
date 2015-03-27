@@ -10,7 +10,8 @@ from django_tml import Translator
 from tml import legacy
 from django.templatetags.i18n import BlockTranslateNode as BaseBlockTranslateNode
 from tml.translation import Key
-
+from django.template.loader import render_to_string
+from .. import inline_translations
 
 register = Library()
 
@@ -69,17 +70,15 @@ class BlockTranslateNode(BaseBlockTranslateNode):
 
 
     def wrap_label(self, ret):
-        if not Translator.instance().supports_inline_tranlation:
-            return ret
+
         if self.nowrap:
             # nowrap flag is set
             return ret
         if self.legacy:
-            # {% blocktrans %} - unsupported feature
+            # {% blocktrans %} - not support inline tranlations
             return ret
-        if Translator.instance().supports_inline_tranlation:
-            return u'<tml:label class="tr8n_translatable tr8n_translated">%s</tml:label>' % ret
-        return ret 
+        return inline_translations.wrap_string(ret)
+ 
 
 
 class LegacyBlockTranlationNode(BlockTranslateNode):
@@ -205,7 +204,7 @@ def do_block_translate(parser, token, legacy = False):
     return cls(extra_context, singular, plural, countervar,
                               counter, message_context, trimmed = trimmed, legacy = legacy, nowrap = options.get('nowrap', False))
 
-
 @register.tag("blocktrans")
 def do_block_translate_legacy(parser, token):
     return do_block_translate(parser, token, True)
+

@@ -9,12 +9,30 @@ def tr(label, data = None, description = None, options = {}):
 def activate(locale):
     Translator.instance().activate(locale)
 
-def use_source(source):
+def activate_source(source):
     """ Use source block
         Args:
             source (string): source name
     """
-    Translator.instance().use_source(source)
+    Translator.instance().activate_source(source)
+
+def deactivate_source():
+    Translator.instance().deactivate_source()
+
+def enter_source(source):
+    """ Enter source block
+        Args:
+            source (string): source name
+    """
+    Translator.instance().enter_source(source)
+
+def exit_source():
+    """ Exit from source block
+        Args:
+            source (string): source name
+    """
+    Translator.instance().exit_source()
+
 
 if settings.TML.get('monkeypatch', False):
     translation._trans = Translator.instance()

@@ -41,9 +41,12 @@ class Translator(object):
     def __init__(self):
         self.locale = None
         self.source = None
+        self.supports_inline_tranlation = False
         self._context = None
+        self._sources = []
         self._supported_locales = None
         self._client = None
+        self.used_sources = []
 
 
     def build_context(self):
@@ -56,6 +59,11 @@ class Translator(object):
         return Context(locale = self.locale,
                        source = self.source,
                        client = self.client)
+
+    def set_supports_inline_tranlation(self, value = True):
+        """ Set is flag for inline translation """
+        self.supports_inline_tranlation = value
+        return self
 
     @property
     def client(self):
@@ -112,17 +120,54 @@ class Translator(object):
         self.locale = locale
         self.reset_context()
 
-    def use_source(self, source):
+    def _use_source(self, source):
+        self.source = source
+        self.reset_context()
+        self.used_sources.append(source)
+
+    def activate_source(self, source):
         """ Get source
             Args:
                 source (string): source code
         """
-        self.source = source
-        self.reset_context()
+        self._use_source(source)
+        self._sources = [] # reset sources stack
         return self
+
+
+    def deactivate_source(self):
+        """ Deactivate source """
+        self.activate_source(None)
+        self.used_sources = []
+
+    _sources = []
+
+    def enter_source(self, source):
+        """ Use source inside another
+            Args:
+                source (string): source
+            Returns:
+                Translator
+        """
+        if self.source:
+            self._sources.append(self.source)
+        self._use_source(source)
+        return self
+
+    def exit_source(self):
+        """ Use last source
+            
+        """
+        try:
+            self._use_source(self._sources.pop())
+        except IndexError:
+            # No source in stack
+            self._use_source(None)
+        return
 
     def reset_context(self):
         self._context = None
+
 
     def deactivate(self):
         """ Use default locole """
@@ -161,6 +206,7 @@ class Translator(object):
             return self.translate(plural, {'number': number}, context)
 
     def translate(self, label, data = {}, description = None):
+        """ Translate label """
         key = Key(label = suggest_label(label), description= description, language = self.context.language)
         translation = self.context.dict.translate(key)
         ret = text_to_sprintf(translation.fetch_option(data, {}).label, self.context.language)
@@ -277,7 +323,8 @@ class Translator(object):
         return templatize(src, origin)
 
     def deactivate_all(self):
-        self.locale = None
+        self.deactivate()
+        self.deactivate_source()
         self.reset_context()
 
     def tr(self, label, data = {}, description = '', options = {}):

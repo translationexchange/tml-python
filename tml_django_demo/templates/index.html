@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load tml %}
+{% load tml_inline %}
 <html>
     <head>
         <title>TML Python SDK</title>
@@ -15,10 +16,25 @@
             .examples td small {display: block; margin-bottom: 0.5em;}
             .examples td:first-child {width: 40%;}
             .examples td:last-child {padding-bottom: 20px;}
+            .examples td:last-child textarea {display: block; width: 100%; margin: 0.4em 0;}
+            .examples td:last-child pre {margin-bottom: 0;}
         </style>
+        {% tml_inline_header %}
     </head>
     <body>
-    <form method="post" action="/translate" style="padding-bottom: 3em;">
+    <div class="container">
+        <div class="col-md-12">
+            <form method="post" action="/inline_mode">
+                <label>
+                    <input type="checkbox" name="inline_mode" {% if inline_tranlations_enabled %}checked{% endif %}/>
+                    inline edit
+                </label>
+                <button type="submit">OK</button>
+            </form>
+        </div>
+    </div>
+
+    <form id="test_tr" method="post" action="/translate" style="padding-bottom: 3em;">
         <div class="container">
             <div class="templatetags row">
                 <div class="col-md-12">
@@ -117,6 +133,21 @@ print tr(
                                 {% tr %}{user} give to {to} {count} apples{% endtr %}
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <small>Inline переводы включаются в cookies, но могут быть отключены свойством nowrap:</small>
+
+                                <pre>
+&lt;textarea&gt;
+{&shy;% tr %&shy;}Test{&shy;% endtr %&shy;}
+&lt;/textarea&gt;
+&lt;img alt="{&shy;% tr nowrap %&shy;}Test{&shy;% endtr %&shy;}" /&gt;</pre>
+                            </td>
+                            <td>
+                                <textarea>{% tr %}Test{% endtr %}</textarea>
+                                <pre>&lt;img alt="{% tr nowrap %}Test{% endtr %}" /&gt;</pre>
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -199,7 +230,7 @@ print tr(
                 $('#label-example').click(function(){
                     $('#label').val($.trim(this.innerHTML));
                 });
-                var $form = $('form');
+                var $form = $('#test_tr');
                 var forceSubmit = false;
                 $form.submit(function(){
                     if (forceSubmit){
@@ -240,5 +271,6 @@ print tr(
                 });
             })
         </script>
+        {% tml_inline_footer %}
     </body>
 </html>

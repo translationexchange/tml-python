@@ -46,6 +46,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django_tml.middleware.SetSourceToViewMiddleware',
+    'django_tml.inline_translations.middleware.InlineTranslationsMiddleware'
 )
 
 ROOT_URLCONF = 'tml_django_demo.urls'
@@ -93,4 +94,5 @@ TML = {
     'token': '4cb7cf6bf7cd64120661ae7da67759076d9b08f233ae510012fc6c3e819b93b8',
     'monkeypatch': True,
     'cache': 'default',
+    'inline_wrapper_cookie': 'tml_inline_translation'
 }

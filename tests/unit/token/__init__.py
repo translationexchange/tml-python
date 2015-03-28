@@ -56,7 +56,7 @@ class TokenTest(unittest.TestCase):
                           v.execute({'name': escape_me}, {}),
                           'Escape data')
         self.assertEquals(escape_me,
-                  v.execute({'name': escape_me}, {'safe': True}),
+                  v.execute({'name': escape_me}, {'escape': False}),
                   'Check safe')
 
     def test_parse_variable(self):

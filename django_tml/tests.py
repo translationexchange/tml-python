@@ -2,9 +2,16 @@
 from django.test import SimpleTestCase
 from .translator import Translator
 from gettext import ngettext
+from django.template import Template
+from django.template.context import Context
+from django_tml import activate, activate_source, inline_translations
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
+    def setUp(self):
+        Translator._instance = None # reset settings
+        inline_translations.turn_off()
+
     def test_tranlator(self):
         t = Translator.instance()
         self.assertEquals(Translator, t.__class__, "Instance returns translator")
@@ -34,12 +41,12 @@ class DjangoTMLTestCase(SimpleTestCase):
         """ Test languages source """
         t = Translator()
         t.activate('ru')
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
-        t.use_source('alpha')
+        t.activate_source('alpha')
         self.assertEqual(u'Hello John', t.tr('Hello {name}', {'name':'John'}), 'Use fallback translation')
         # flush missed keys on change context:
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEquals('sources/register_keys', t.client.url, 'Flush missed keys')
         # handle change:
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
@@ -47,7 +54,7 @@ class DjangoTMLTestCase(SimpleTestCase):
     def test_gettext(self):
         t = Translator()
         t.activate('ru')
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEqual(u'Привет %(name)s', t.ugettext('Hello {name}'), 'ugettext')
         self.assertEqual('Привет %(name)s', t.gettext('Hello {name}'), 'ugettext')
         self.assertEqual('Здорово %(name)s', t.pgettext('Greeting', 'Hi {name}'), 'ugettext')
@@ -57,4 +64,100 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'%(number)s яблока', t.ungettext('One apple', '{number} apples', 22), 'ungettext + 22')
         self.assertEquals(u'%(number)s яблок', t.ungettext('One apple', '{number} apples', 5), 'ungettext + 5')
         self.assertEquals('%(number)s яблок', t.ngettext('One apple', '{number} apples', 12), 'ngettext + 12')
+
+    def test_template_tags(self):
+        """ Test for template tags """
+        activate('ru')
+        t = Template('{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        c = Context({'name':'John'})
+        self.assertEquals(u'Привет John', t.render(c))
+        t = Template(
+        '''
+        {%load tml %}
+        {% tr trimmed %}
+            Hello {name}
+        {% endtr %}
+        ''')
+        self.assertEquals(u'''Привет John''', t.render(c).strip(), 'Trimmed support')
+        t = Template(u'{%load tml %}{% tr with name="Вася" %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет Вася', t.render(c), 'With syntax')
+
+        t = Template('{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет &lt;&quot;Вася&quot;&gt;', t.render(Context({'name':'<"Вася">'})))
+        t = Template(u'{%load tml %}{% tr with html|safe as name %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет <"Вася">', t.render(Context({'html':'<"Вася">'})))
+
+    def test_blocktrans(self):
+        activate('ru')
+        activate_source('blocktrans')
+        c = Context({'name':'John'})
+
+        t = Template('{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
+        self.assertEquals(u'Привет John', t.render(c))
+
+        t = Template('{%load tml %}{% blocktrans %}Hello {{name}}{% endblocktrans %}')
+        self.assertEquals(u'Привет John', t.render(c), 'Use new tranlation')
+
+        t = Template('{%load tml %}{% blocktrans %}Hey {{name}}{% endblocktrans %}') 
+        self.assertEquals(u'Эй John, привет John', t.render(c), 'Use old tranlation')
+
+        t = Template('{%load tml %}{% blocktrans count count=apples_count %}One apple{% plural %}{count} apples{% endblocktrans %}')
+        self.assertEquals(u'Одно яблоко', t.render(Context({'apples_count':1})),'Plural one')
+        self.assertEquals(u'2 яблока', t.render(Context({'apples_count':2})),'Plural 2')
+        self.assertEquals(u'21 яблоко', t.render(Context({'apples_count':21})),'Plural 21')
+
+    def test_inline(self):
+        """ Inline tranlations wrapper """
+        activate('ru')
+        inline_translations.turn_on()
+        c = Context({'name':'John'})
+        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
+
+        self.assertEquals(u'<tml:label class="tml_translatable tml_translated" data-translation_key="90e0ac08b178550f6513762fa892a0ca" data-target_locale="ru">Привет John</tml:label>',
+                          t.render(c),
+                          'Wrap translation')
+        t = Template(u'{%load tml %}{% tr nowrap %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет John',
+                          t.render(c),
+                          'Nowrap option')
+
+        t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
+        self.assertEquals(u'Привет John',
+                          t.render(c),
+                          'Nowrap blocktrans')
+
+        t = Template(u'{%load tml %}{% tr %}Untranslated{% endtr %}')
+        self.assertEquals(u'<tml:label class="tml_translatable tml_not_translated" data-translation_key="9bf6a924c9f25e53a6b07fc86783bb7d" data-target_locale="ru">Untranslated</tml:label>',
+                          t.render(c),
+                          'Untranslated')
+        activate('ru')
+        inline_translations.turn_off()
+        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
+        self.assertEquals(u'Привет John',
+                          t.render(c),
+                          'Turn off inline')
+
+    def test_sources_stack(self):
+        t = Translator.instance()
+        self.assertEqual(None, t.source, 'None source by default')
+        t.activate_source('index')
+        self.assertEqual('index', t.source, 'Use source')
+        t.enter_source('auth')
+        self.assertEqual('auth', t.source, 'Enter (1 level)')
+        t.enter_source('mail')
+        self.assertEqual('mail', t.source, 'Enter (2 level)')
+        t.exit_source()
+        self.assertEqual('auth', t.source, 'Exit (2 level)')
+        t.exit_source()
+        self.assertEqual('index', t.source, 'Exit (1 level)')
+        t.exit_source()
+        self.assertEqual(None, t.source, 'None source by default')
+
+        t.activate_source('index')
+        t.enter_source('auth')
+        t.enter_source('mail')
+        t.activate_source('inner')
+        t.exit_source()
+        self.assertEqual(None, t.source, 'Use destroys all sources stack')
 

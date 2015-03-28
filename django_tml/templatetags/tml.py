@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 from __future__ import absolute_import
 from django.template import (Node, Variable, TemplateSyntaxError,
     TokenParser, Library, TOKEN_TEXT, TOKEN_VAR)
@@ -9,14 +11,14 @@ from django.utils.translation.trans_real import trim_whitespace
 from django_tml import Translator
 from tml import legacy
 from django.templatetags.i18n import BlockTranslateNode as BaseBlockTranslateNode
+from .. import inline_translations
 from tml.translation import Key
-
 
 register = Library()
 
 class BlockTranslateNode(BaseBlockTranslateNode):
 
-    def __init__(self, extra_context, singular, plural, countervar, counter, description, trimmed, legacy = False):
+    def __init__(self, extra_context, singular, plural, countervar, counter, description, trimmed, nowrap = False, legacy = False):
         """ Block for {% tr %} {% endtr %}
             extra_context (dict): block with params
             singular (string): label for singular
@@ -24,7 +26,9 @@ class BlockTranslateNode(BaseBlockTranslateNode):
             message_context (string): key description
             contervar (string): variable for counter
             trimmed (boolean): trim context
+            nowrap (boolean): no not wrap result in <tml:label> for inline tranlation
             legacy (boolean): supports legacy e.c. allow {{name}} syntax in label and %(name)s syntax in response
+
         """
         self.extra_context = extra_context
         self.description = description
@@ -33,6 +37,8 @@ class BlockTranslateNode(BaseBlockTranslateNode):
         self.countervar = countervar
         self.counter = counter
         self.trimmed = trimmed
+        self.legacy = legacy
+        self.nowrap = nowrap
 
 
     def render(self, data, nested=False):
@@ -57,10 +63,44 @@ class BlockTranslateNode(BaseBlockTranslateNode):
                 label, void = self.render_token_list(self.plural)
         else:
             label, void = self.render_token_list(self.singular)
-        return self.translate(label, data, description)
+
+        return self.wrap_label(*self.translate(label, data, description))
 
     def translate(self, label, data, description):
-        return Translator.instance().tr(label, data, description)
+        """ Translate label
+            Args:
+                label (string): translated label
+                data (dict): user data
+                description: description
+            Returns:
+                translated text, key, translated
+        """
+        t = Translator.instance()
+        key = Key(label = label, description = description, language = t.context.language)
+        try:
+            translation = t.context.dict.fetch(key)
+            return (translation.execute(data, {}), key, True)
+        except Exception as e:
+            return self.fallback(key, data)
+
+    def fallback(self, key, data):
+        """ Translation fallback"""
+        return (Translator.instance().context.dict.fallback(key).execute(data, {}),
+                key,
+                False)
+
+
+    def wrap_label(self, ret, key, tranlated):
+
+        if self.nowrap:
+            # nowrap flag is set
+            return ret
+        if self.legacy:
+            # {% blocktrans %} - not support inline tranlations
+            return ret
+        return inline_translations.wrap_string(ret, key, tranlated)
+ 
+
 
 class LegacyBlockTranlationNode(BlockTranslateNode):
     """ Tranlation with back support """
@@ -75,7 +115,19 @@ class LegacyBlockTranlationNode(BlockTranslateNode):
             Return:
                 tranlation
         """
-        return legacy.translate(Translator.instance().context, label, data, description, {})
+        context = Translator.instance().context
+        try:
+            # Load legacy translation:
+            translation, key = legacy.fetch(context,
+                                            label,
+                                            description)
+            # Execute in legacy mode with %(token)s support
+            return (legacy.execute(translation, data, {}), key, True)
+        except Exception:
+            # Fallback
+            key = Key(label = label, description = description, language = context.language)
+            translation = context.dict.fallback(key) # fetch fallback translation
+            return (legacy.execute(translation, data, {}), key, False)
 
 @register.tag("tr")
 def do_block_translate(parser, token, legacy = False):
@@ -142,6 +194,8 @@ def do_block_translate(parser, token, legacy = False):
                 six.reraise(TemplateSyntaxError, TemplateSyntaxError(msg), sys.exc_info()[2])
         elif option == "trimmed":
             value = True
+        elif option == "nowrap":
+            value = True
         else:
             raise TemplateSyntaxError('Unknown argument for %r tag: %r.' %
                                       (bits[0], option))
@@ -181,9 +235,9 @@ def do_block_translate(parser, token, legacy = False):
 
     cls = LegacyBlockTranlationNode if legacy else BlockTranslateNode
     return cls(extra_context, singular, plural, countervar,
-                              counter, message_context, trimmed = trimmed, legacy = legacy)
-
+                              counter, message_context, trimmed = trimmed, legacy = legacy, nowrap = options.get('nowrap', False))
 
 @register.tag("blocktrans")
 def do_block_translate_legacy(parser, token):
     return do_block_translate(parser, token, True)
+

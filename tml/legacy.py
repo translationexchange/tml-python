@@ -47,23 +47,33 @@ def translate(context, label, data, description, options):
             data (dict): user data
             options (dict): tranlation options
         Returns:
-            string
+            text, key
     """
-    t = fetch(context, label, description)
+    t, key = fetch(context, label, description)
     o = t.fetch_option(data, options)
     # support %(name)s -> {name}
     o.label = suggest_label(o.label)
+    return (o.apply(data, options), key)
+
+def execute(translation, data, options):
+    """ Execute translation in legacy mode """
+    o = translation.fetch_option(data, options)
+    # support %(name)s -> {name}
+    o.label = suggest_label(o.label)
+    # apply translation:
     return o.apply(data, options)
 
 
 def fetch(context, label, description):
-    suggested_key = Key(label = suggest_label(label), description = description, language = context.language)
+    suggested_key = Key(label = suggest_label(label),
+                        description = description, 
+                        language = context.language)
     try:
-        return context.dict.fetch(suggested_key)
-    except Exception:
+        return (context.dict.fetch(suggested_key), suggested_key)
+    except Exception as e:
+        if label == suggested_key.label:
+            # Suggested label equal given:
+            raise e
         key = Key(label = label, description = description, language = context.language)
-        if key.key != suggested_key.key:
-            return context.dict.translate(key)
-        else:
-            return context.fallback(key)
+        return (context.dict.fetch(key), key)
 

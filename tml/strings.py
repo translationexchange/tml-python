@@ -8,9 +8,9 @@ def to_string(text):
     """
     if type(text) is unicode:
         return text
-    if type(text) is str:
-        return unicode(str(text).decode('utf-8'))
-    return unicode(text)
+    return unicode(str(text).decode('utf-8'))
+
+
 
 SUGGEST_STRING_KEYS = ['title','name','html','text']
 
@@ -23,3 +23,4 @@ def suggest_string(data):
             # Return first key:
             return dict[key]
     return data
+

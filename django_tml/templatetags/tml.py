@@ -12,6 +12,7 @@ from django_tml import Translator
 from tml import legacy
 from django.templatetags.i18n import BlockTranslateNode as BaseBlockTranslateNode
 from .. import inline_translations
+from tml.translation import Key
 
 register = Library()
 
@@ -62,14 +63,34 @@ class BlockTranslateNode(BaseBlockTranslateNode):
                 label, void = self.render_token_list(self.plural)
         else:
             label, void = self.render_token_list(self.singular)
-        return self.wrap_label(self.translate(label, data, description))
+
+        return self.wrap_label(*self.translate(label, data, description))
 
     def translate(self, label, data, description):
+        """ Translate label
+            Args:
+                label (string): translated label
+                data (dict): user data
+                description: description
+            Returns:
+                translated text, key, translated
+        """
         t = Translator.instance()
-        return t.tr(label, data, description, {'escape': True})
+        key = Key(label = label, description = description, language = t.context.language)
+        try:
+            translation = t.context.dict.fetch(key)
+            return (translation.execute(data, {}), key, True)
+        except Exception as e:
+            return self.fallback(key, data)
+
+    def fallback(self, key, data):
+        """ Translation fallback"""
+        return (Translator.instance().context.dict.fallback(key).execute(data, {}),
+                key,
+                False)
 
 
-    def wrap_label(self, ret):
+    def wrap_label(self, ret, key, tranlated):
 
         if self.nowrap:
             # nowrap flag is set
@@ -77,7 +98,7 @@ class BlockTranslateNode(BaseBlockTranslateNode):
         if self.legacy:
             # {% blocktrans %} - not support inline tranlations
             return ret
-        return inline_translations.wrap_string(ret)
+        return inline_translations.wrap_string(ret, key, tranlated)
  
 
 
@@ -94,7 +115,19 @@ class LegacyBlockTranlationNode(BlockTranslateNode):
             Return:
                 tranlation
         """
-        return legacy.translate(Translator.instance().context, label, data, description, {})
+        context = Translator.instance().context
+        try:
+            # Load legacy translation:
+            translation, key = legacy.fetch(context,
+                                            label,
+                                            description)
+            # Execute in legacy mode with %(token)s support
+            return (legacy.execute(translation, data, {}), key, True)
+        except Exception:
+            # Fallback
+            key = Key(label = label, description = description, language = context.language)
+            translation = context.dict.fallback(key) # fetch fallback translation
+            return (legacy.execute(translation, data, {}), key, False)
 
 @register.tag("tr")
 def do_block_translate(parser, token, legacy = False):

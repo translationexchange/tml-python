@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load tml %}
+{% load tml_inline %}
 <html>
     <head>
         <title>TML Python SDK</title>
@@ -18,6 +19,7 @@
             .examples td:last-child textarea {display: block; width: 100%; margin: 0.4em 0;}
             .examples td:last-child pre {margin-bottom: 0;}
         </style>
+        {% tml_inline_header %}
     </head>
     <body>
     <div class="container">
@@ -269,5 +271,6 @@ print tr(
                 });
             })
         </script>
+        {% tml_inline_footer %}
     </body>
 </html>

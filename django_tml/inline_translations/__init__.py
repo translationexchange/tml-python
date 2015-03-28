@@ -25,9 +25,10 @@ def turn_off_for_session():
     turn_off()
     save = True
 
-def wrap_string(text):
+def wrap_string(text, key, translated):
     """ Wrap string with tranlation """
     global enabled
     if enabled:
-            return u'<tml:label class="tr8n_translatable tr8n_translated">%s</tml:label>' % text
+        class_name = 'tml_translated' if translated else 'tml_not_translated'
+        return u'<tml:label class="tml_translatable %(class_name)s" data-translation_key="%(key)s" data-target_locale="%(locale)s">%(text)s</tml:label>' % ({'key':key.key, 'text':text, 'class_name': class_name, 'locale': key.language.locale})
     return text

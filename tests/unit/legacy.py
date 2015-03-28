@@ -50,10 +50,12 @@ class TokenTest(unittest.TestCase):
         context = Context()
         context.language = Language.load_by_locale(Application.load_default(c), 'ru')
         context.dict = LanguageDictionary(context.language, [])
-        self.assertEquals(u'Хелло Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
+        (t, k) = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
+        self.assertEquals(u'Хелло Bill', t)
         # Check old response syntax:
         context.dict.translations['8a7c891aa103e45e904a173f218cab9a'][0]['label'] = 'Привет %(name)s'
-        self.assertEquals(u'Привет Bill', translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {}))
+        (t, k) = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
+        self.assertEquals(u'Привет Bill', t)
 
 if __name__ == '__main__':
     unittest.main()

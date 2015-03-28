@@ -10,6 +10,7 @@ class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
     def setUp(self):
         Translator._instance = None # reset settings
+        inline_translations.turn_off()
 
     def test_tranlator(self):
         t = Translator.instance()
@@ -96,7 +97,7 @@ class DjangoTMLTestCase(SimpleTestCase):
 
         t = Template('{%load tml %}{% blocktrans %}Hello {{name}}{% endblocktrans %}')
         self.assertEquals(u'Привет John', t.render(c), 'Use new tranlation')
-        
+
         t = Template('{%load tml %}{% blocktrans %}Hey {{name}}{% endblocktrans %}') 
         self.assertEquals(u'Эй John, привет John', t.render(c), 'Use old tranlation')
 
@@ -112,7 +113,7 @@ class DjangoTMLTestCase(SimpleTestCase):
         c = Context({'name':'John'})
         t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
 
-        self.assertEquals(u'<tml:label class="tr8n_translatable tr8n_translated">Привет John</tml:label>',
+        self.assertEquals(u'<tml:label class="tml_translatable tml_translated" data-translation_key="90e0ac08b178550f6513762fa892a0ca" data-target_locale="ru">Привет John</tml:label>',
                           t.render(c),
                           'Wrap translation')
         t = Template(u'{%load tml %}{% tr nowrap %}Hello {name}{% endtr %}')
@@ -125,6 +126,11 @@ class DjangoTMLTestCase(SimpleTestCase):
                           t.render(c),
                           'Nowrap blocktrans')
 
+        t = Template(u'{%load tml %}{% tr %}Untranslated{% endtr %}')
+        self.assertEquals(u'<tml:label class="tml_translatable tml_not_translated" data-translation_key="9bf6a924c9f25e53a6b07fc86783bb7d" data-target_locale="ru">Untranslated</tml:label>',
+                          t.render(c),
+                          'Untranslated')
+        activate('ru')
         inline_translations.turn_off()
         t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
         t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')

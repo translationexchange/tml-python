@@ -1,11 +1,20 @@
 # encoding: UTF-8
 __author__ = 'a@toukmanov.ru'
-
 from .exceptions import Error
 
 class Application(object):
     """ TML application """
-    def __init__(self, client, id, languages, default_locale):
+    client = None # API client
+    id = None # application id
+    languages = None # supported language
+    default_locale = None
+    features = {} # key - feature code, value - boolean supported)
+    key = None # client key
+    name = None # human readable name
+    shortcuts = {}
+    tools = {} # tools URLS 
+
+    def __init__(self, client, id, languages, default_locale, **kwargs):
         """ .ctor
             Args:
                 client (api.client.Client): API client
@@ -16,6 +25,8 @@ class Application(object):
         self.id = id
         self.languages = languages
         self.default_locale = default_locale
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
 
 
     @classmethod
@@ -27,7 +38,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return Application(client, data['id'], data['languages'], data['default_locale'])
+        return Application(client, **data)
 
 
     @classmethod
@@ -87,3 +98,4 @@ class LanguageNotSupported(Error):
 
     def __str__(self):
         return 'Locale %s is not suppored by application %d' % (self.locale, self.application.id)
+

@@ -46,6 +46,7 @@ class Translator(object):
         self._sources = []
         self._supported_locales = None
         self._client = None
+        self.used_sources = []
 
 
     def build_context(self):
@@ -122,8 +123,9 @@ class Translator(object):
     def _use_source(self, source):
         self.source = source
         self.reset_context()
+        self.used_sources.append(source)
 
-    def use_source(self, source):
+    def activate_source(self, source):
         """ Get source
             Args:
                 source (string): source code
@@ -131,6 +133,12 @@ class Translator(object):
         self._use_source(source)
         self._sources = [] # reset sources stack
         return self
+
+
+    def deactivate_source(self):
+        """ Deactivate source """
+        self.activate_source(None)
+        self.used_sources = []
 
     _sources = []
 
@@ -198,6 +206,7 @@ class Translator(object):
             return self.translate(plural, {'number': number}, context)
 
     def translate(self, label, data = {}, description = None):
+        """ Translate label """
         key = Key(label = suggest_label(label), description= description, language = self.context.language)
         translation = self.context.dict.translate(key)
         ret = text_to_sprintf(translation.fetch_option(data, {}).label, self.context.language)
@@ -314,9 +323,8 @@ class Translator(object):
         return templatize(src, origin)
 
     def deactivate_all(self):
-        self.locale = None
-        self.source = None
-        self.supports_inline_tranlation = False
+        self.deactivate()
+        self.deactivate_source()
         self.reset_context()
 
     def tr(self, label, data = {}, description = '', options = {}):

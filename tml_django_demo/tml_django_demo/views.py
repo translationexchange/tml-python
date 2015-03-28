@@ -4,7 +4,7 @@ from django.utils import translation
 from django.http import HttpResponse
 from json import dumps, loads
 from django.views.decorators.csrf import csrf_exempt
-from django_tml import tr, activate, use_source
+from django_tml import tr, activate, activate_source, deactivate_source
 from django_tml import inline_translations
 
 
@@ -35,9 +35,9 @@ def translate(request):
     source = request.POST.get('source')
     if source:
         # init source:
-        use_source(source)
+        activate_source(source)
     result = tr(label, data, description)
-    use_source(None) # reset source
+    deactivate_source() # reset source
     return HttpResponse(dumps({'result': result}))
 
 @csrf_exempt

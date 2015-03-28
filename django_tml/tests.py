@@ -4,7 +4,7 @@ from .translator import Translator
 from gettext import ngettext
 from django.template import Template
 from django.template.context import Context
-from django_tml import activate, use_source, inline_translations
+from django_tml import activate, activate_source, inline_translations
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -40,12 +40,12 @@ class DjangoTMLTestCase(SimpleTestCase):
         """ Test languages source """
         t = Translator()
         t.activate('ru')
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
-        t.use_source('alpha')
+        t.activate_source('alpha')
         self.assertEqual(u'Hello John', t.tr('Hello {name}', {'name':'John'}), 'Use fallback translation')
         # flush missed keys on change context:
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEquals('sources/register_keys', t.client.url, 'Flush missed keys')
         # handle change:
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
@@ -53,7 +53,7 @@ class DjangoTMLTestCase(SimpleTestCase):
     def test_gettext(self):
         t = Translator()
         t.activate('ru')
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEqual(u'Привет %(name)s', t.ugettext('Hello {name}'), 'ugettext')
         self.assertEqual('Привет %(name)s', t.gettext('Hello {name}'), 'ugettext')
         self.assertEqual('Здорово %(name)s', t.pgettext('Greeting', 'Hi {name}'), 'ugettext')
@@ -88,7 +88,7 @@ class DjangoTMLTestCase(SimpleTestCase):
 
     def test_blocktrans(self):
         activate('ru')
-        use_source('blocktrans')
+        activate_source('blocktrans')
         c = Context({'name':'John'})
 
         t = Template('{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
@@ -135,7 +135,7 @@ class DjangoTMLTestCase(SimpleTestCase):
     def test_sources_stack(self):
         t = Translator.instance()
         self.assertEqual(None, t.source, 'None source by default')
-        t.use_source('index')
+        t.activate_source('index')
         self.assertEqual('index', t.source, 'Use source')
         t.enter_source('auth')
         self.assertEqual('auth', t.source, 'Enter (1 level)')
@@ -148,10 +148,10 @@ class DjangoTMLTestCase(SimpleTestCase):
         t.exit_source()
         self.assertEqual(None, t.source, 'None source by default')
 
-        t.use_source('index')
+        t.activate_source('index')
         t.enter_source('auth')
         t.enter_source('mail')
-        t.use_source('inner')
+        t.activate_source('inner')
         t.exit_source()
         self.assertEqual(None, t.source, 'Use destroys all sources stack')
 

@@ -9,12 +9,15 @@ def tr(label, data = None, description = None, options = {}):
 def activate(locale):
     Translator.instance().activate(locale)
 
-def use_source(source):
+def activate_source(source):
     """ Use source block
         Args:
             source (string): source name
     """
-    Translator.instance().use_source(source)
+    Translator.instance().activate_source(source)
+
+def deactivate_source():
+    Translator.instance().deactivate_source()
 
 def enter_source(source):
     """ Enter source block

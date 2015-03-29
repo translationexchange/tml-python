@@ -104,7 +104,6 @@ class AbstractVariableToken(AbstractToken):
 
 class VariableToken(AbstractVariableToken):
     """ Token for variabel {name} """
-    USE_KEYS = ['name','title','text'] # Keys in dict to fetch printable value
     IS_TOKEN = re.compile('\{(\w+)\}') # Regext to check objects
     def __init__(self, name):
         """
@@ -136,6 +135,21 @@ class VariableToken(AbstractVariableToken):
 
     def __str__(self):
         return '{%s}' % self.name
+
+class SelfVariableToken(VariableToken):
+
+    TOKEN = '{$0}'
+
+    def __init__(self):
+        pass
+
+    def fetch(self, data):
+        return data
+
+    @classmethod
+    def validate(cls, text, language):
+        if text == cls.TOKEN:
+            return SelfVariableToken()
 
 
 class RulesToken(AbstractVariableToken):
@@ -236,7 +250,7 @@ class TokenMatcher(object):
         # No token find:
         raise InvalidTokenSyntax(text)
 
-data_matcher = TokenMatcher([TextToken, VariableToken, RulesToken, PipeToken, CaseToken])
+data_matcher = TokenMatcher([TextToken, VariableToken, RulesToken, PipeToken, CaseToken, SelfVariableToken])
 
 def execute_all(tokens, data, options):
     """ Execute all tokens

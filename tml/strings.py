@@ -8,8 +8,9 @@ def to_string(text):
     """
     if type(text) is unicode:
         return text
+    if hasattr(text, '__html__'):
+        return unicode(text.__html__())
     return unicode(str(text).decode('utf-8'))
-
 
 
 SUGGEST_STRING_KEYS = ['title','name','html','text']

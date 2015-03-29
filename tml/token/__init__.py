@@ -23,10 +23,10 @@ def escape_if_needed(text, options):
         Returns:
             text
     """
+    if hasattr(text, '__html__'):
+        # Text has escape itself:
+        return to_string(text.__html__())
     if need_to_escape(options):
-        if hasattr(text, '__html__'):
-            # Text has escape itself:
-            return text.__html__()
         return escape(to_string(text))
     return to_string(text)
 

@@ -67,9 +67,13 @@ def parse(text, tags_factory = None):
                     tag_name = None
                 elif not tag_name is None:
                     # Finish of tag definition [link^]site.com[/link]
-                    stack.append(element)
+                    new_element = tags_factory.build(tag_name)
+                    if new_element.self_closed:
+                        element.append(new_element)
+                    else:
+                        stack.append(element)
+                        element = new_element
                     trace('build', tag_name)
-                    element = tags_factory.build(tag_name)
                     tag_name = None
                 elif element.__class__ is ShortTag:
                     # Finish of short tag: [i: text^]

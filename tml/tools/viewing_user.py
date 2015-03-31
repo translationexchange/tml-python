@@ -13,7 +13,7 @@ def set_viewing_user(user):
     Gender.match(user)
     _viewing_user = user
 
-def get_viewing_user(key, data, context):
+def get_viewing_user(key, data = {}, context = None):
     """ Get viewing user """
     global _viewing_user
     if key == 'viewing_user':

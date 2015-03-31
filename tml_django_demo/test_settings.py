@@ -7,3 +7,5 @@ def get_client():
 
 TML['api_client'] = get_client
 
+TML_DATA_PREPROCESSORS = ['tml.tools.list.preprocess_lists',]
+

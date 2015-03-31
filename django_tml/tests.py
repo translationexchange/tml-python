@@ -4,7 +4,7 @@ from .translator import Translator
 from gettext import ngettext
 from django.template import Template
 from django.template.context import Context
-from django_tml import activate, activate_source, inline_translations
+from django_tml import activate, activate_source, inline_translations, tr
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -160,4 +160,10 @@ class DjangoTMLTestCase(SimpleTestCase):
         t.activate_source('inner')
         t.exit_source()
         self.assertEqual(None, t.source, 'Use destroys all sources stack')
+
+    def test_preprocess_data(self):
+        activate('ru')
+        self.assertEquals(u'Привет Вася and Петя', tr('Hello {name}', {'name':['Вася','Петя']}))
+        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        self.assertEquals(u'Привет Вася and Петя', t.render(Context({'name':['Вася','Петя']})))
 

@@ -39,9 +39,7 @@ class List(Renderable):
             return self.separator.join([tpl(item) for item in self.items[0:limit]])
 
 def preprocess_lists(data, context):
-    for key in data:
-        if type(data[key]) is list:
-            data[key] = List(data[key], last_separator = 'and')
+    if type(data) is list:
+        return List(data, last_separator = 'and')
     return data
-            
 

@@ -96,3 +96,5 @@ TML = {
     'cache': 'default',
     'inline_wrapper_cookie': 'tml_inline_translation'
 }
+
+TML_DATA_PREPROCESSORS = ['tml.tools.list.preprocess_lists',]

@@ -5,10 +5,6 @@ from tml.tools.template import Template
 from tests.mock import Client
 from tml import Context
 
-class ContextStub(object):
-    def tr(self, label):
-        return label.upper()
-
 
 class list(unittest.TestCase):
 

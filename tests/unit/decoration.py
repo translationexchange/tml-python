@@ -81,6 +81,11 @@ class decoration_test(unittest.TestCase):
         with self.assertRaises(ParseError) as context:
             parse('[b:not [/b]')
 
+    def test_self_closed(self):
+        self.assertEquals('Hello<br/>world', parse('Hello[br]world').render(), 'br')
+        self.assertEquals('<h1>Hello<br/>world</h1>', parse('[h1]Hello[br]world[/h1]').render(), 'h1: br')
+        self.assertEquals('<h1>Hello<br/>world</h1>', parse('[h1: Hello[br]world]').render(), 'h1: br')
+
 
 if __name__ == '__main__':
     unittest.main()

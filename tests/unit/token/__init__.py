@@ -31,7 +31,7 @@ class TokenTest(unittest.TestCase):
         self.language = FakeLanguage()
 
     """ Test client """
-    def text_parse_text(self):
+    def test_parse_text(self):
         """ Parse text """
         t = TextToken.validate('test', self.language)
         self.assertEqual(t.__class__, TextToken, 'Fetch text token')
@@ -58,6 +58,7 @@ class TokenTest(unittest.TestCase):
         self.assertEquals(escape_me,
                   v.execute({'name': escape_me}, {'escape': False}),
                   'Check safe')
+
 
     def test_parse_variable(self):
         """ Test variable token parsing """

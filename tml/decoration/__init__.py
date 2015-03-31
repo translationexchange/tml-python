@@ -60,10 +60,11 @@ class AttributeIsNotSet(Error):
 
 class Tag(Set):
     """ Tag element """
-    def __init__(self, name = None, tag = None, attributes = []):
+    def __init__(self, name = None, tag = None, attributes = [], self_closed = False):
         self.name = name
         self.tag = tag
         self.attributes = attributes
+        self.self_closed = self_closed
         super(Tag, self).__init__()
 
     def render(self, data = None):
@@ -73,6 +74,8 @@ class Tag(Set):
                 attributes[key] = data[self.name][key]
             except Exception:
                 raise AttributeIsNotSet(self.name, key)
+        if self.self_closed:
+            return '<%s/>%s' % (self.tag, super(Tag, self).render(data))
         return '<%s%s>%s</%s>' % (self.tag, render_attributes(attributes), super(Tag, self).render(data), self.tag)
 
 
@@ -87,8 +90,10 @@ class TagFactory(object):
         except KeyError:
             raise UnsupportedTag(name, self)
 
-    def allow(self, name, tag, attributes = {}):
-        self.allowed_tags[name] = (tag, attributes)
+    def allow(self, name, tag = None, attributes = [], self_closed = False):
+        if tag is None:
+            tag = name
+        self.allowed_tags[name] = (tag, attributes, self_closed)
         return self
 
     @property
@@ -107,9 +112,22 @@ class UnsupportedTag(Error):
 
 
 system_tags = TagFactory()
+
+system_tags.allow('strong', 'strong')
+system_tags.allow('bold', 'strong')
+system_tags.allow('b', 'strong')
+system_tags.allow('em', 'em')
+system_tags.allow('italic', 'i')
+system_tags.allow('i', 'i')
+system_tags.allow('br', 'br', [], self_closed = True)
 system_tags.allow('link', 'a', ['href'])
 system_tags.allow('a', 'a', ['href'])
-system_tags.allow('b', 'strong')
-system_tags.allow('i', 'i')
 system_tags.allow('-', 'strike')
+system_tags.allow('strike', 'strike')
+system_tags.allow('h1')
+system_tags.allow('h2')
+system_tags.allow('h3')
+system_tags.allow('div', 'div', ['id','class','style'])
+system_tags.allow('span', 'span', ['id','class','style'])
+
 

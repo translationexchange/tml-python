@@ -92,11 +92,17 @@ class TextToken(AbstractToken):
 
 
 class AbstractVariableToken(AbstractToken):
+
+    IS_VARIABLE = '([\$\d\w]+)'
+    REGEXP_TOKEN = '^\{%s\}$'
+
     def __init__(self, name):
         self.name = name
 
     def fetch(self, data):
         try:
+            if self.name == '$0':
+                return data
             return data[self.name]
         except KeyError:
             raise RequiredArgumentIsNotPassed(self.name, data)
@@ -104,8 +110,7 @@ class AbstractVariableToken(AbstractToken):
 
 class VariableToken(AbstractVariableToken):
     """ Token for variabel {name} """
-    USE_KEYS = ['name','title','text'] # Keys in dict to fetch printable value
-    IS_TOKEN = re.compile('\{(\w+)\}') # Regext to check objects
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % AbstractVariableToken.IS_VARIABLE) # Regext to check objects
     def __init__(self, name):
         """
             Args:
@@ -155,7 +160,7 @@ class RulesToken(AbstractVariableToken):
         self.rules = rules
         self.language = language
 
-    IS_TOKEN = re.compile('^\{(\w+)\|([^\|]{1}(.*))\}$')
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + '\|([^\|]{1}(.*))',))
     """ Compiler for rules """
     @classmethod
     def validate(cls, text, language):
@@ -170,7 +175,7 @@ class RulesToken(AbstractVariableToken):
 
 class CaseToken(RulesToken):
     """ Language keys {name::nom} """
-    IS_TOKEN = re.compile('^\{(\w+)\:\:(.*)\}$')
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + '\:\:(.*)',))
 
     def __init__(self, name, case, language):
         super(RulesToken, self).__init__(name)
@@ -198,7 +203,7 @@ class PipeToken(RulesToken):
                                 count = 100  -> 100 tokens
         works like {name||rules} == {name} {name|rules}
     """
-    IS_TOKEN = re.compile('^\{(\w+)\|\|(.*)\}$')
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + '\|\|(.*)',))
 
     def __init__(self, name, rules, language):
         self.token = VariableToken(name)

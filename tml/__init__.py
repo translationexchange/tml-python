@@ -11,7 +11,6 @@ from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .decoration.parser import parse as parse_decoration
 from .tools import Renderable
-from .tools import render_data
 
 
 __author__ = 'a@toukmanov.ru'
@@ -137,14 +136,27 @@ class Context(object):
             Returns:
                 dict: data after modification
         """
-        for preprocessor in self.data_preprocessors:
-            # Preprocess data with preprocessors:
-            data = preprocessor(data = data, context = self)
-        # Render all data:
-        return render_data(data, self)
+        return DataInContext(data, self)
 
 context = Context()
 
+class DataInContext(object):
+    """ Render data on demand """
+    def __init__(self, data, context):
+        """ .ctor
+            data (dict): user data
+            context (tml.Context): translation context (current language etc.)
+        """
+        self.data = data
+        self.context = context
+
+    def __getitem__(self, key, *args, **kwargs):
+        ret = self.data[key]
+        for p in self.context.data_preprocessors:
+            ret = p(ret, self.context)
+        if isinstance(ret, Renderable):
+            ret = ret.render(self.context)
+        return ret
 
 def configure(**kwargs):
     return context.configure(**kwargs)

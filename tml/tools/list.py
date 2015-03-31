@@ -1,10 +1,7 @@
 # encoding: UTF-8
 from .template import Variable
 from ..strings import to_string
-
-class Renderable(object):
-    def render(self, context):
-        raise NotImplemented()
+from . import Renderable
 
 class List(Renderable):
     """ Display list """
@@ -31,6 +28,20 @@ class List(Renderable):
             return self.render_items(limit, tpl)
         return u'%s %s %s' % (self.render_items(limit - 1, tpl), context.tr(self.last_separator), tpl(self.items[limit-1]))
 
+    @classmethod
+    def from_list(self, items):
+        return List(items, last_separator = 'and')
+
+    def __iter__(self):
+        return self.items
+
     def render_items(self, limit, tpl):
             return self.separator.join([tpl(item) for item in self.items[0:limit]])
+
+def preprocess_lists(data):
+    for key in data:
+        if type(data[key]) is list:
+            data[key] = List(data[key], last_separator = 'and')
+    return data
+            
 

@@ -11,6 +11,7 @@ from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .decoration.parser import parse as parse_decoration
 from .tools import Renderable
+from argparse import ArgumentError
 
 
 __author__ = 'a@toukmanov.ru'
@@ -128,6 +129,7 @@ class Context(object):
 
     # List of objects which preprocess data before translation:
     data_preprocessors = []
+    env_generators = []
 
     def prepare_data(self, data):
         """ Prepare data for render 
@@ -151,12 +153,29 @@ class DataInContext(object):
         self.context = context
 
     def __getitem__(self, key, *args, **kwargs):
-        ret = self.data[key]
+        try:
+            # get item for data:
+            ret = self.data[key]
+        except KeyError as e:
+            return self.generate_item(key)
         for p in self.context.data_preprocessors:
+            # preprocess data ([] -> List etc)
             ret = p(ret, self.context)
+        # Apply renderable data:
         if isinstance(ret, Renderable):
             ret = ret.render(self.context)
         return ret
+
+    def generate_item(self, key):
+        """ Generate item for key """
+        for g in self.context.env_generators:
+            try:
+                ret = g(key, self.context, self.data)
+                if not ret is None:
+                    return ret
+            except ArgumentError:
+                pass
+        raise KeyError('%s key is not found in translation data' % key) 
 
 def configure(**kwargs):
     return context.configure(**kwargs)

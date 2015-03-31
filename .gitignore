@@ -2,4 +2,5 @@
 .project
 .pydevproject
 .idea
+.settings
 test.py

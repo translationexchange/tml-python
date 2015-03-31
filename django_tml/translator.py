@@ -52,10 +52,12 @@ class Translator(object):
 
     def _build_preprocessors(self):
         """ Build translation preprocessors defined at TML_DATA_PREPROCESSORS """
-        if not hasattr(settings, 'TML_DATA_PREPROCESSORS'):
-            return
-        for include in settings.TML_DATA_PREPROCESSORS:
-            Context.data_preprocessors.append(import_string(include))
+        if hasattr(settings, 'TML_DATA_PREPROCESSORS'):
+            for include in settings.TML_DATA_PREPROCESSORS:
+                Context.data_preprocessors.append(import_string(include))
+        if hasattr(settings, 'TML_ENV_GENERATORS'):
+            for include in settings.TML_ENV_GENERATORS:
+                Context.env_generators.append(import_string(include))
 
 
     def build_context(self):

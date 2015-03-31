@@ -8,4 +8,5 @@ urlpatterns = patterns('',
     url(r'^$', 'tml_django_demo.views.home'),
     url(r'^translate$', 'tml_django_demo.views.translate'),
     url(r'^inline_mode', 'tml_django_demo.views.inline_mode'),
+    url(r'^auth', 'tml_django_demo.views.auth'),
 )

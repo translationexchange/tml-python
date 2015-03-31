@@ -6,15 +6,19 @@ from json import dumps, loads
 from django.views.decorators.csrf import csrf_exempt
 from django_tml import tr, activate, activate_source, deactivate_source
 from django_tml import inline_translations
+from django.contrib.auth import authenticate, login, logout
+from tml.tools.viewing_user import get_viewing_user
 
 
 def home(request):
+    auth_user = request.user
     language = translation.get_language_from_request(request, True)
     translation.activate(language)
     user = {'gender': request.GET.get('user_gender','male'),'name': request.GET.get('user_name','Вася')}
     to = {'gender': request.GET.get('to_gender','female'),'name': request.GET.get('to_name','Маша')}
     count = request.GET.get('count', 5)
-    return render_to_response('index.html', {'user':user,
+    return render_to_response('index.html', {'viewing_user': get_viewing_user('viewing_user'),
+                                             'user':user,
                                              'to': to,
                                              'count': count,
                                              'language': language,
@@ -48,3 +52,12 @@ def inline_mode(request):
         inline_translations.turn_off_for_session()
     return redirect('/')
 
+@csrf_exempt
+def auth(request):
+    if request.method == 'POST':
+        user = authenticate(name = request.POST.get('name'), gender = request.POST.get('gender'))
+        login(request, user)
+    elif request.GET.get('logout'):
+        logout(request)
+    return redirect('/')
+    

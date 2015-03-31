@@ -9,6 +9,7 @@ from tml.translation import TranslationOption
 from django.utils.translation import LANGUAGE_SESSION_KEY
 from tml.legacy import text_to_sprintf, suggest_label
 from types import FunctionType
+from django.utils.module_loading import import_string
 
 
 def to_str(fn):
@@ -47,6 +48,14 @@ class Translator(object):
         self._supported_locales = None
         self._client = None
         self.used_sources = []
+        self._build_preprocessors()
+
+    def _build_preprocessors(self):
+        """ Build translation preprocessors defined at TML_DATA_PREPROCESSORS """
+        if not hasattr(settings, 'TML_DATA_PREPROCESSORS'):
+            return
+        for include in settings.TML_DATA_PREPROCESSORS:
+            Context.data_preprocessors.append(import_string(include))
 
 
     def build_context(self):

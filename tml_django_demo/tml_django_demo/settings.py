@@ -39,14 +39,20 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
+    'django.contrib.sessions',
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
     'django_tml',
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django_tml.middleware.SetSourceToViewMiddleware',
-    'django_tml.inline_translations.middleware.InlineTranslationsMiddleware'
+    'django_tml.inline_translations.middleware.InlineTranslationsMiddleware',
+    'tml_django_demo.auth.DemoViewingUserMiddleware',
 )
 
 ROOT_URLCONF = 'tml_django_demo.urls'
@@ -64,6 +70,7 @@ DATABASES = {
     }
 }
 
+AUTHENTICATION_BACKENDS = ['tml_django_demo.auth.LoginBackend']
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 

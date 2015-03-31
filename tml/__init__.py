@@ -149,7 +149,7 @@ class DataInContext(object):
             data (dict): user data
             context (tml.Context): translation context (current language etc.)
         """
-        self.data = data
+        self.data = data if data else {}
         self.context = context
 
     def __getitem__(self, key, *args, **kwargs):

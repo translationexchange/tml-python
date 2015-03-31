@@ -10,6 +10,8 @@ from .translation import Key
 from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .decoration.parser import parse as parse_decoration
+from .tools import Renderable
+from .tools import render_data
 
 
 __author__ = 'a@toukmanov.ru'
@@ -107,7 +109,7 @@ class Context(object):
         # Translate data:
         t = self.dict.translate(Key(label = label, description = description, language = self.language))
         # Apply tokens:
-        ret = t.execute(data, options)
+        ret = t.execute(self.prepare_data(data), options)
         # Apply decoration:
         return parse_decoration(ret).render(options)
 
@@ -125,6 +127,21 @@ class Context(object):
     def application(self):
         return self.language.application
 
+    # List of objects which preprocess data before translation:
+    data_preprocessors = []
+
+    def prepare_data(self, data):
+        """ Prepare data for render 
+            Args:
+                data (dict): raw data
+            Returns:
+                dict: data after modification
+        """
+        for preprocessor in self.data_preprocessors:
+            # Preprocess data with preprocessors:
+            data = preprocessor(data = data, context = self)
+        # Render all data:
+        return render_data(data, self)
 
 context = Context()
 
@@ -142,7 +159,7 @@ def tr(label, data = {}, description = '', options = {}):
             language (Language):
             options (dict): options 
     """
-    return context.tr(label, data, description, options)
+    return context.tr(label, context.prepare_data(data), description, options)
 
 
 def submit_missed():

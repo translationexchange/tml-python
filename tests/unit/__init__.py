@@ -36,6 +36,7 @@ import tml
 from tests.mock import Client as ClientMock
 import unittest
 from tml.dictionary.source import SourceDictionary
+from tml.tools import list as tml_list
 
 __author__ = 'a@toukamnov.ru'
 
@@ -72,6 +73,15 @@ class api_test(unittest.TestCase):
         self.assertEquals(type(tml.context.dict), Dictionary, 'No preload data')
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
+
+    def test_renderable_items(self):
+        c = Context(client = self.client)
+        hello_all = c.tr('Hello {name}', {'name': tml_list.List([u'Вася',u'Петя','Коля'], last_separator='и')})
+        self.assertEquals(u'Привет Вася, Петя и Коля', hello_all, 'Pass List instance')
+        Context.data_preprocessors.append(tml_list.preprocess_lists)
+        hello_all = c.tr('Hello {name}', {'name': [u'Вася',u'Петя','Коля']})
+        self.assertEquals(u'Привет Вася, Петя and Коля', hello_all, 'Preprocess lists')
+
 
 if __name__ == '__main__':
     unittest.main()

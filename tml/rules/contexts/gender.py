@@ -1,5 +1,6 @@
 # encoding: UTF-8
 from _ctypes import ArgumentError
+from tml.strings import to_string
 
 
 class Gender(object):
@@ -23,8 +24,8 @@ class Gender(object):
     def other(cls, value):
         return cls(Gender.OTHER, value)
 
-    def __str__(self, *args, **kwargs):
-        return self.value
+    def __unicode__(self, *args, **kwargs):
+        return to_string(self.value)
 
     @classmethod
     def supported_gender(cls, gender):

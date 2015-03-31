@@ -208,9 +208,15 @@ class Translator(object):
     def translate(self, label, data = {}, description = None):
         """ Translate label """
         key = Key(label = suggest_label(label), description= description, language = self.context.language)
+        # fetch translation for key:
         translation = self.context.dict.translate(key)
-        ret = text_to_sprintf(translation.fetch_option(data, {}).label, self.context.language)
-        return ret
+        # prepare data for tranlation (apply env first):
+        data = self.context.prepare_data(data)
+        # fetch option depends env:
+        option = translation.fetch_option(data, {})
+        # convert {name} -> %(name)s
+        return text_to_sprintf(option.label, self.context.language)
+
 
 
     def get_language_bidi(self):

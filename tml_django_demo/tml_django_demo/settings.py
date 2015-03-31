@@ -98,3 +98,4 @@ TML = {
 }
 
 TML_DATA_PREPROCESSORS = ['tml.tools.list.preprocess_lists',]
+TML_ENV_GENERATORS = ['tml.tools.viewing_user.get_viewing_user',]

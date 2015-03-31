@@ -1,10 +1,12 @@
 # encoding: UTF-8
 from django.test import SimpleTestCase
 from .translator import Translator
-from gettext import ngettext
+from gettext import ngettext, gettext
 from django.template import Template
 from django.template.context import Context
-from django_tml import activate, activate_source, inline_translations, tr
+from django_tml import activate, activate_source, inline_translations, tr,\
+    deactivate_source
+from tml.tools.viewing_user import set_viewing_user
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -166,4 +168,12 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'Привет Вася and Петя', tr('Hello {name}', {'name':['Вася','Петя']}))
         t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
         self.assertEquals(u'Привет Вася and Петя', t.render(Context({'name':['Вася','Петя']})))
+
+    def test_viewing_user(self):
+        activate('ru')
+        set_viewing_user({'name':'John','gender':'male'})
+        deactivate_source()
+        self.assertEquals('Mr', tr('honorific'))
+        set_viewing_user('female')
+        self.assertEquals('Ms', tr('honorific'))
 

@@ -13,7 +13,7 @@ def return_label_fallback(key):
     return Translation(key, [])
 
 
-class AbstactDictionary(object):
+class AbstractDictionary(object):
     """ Dictionary """
     def __init__(self, fallback = None):
         """ Dictionary .ctor
@@ -46,7 +46,7 @@ class AbstactDictionary(object):
         return self._fallback
 
 
-class Hashtable(AbstactDictionary):
+class Hashtable(AbstractDictionary):
     """ Dictionary with translation store in hash """
     def __init__(self, translations = None, fallback = None):
         """ .ctor

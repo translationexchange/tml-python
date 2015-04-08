@@ -12,6 +12,7 @@ from .decoration import system_tags as system_decoration_tags
 from .decoration.parser import parse as parse_decoration
 from .tools import Renderable
 from argparse import ArgumentError
+from .dictionary import AbstactDictionary
 
 
 __author__ = 'a@toukmanov.ru'
@@ -47,7 +48,10 @@ class Context(object):
                                                                    self.build_client(token, client)))
         handle = Exception if use_fallback_dictionary else None
         try:
-            if source:
+            if isinstance(source, Abstrac):
+                # dictionary instance passed:
+                self.dict = source
+            elif source:
                 self.dict = SourceDictionary(language = self.language, source = source)
             else:
                 self.dict = Dictionary()

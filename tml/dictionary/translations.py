@@ -1,10 +1,10 @@
 # encoding: UTF-8
-from . import AbstactDictionary
+from . import AbstractDictionary
 from tml.api.pagination import allpages
 from tml.translation import Translation
 
 
-class Dictionary(AbstactDictionary):
+class Dictionary(AbstractDictionary):
     """ Dictionary fetch translation for each key via API """
     def fetch(self, key):
         """ Translate key

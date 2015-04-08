@@ -1,3 +1,4 @@
+# encoding: UTF-8
 import unittest
 import requests
 from tml.api import client

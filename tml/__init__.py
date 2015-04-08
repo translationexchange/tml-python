@@ -48,7 +48,7 @@ class Context(object):
                                                                    self.build_client(token, client)))
         handle = Exception if use_fallback_dictionary else None
         try:
-            if isinstance(source, Abstra):
+            if isinstance(source, AbstractDictionary):
                 # dictionary instance passed:
                 self.dict = source
             elif source:

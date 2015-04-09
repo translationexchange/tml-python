@@ -13,6 +13,10 @@ class CachedClient(object):
     @classmethod
     def instance(cls):
         client = Client(settings.TML.get('token'))
+        return cls.wrap(client)
+
+    @classmethod
+    def wrap(cls, client):
         backend_name = settings.TML.get('cache', None)
         if backend_name is None:
             return client

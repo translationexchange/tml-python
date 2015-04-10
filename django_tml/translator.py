@@ -84,7 +84,8 @@ class Translator(object):
         """
         return build_context(locale = self.locale, 
                              source = self.source,
-                             client = self.client)
+                             client = self.build_client(),
+                             use_snapshot = self.use_snapshot)
 
     def set_supports_inline_tranlation(self, value = True):
         """ Set is flag for inline translation """
@@ -97,11 +98,12 @@ class Translator(object):
             Returns:
                 Client
         """
-        if self._client is None:
-            self._client = self.build_client()
-        return self._client
+        return self.build_client()
 
     def build_client(self):
+        if self.use_snapshot:
+            # Use snapshot:
+            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot'])) 
         if 'api_client' in self.settings.TML:
             # Custom client:
             custom_client = self.settings.TML['api_client']
@@ -119,14 +121,11 @@ class Translator(object):
         if not self.cache:
             # No cache:
             return Client(self.settings.TML['token'])
-        if self.use_snapshot:
-            # Use snapshot:
-            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot'])) 
         return CachedClient.instance()
 
     @property
     def use_snapshot(self):
-        return 'snapshot' in self.settings.TML and self.source
+        return 'snapshot' in self.settings.TML and self.cache
 
     @property
     def context(self):

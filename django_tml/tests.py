@@ -7,6 +7,19 @@ from django.template.context import Context
 from django_tml import activate, activate_source, inline_translations, tr,\
     deactivate_source
 from tml.tools.viewing_user import set_viewing_user
+from copy import copy
+from django.conf import settings
+from os.path import dirname
+from tml.api.mock import Hashtable as DumbClient
+from tml.context import SourceContext
+
+class WithSnapshotSettings(object):
+    def __init__(self):
+        self.TML = {}
+        for key in settings.TML:
+            self.TML[key] = settings.TML[key]
+        self.TML['snapshot'] = dirname(settings.BASE_DIR) + '/tests/fixtures/snapshot.tar.gz'
+
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -48,8 +61,9 @@ class DjangoTMLTestCase(SimpleTestCase):
         t.activate_source('alpha')
         self.assertEqual(u'Hello John', t.tr('Hello {name}', {'name':'John'}), 'Use fallback translation')
         # flush missed keys on change context:
+        client = t.context.language.client
         t.activate_source('index')
-        self.assertEquals('sources/register_keys', t.client.url, 'Flush missed keys')
+        self.assertEquals('sources/register_keys', client.url, 'Flush missed keys')
         # handle change:
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
 
@@ -178,5 +192,12 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals('Ms', tr('honorific'))
 
     def test_snapshot_context(self):
-        Translator.instance()
+        t = Translator(WithSnapshotSettings())
+        self.assertTrue(t.use_snapshot, 'Use snapshot with settings')
+        t.activate('ru')
+        self.assertEquals('Test', t.context.tr('Test'), 'Stub translation without source')
+        t.activate_source('xxxx')
+        self.assertEquals(u'Тест', t.context.tr('Test'), 'Works with source')
+        t.activate_source('notexists')
+        self.assertEquals(u'Test', t.context.tr('Test'), 'Notexists source')
 

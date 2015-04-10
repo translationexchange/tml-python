@@ -31,7 +31,7 @@
 #++
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
-from tml import configure, tr, context, Context, Gender, ContextNotConfigured, submit_missed
+from tml import configure, tr, build_context, Gender, ContextNotConfigured, submit_missed, RenderEngine
 import tml
 from tests.mock import Client as ClientMock
 import unittest
@@ -57,12 +57,12 @@ class api_test(unittest.TestCase):
             submit_missed()
 
     def test_configure(self):
-        c = Context(None, client = self.client)
+        c = build_context(client = self.client)
 
         self.assertEquals('en', c.language.locale, 'Load app defaults')
         self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
 
-        c = Context(locale = 'ru', application_id = 2, client = self.client)
+        c = build_context(locale = 'ru', application_id = 2, client = self.client)
         self.assertEquals('ru', c.language.locale, 'Custom locale')
         self.assertEquals(2, c.language.application.id, 'Custom application id')
 
@@ -76,16 +76,16 @@ class api_test(unittest.TestCase):
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
 
     def test_renderable_items(self):
-        c = Context(client = self.client)
+        c = build_context(client = self.client)
         hello_all = c.tr('Hello {name}', {'name': tml_list.List([u'Вася',u'Петя','Коля'], last_separator='и')})
         self.assertEquals(u'Привет Вася, Петя и Коля', hello_all, 'Pass List instance')
-        Context.data_preprocessors.append(tml_list.preprocess_lists)
+        RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
         hello_all = c.tr('Hello {name}', {'name': [u'Вася',u'Петя','Коля']})
         self.assertEquals(u'Привет Вася, Петя and Коля', hello_all, 'Preprocess lists')
 
     def test_fallback_language(self):
         label = u'Only english tranlation'
-        c = Context(client = self.client, locale = 'ru')
+        c = build_context(client = self.client, locale = 'ru')
         key = Key(label = label, description = '', language = c.language)
         self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
         self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
@@ -98,12 +98,12 @@ class api_test(unittest.TestCase):
         self.client.read('sources/%s/translations' % source_hash, {'locale':'ru'}, 'sources/sources_empty.json', True)
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
-        c = Context(client = self.client, locale = 'ru', source = source)
+        c = build_context(client = self.client, locale = 'ru', source = source)
         self.assertEquals('Has english translation', c.tr(label),'Use fallback source for en')
         del c
         self.assertEquals(self.client.url, 'sources/register_keys', 'Submit missed keys url')
         self.assertEquals({'source_keys': '[{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]'}, self.client.params, 'Submit missed key data')
-        c = Context(client = self.client, locale = 'ru', source = source)
+        c = build_context(client = self.client, locale = 'ru', source = source)
         self.assertEquals('Never translated', c.tr('Never translated'), 'Never tranlated parent fallback')
 
 if __name__ == '__main__':

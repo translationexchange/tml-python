@@ -11,46 +11,35 @@ from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .dictionary import AbstractDictionary
 from .context import LanguageContext, ContextNotConfigured
-
+from .api.snapshot import open_snapshot
+from tml.context import SourceContext
+from render import RenderEngine
 
 __author__ = 'a@toukmanov.ru'
 
 
-class Context(LanguageContext):
-    """ Execution context """
+def build_client(client, snapshot_path, token):
+    if client:
+        # Client instance passed:
+        return client
+    elif snapshot_path:
+        # Get data from snapshot:
+        return open_snapshot(snapshot_path)
+    # Get data from API:
+    return Client(token)
 
-    def __init__(self, token = None, source = None, client = None, missed_keys = None, **kwargs):
-        """ Configure tranlation
-            Args:
-                token (string): API token
-                locale (string): selected locale
-                application_id (int): API application id (use default if None)
-                client (Client): custom API client
-                decoration_tags (TagsFactory): custom decoration tags
-                use_fallback_dictionary (Boolean): use fallback dictionart
-        """
-        self.source = source
-        super(Context, self).__init__(client = client if client else Client(token), **kwargs)
-        self.missed_keys = missed_keys
-
-    def build_dict(self, language):
-        """ Build dictionary for language """
-        if self.source:
-            return SourceDictionary(self.source, language)
-        return super(Context, self).build_dict(language)
-
-    def submit_missed(self):
-        """ Submit missed key to server after app is executed """
-        if self.missed_keys is None:
-            raise ContextNotConfigured('Translation is not configured')
-        self.missed_keys.submit_all()
-
+def build_context(token = None, source = None, client = None, snapshot_path = None, **kwargs):
+    kwargs['client'] = build_client(client, snapshot_path, token)
+    if source:
+        return SourceContext(source, **kwargs)
+    else:
+        return LanguageContext(**kwargs)
 
 context = None
 
 def configure(**kwargs):
     global context
-    context = Context(**kwargs)
+    context = build_context(**kwargs)
 
 def get_context():
     global context

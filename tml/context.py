@@ -8,6 +8,7 @@ from tml.dictionary import TranslationIsNotExists
 from tml.language import Language
 from .dictionary import NoneDict
 from .dictionary.translations import Dictionary
+from .dictionary.source import SourceDictionary
 
 class ContextNotConfigured(Error):
     pass
@@ -129,4 +130,15 @@ class LanguageContext(AbstractContext):
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)
+
+
+class SourceContext(LanguageContext):
+    """ Context with source """
+    def __init__(self, source, **kwargs):
+        self.source = source
+        super(SourceContext, self).__init__(**kwargs)
+
+    def build_dict(self, language):
+        """ Build dictionary for language """
+        return SourceDictionary(self.source, language)
 

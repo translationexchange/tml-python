@@ -1,7 +1,7 @@
 # encoding: UTF-8
 from django.conf import settings
 from django.utils.translation.trans_real import to_locale, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re, _BROWSERS_DEPRECATED_LOCALES 
-from tml import Context
+from tml import build_context
 from tml.application import LanguageNotSupported, Application
 from django_tml.cache import CachedClient
 from tml import Key
@@ -12,6 +12,7 @@ from types import FunctionType
 from django.utils.module_loading import import_string
 from tml.api.client import Client
 from tml.api.snapshot import open_snapshot
+from tml.render import RenderEngine
 
 
 def to_str(fn):
@@ -67,10 +68,10 @@ class Translator(object):
         """ Build translation preprocessors defined at TML_DATA_PREPROCESSORS """
         if hasattr(settings, 'TML_DATA_PREPROCESSORS'):
             for include in settings.TML_DATA_PREPROCESSORS:
-                Context.data_preprocessors.append(import_string(include))
+                RenderEngine.data_preprocessors.append(import_string(include))
         if hasattr(settings, 'TML_ENV_GENERATORS'):
             for include in settings.TML_ENV_GENERATORS:
-                Context.env_generators.append(import_string(include))
+                RenderEngine.env_generators.append(import_string(include))
 
 
     def build_context(self):
@@ -80,9 +81,9 @@ class Translator(object):
             Returns:
                 Context
         """
-        return Context(locale = self.locale,
-                       source = self.source,
-                       client = self.client)
+        return build_context(locale = self.locale, 
+                             source = self.source,
+                             client = self.client)
 
     def set_supports_inline_tranlation(self, value = True):
         """ Set is flag for inline translation """

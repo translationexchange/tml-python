@@ -9,10 +9,8 @@ from .dictionary.source import SourceDictionary
 from .translation import Key
 from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
-from .decoration.parser import parse as parse_decoration
-from .tools import Renderable
-from argparse import ArgumentError
 from .dictionary import AbstractDictionary
+from .render import RenderEngine
 
 
 __author__ = 'a@toukmanov.ru'
@@ -22,7 +20,7 @@ class ContextNotConfigured(Error):
     pass
 
 
-class Context(object):
+class Context(RenderEngine):
     """ Execution context """
     def __init__(self, **kwargs):
         self.language = None
@@ -112,10 +110,7 @@ class Context(object):
             raise ContextNotConfigured('Translation is not configured')
         # Translate data:
         t = self.dict.translate(Key(label = label, description = description, language = self.language))
-        # Apply tokens:
-        ret = t.execute(self.prepare_data(data), options)
-        # Apply decoration:
-        return parse_decoration(ret).render(options)
+        return self.render(t, data, options)
 
     def submit_missed(self):
         """ Submit missed key to server after app is executed """
@@ -131,58 +126,12 @@ class Context(object):
     def application(self):
         return self.language.application
 
-    # List of objects which preprocess data before translation:
-    data_preprocessors = []
-    env_generators = []
-
-    def prepare_data(self, data):
-        """ Prepare data for render 
-            Args:
-                data (dict): raw data
-            Returns:
-                dict: data after modification
-        """
-        return DataInContext(data, self)
 
 context = Context()
 
-class DataInContext(object):
-    """ Render data on demand """
-    def __init__(self, data, context):
-        """ .ctor
-            data (dict): user data
-            context (tml.Context): translation context (current language etc.)
-        """
-        self.data = data if data else {}
-        self.context = context
-
-    def __getitem__(self, key, *args, **kwargs):
-        try:
-            # get item for data:
-            ret = self.data[key]
-        except KeyError as e:
-            return self.generate_item(key)
-        for p in self.context.data_preprocessors:
-            # preprocess data ([] -> List etc)
-            ret = p(ret, self.context)
-        # Apply renderable data:
-        if isinstance(ret, Renderable):
-            ret = ret.render(self.context)
-        return ret
-
-    def generate_item(self, key):
-        """ Generate item for key """
-        for g in self.context.env_generators:
-            try:
-                ret = g(key, self.context, self.data)
-                if not ret is None:
-                    return ret
-            except ArgumentError:
-                pass
-        raise KeyError('%s key is not found in translation data' % key) 
-
 def configure(**kwargs):
-    return context.configure(**kwargs)
+    global context
+    context = Context(**kwargs)
 
 
 def tr(label, data = {}, description = '', options = {}):

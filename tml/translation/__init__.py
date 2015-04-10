@@ -4,6 +4,7 @@ from tml.token import execute_all
 from hashlib import md5
 from .context import Context
 from ..exceptions import Error
+from ..strings import to_string
 from ..token.parser import default_parser
 from tml.exceptions import RequiredArgumentIsNotPassed
 
@@ -38,7 +39,8 @@ class Key(object):
             description = self.description
         else:
             description = ''
-        ret = md5('%s;;;%s' % (self.label, description)).hexdigest()
+        key = u'%s;;;%s' % (to_string(self.label), to_string(description))
+        ret = md5(key.encode('utf-8')).hexdigest()
         return ret
 
     @property

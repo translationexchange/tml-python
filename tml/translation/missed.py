@@ -6,6 +6,7 @@ class MissedKeys(object):
     """ Object append missed key"""
     def __init__(self, client):
         self.client = client
+        self.keys = []
 
     def submit(self, missed_keys):
         """ Submit keys over API
@@ -14,8 +15,6 @@ class MissedKeys(object):
         """
         return self.client.post('sources/register_keys',{'source_keys': dumps(missed_keys)})
 
-
-    keys = []
     def append(self, key):
         """ Add key to missed
             Args:

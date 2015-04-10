@@ -125,7 +125,7 @@ class Translator(object):
 
     @property
     def use_snapshot(self):
-        return 'snapshot' in self.settings.TML and self.cache
+        return 'snapshot' in self.settings.TML and self.settings.TML['snapshot'] and self.cache
 
     @property
     def context(self):

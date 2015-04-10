@@ -3,7 +3,7 @@ from .exceptions import Error
 from .application import Application
 from .language import Language
 from .api.client import Client
-from .dictionary import Hashtable
+from .dictionary import Hashtable, TranslationIsNotExists
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
 from .translation import Key

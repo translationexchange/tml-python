@@ -48,26 +48,25 @@ class api_test(unittest.TestCase):
         self.client.read('applications/2/translations', {'locale':'ru','page':1}, 'applications/1/translations.json')
 
     def test_configure_first(self):
-        tml.context = Context() # reset context
+        tml.context = None
         with self.assertRaises(ContextNotConfigured):
             tr('Hello')
         with self.assertRaises(ContextNotConfigured):
             submit_missed()
 
     def test_configure(self):
-        c = Context()
-        c.configure(None, client = self.client)
+        c = Context(None, client = self.client)
 
         self.assertEquals('en', c.language.locale, 'Load app defaults')
         self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
 
-        c.configure(None, locale = 'ru', application_id = 2, client = self.client)
+        c = Context(locale = 'ru', application_id = 2, client = self.client)
         self.assertEquals('ru', c.language.locale, 'Custom locale')
         self.assertEquals(2, c.language.application.id, 'Custom application id')
 
 
     def test_configure_globals(self):
-        configure(token = None, locale = 'ru', application_id = None, client = self.client)
+        configure(locale = 'ru', application_id = None, client = self.client)
         self.assertEquals('ru', tml.context.locale)
         self.assertEquals(1, tml.context.language.application.id, 'Load default application')
         self.assertEquals(type(tml.context.dict), Dictionary, 'No preload data')

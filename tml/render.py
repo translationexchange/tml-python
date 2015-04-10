@@ -10,6 +10,18 @@ class RenderEngine(object):
     # List of objects which add custom values to data (like viewing_user)
     env_generators = []
 
+    def __init__(self, data_preprocessors = None, env_generators = None):
+        """ .ctor
+            Args:
+                data_preprocessors (list): List of objects which preprocess data before translation (join lists for example)
+                env_generators (list): List of objects which add custom values to data (like viewing_user)
+        """
+        if data_preprocessors:
+            self.data_preprocessors = data_preprocessors
+        if env_generators:
+            self.env_generators = env_generators
+
+
     def render(self, translation, data, options):
         """ Render translation 
             Args:

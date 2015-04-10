@@ -77,4 +77,7 @@ class TranslationIsNotExists(Error):
         self.dict = dict
 
 
-
+class NoneDict(AbstractDictionary):
+    """ Translate nothing """
+    def fetch(self, key):
+        raise TranslationIsNotExists(key, self)

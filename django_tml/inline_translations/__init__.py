@@ -1,15 +1,18 @@
 # encoding: UTF-8
+from .. import Translator
 enabled = False
 save = False
 
 def turn_on():
     """ Turn on inline tranlations """
     global enabled
+    Translator.instance().turn_off_cache()
     enabled = True
 
 def turn_off():
     """ Turn off inline translations """
     global enabled
+    Translator.instance().turn_on_cache()
     enabled = False
 
 

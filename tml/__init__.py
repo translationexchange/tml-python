@@ -10,9 +10,8 @@ from .translation import Key
 from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .dictionary import AbstractDictionary
-from .context import LanguageContext, ContextNotConfigured
+from .context import LanguageContext, ContextNotConfigured, SourceContext, SnapshotContext
 from .api.snapshot import open_snapshot
-from tml.context import SourceContext
 from render import RenderEngine
 
 __author__ = 'a@toukmanov.ru'
@@ -28,8 +27,10 @@ def build_client(client, snapshot_path, token):
     # Get data from API:
     return Client(token)
 
-def build_context(token = None, source = None, client = None, snapshot_path = None, **kwargs):
+def build_context(token = None, source = None, client = None, snapshot_path = None, use_snapshot = False, **kwargs):
     kwargs['client'] = build_client(client, snapshot_path, token)
+    if use_snapshot:
+        return SnapshotContext(source, **kwargs)
     if source:
         return SourceContext(source, **kwargs)
     else:

@@ -7,6 +7,19 @@ from django.template.context import Context
 from django_tml import activate, activate_source, inline_translations, tr,\
     deactivate_source
 from tml.tools.viewing_user import set_viewing_user
+from copy import copy
+from django.conf import settings
+from os.path import dirname
+from tml.api.mock import Hashtable as DumbClient
+from tml.context import SourceContext
+
+class WithSnapshotSettings(object):
+    def __init__(self):
+        self.TML = {}
+        for key in settings.TML:
+            self.TML[key] = settings.TML[key]
+        self.TML['snapshot'] = dirname(settings.BASE_DIR) + '/tests/fixtures/snapshot.tar.gz'
+
 
 class DjangoTMLTestCase(SimpleTestCase):
     """ Tests for django tml tranlator """
@@ -21,7 +34,7 @@ class DjangoTMLTestCase(SimpleTestCase):
 
     def test_languages(self):
         """ Language switch """
-        t = Translator()
+        t = Translator.instance()
         # reset en tranlation:
         en_hello_url = t.client.build_url('translation_keys/90e0ac08b178550f6513762fa892a0ca/translations',
                                           {'locale':'en', 'page': 1})
@@ -41,20 +54,21 @@ class DjangoTMLTestCase(SimpleTestCase):
 
     def test_source(self):
         """ Test languages source """
-        t = Translator()
+        t = Translator.instance()
         t.activate('ru')
         t.activate_source('index')
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
         t.activate_source('alpha')
         self.assertEqual(u'Hello John', t.tr('Hello {name}', {'name':'John'}), 'Use fallback translation')
         # flush missed keys on change context:
+        client = t.context.language.client
         t.activate_source('index')
-        self.assertEquals('sources/register_keys', t.client.url, 'Flush missed keys')
+        self.assertEquals('sources/register_keys', client.url, 'Flush missed keys')
         # handle change:
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
 
     def test_gettext(self):
-        t = Translator()
+        t = Translator.instance()
         t.activate('ru')
         t.activate_source('index')
         self.assertEqual(u'Привет %(name)s', t.ugettext('Hello {name}'), 'ugettext')
@@ -176,4 +190,14 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals('Mr', tr('honorific'))
         set_viewing_user('female')
         self.assertEquals('Ms', tr('honorific'))
+
+    def test_snapshot_context(self):
+        t = Translator(WithSnapshotSettings())
+        self.assertTrue(t.use_snapshot, 'Use snapshot with settings')
+        t.activate('ru')
+        self.assertEquals('Test', t.context.tr('Test'), 'Stub translation without source')
+        t.activate_source('xxxx')
+        self.assertEquals(u'Тест', t.context.tr('Test'), 'Works with source')
+        t.activate_source('notexists')
+        self.assertEquals(u'Test', t.context.tr('Test'), 'Notexists source')
 

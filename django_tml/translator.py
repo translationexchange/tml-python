@@ -39,10 +39,11 @@ class Translator(object):
                 Translator
         """
         if cls._instance is None:
-            cls._instance = cls()
+            cls._instance = cls(settings)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, settings):
+        self.settings = settings
         self.locale = None
         self.source = None
         self.supports_inline_tranlation = False
@@ -66,10 +67,10 @@ class Translator(object):
 
     def _build_preprocessors(self):
         """ Build translation preprocessors defined at TML_DATA_PREPROCESSORS """
-        if hasattr(settings, 'TML_DATA_PREPROCESSORS'):
+        if hasattr(self.settings, 'TML_DATA_PREPROCESSORS'):
             for include in settings.TML_DATA_PREPROCESSORS:
                 RenderEngine.data_preprocessors.append(import_string(include))
-        if hasattr(settings, 'TML_ENV_GENERATORS'):
+        if hasattr(self.settings, 'TML_ENV_GENERATORS'):
             for include in settings.TML_ENV_GENERATORS:
                 RenderEngine.env_generators.append(import_string(include))
 
@@ -83,7 +84,8 @@ class Translator(object):
         """
         return build_context(locale = self.locale, 
                              source = self.source,
-                             client = self.client)
+                             client = self.build_client(),
+                             use_snapshot = self.use_snapshot)
 
     def set_supports_inline_tranlation(self, value = True):
         """ Set is flag for inline translation """
@@ -96,14 +98,15 @@ class Translator(object):
             Returns:
                 Client
         """
-        if self._client is None:
-            self._client = self.build_client()
-        return self._client
+        return self.build_client()
 
     def build_client(self):
-        if 'api_client' in settings.TML:
+        if self.use_snapshot:
+            # Use snapshot:
+            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot'])) 
+        if 'api_client' in self.settings.TML:
             # Custom client:
-            custom_client = settings.TML['api_client']
+            custom_client = self.settings.TML['api_client']
             if type(custom_client) is FunctionType:
                 # factory function:
                 return custom_client()
@@ -117,15 +120,12 @@ class Translator(object):
                 return custom_client
         if not self.cache:
             # No cache:
-            return Client(settings.TML['token'])
-        if self.use_snapshot:
-            # Use snapshot:
-            return CachedClient.wrap(open_snapshot(settings.TML['snapshot'])) 
+            return Client(self.settings.TML['token'])
         return CachedClient.instance()
 
     @property
     def use_snapshot(self):
-        return 'snapshot' in settings.TML and self.source
+        return 'snapshot' in self.settings.TML and self.cache
 
     @property
     def context(self):
@@ -297,7 +297,7 @@ class Translator(object):
             if self.check_for_language(lang_code):
                 return lang_code
     
-        lang_code = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
+        lang_code = request.COOKIES.get(self.settings.LANGUAGE_COOKIE_NAME)
         if self.check_for_language(lang_code):
             return lang_code
     
@@ -371,7 +371,7 @@ class Translator(object):
     def tr(self, label, data = {}, description = '', options = {}):
         try:
             return self.context.tr(label, data, description, options)
-        except settings.TML.get('handle', Exception) as e:
+        except self.settings.TML.get('handle', Exception) as e:
             # Use label if tranlation fault:
             return TranslationOption(label = label, language= self.context.language).execute(data, options)
 

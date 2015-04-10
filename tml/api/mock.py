@@ -9,6 +9,7 @@ import re
 
 class Hashtable(Client):
     """ Client mock: all data stored in hashtable """
+    last_url = None
     def __init__(self, data = {}, strict = False):
         """ .ctor
             Args:
@@ -34,6 +35,7 @@ class Hashtable(Client):
             Returns:
                 dict
         """
+        self.__class__.last_url = url
         self.url = url
         self.method = method
         self.params = params

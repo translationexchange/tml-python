@@ -4,11 +4,13 @@ from .translation import Key
 from .render import RenderEngine
 from .dictionary import return_label_fallback
 from .exceptions import Error
-from tml.dictionary import TranslationIsNotExists
-from tml.language import Language
+from .dictionary import TranslationIsNotExists
+from .dictionary.snapshot import SnapshotDictionary
+from .language import Language
 from .dictionary import NoneDict
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
+
 
 class ContextNotConfigured(Error):
     pass
@@ -141,4 +143,17 @@ class SourceContext(LanguageContext):
     def build_dict(self, language):
         """ Build dictionary for language """
         return SourceDictionary(self.source, language)
+
+
+class SnapshotContext(LanguageContext):
+    """ Snapshot usage """
+    def __init__(self, source, **kwargs):
+        self.source = source
+        super(SnapshotContext, self).__init__(**kwargs)
+
+    def build_dict(self, language):
+        if not self.source:
+            # Snapshot does not works out of source:
+            return NoneDict()
+        return SnapshotDictionary(self.source, language)
 

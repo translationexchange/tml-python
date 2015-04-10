@@ -5,6 +5,7 @@ from .rules.options import fetch_default_arg
 from .translation import Key
 from .strings import to_string
 import re
+from tml.dictionary import TranslationIsNotExists
 
 
 def render_token(token):
@@ -49,11 +50,11 @@ def translate(context, label, data, description, options):
         Returns:
             text, key
     """
-    t, key = fetch(context, label, description)
+    t = fetch(context, label, description)
     o = t.fetch_option(data, options)
     # support %(name)s -> {name}
     o.label = suggest_label(o.label)
-    return (o.apply(data, options), key)
+    return o.apply(data, options)
 
 def execute(translation, data, options):
     """ Execute translation in legacy mode """
@@ -65,15 +66,17 @@ def execute(translation, data, options):
 
 
 def fetch(context, label, description):
-    suggested_key = Key(label = suggest_label(label),
-                        description = description, 
-                        language = context.language)
+    """ Fetch translation for old label """
     try:
-        return (context.dict.fetch(suggested_key), suggested_key)
-    except Exception as e:
-        if label == suggested_key.label:
-            # Suggested label equal given:
-            raise e
-        key = Key(label = label, description = description, language = context.language)
-        return (context.dict.fetch(key), key)
+        # Try to suggest translation replace %(name)s -> {name}
+        return context.fetch(suggest_label(label), description)
+    except TranslationIsNotExists:
+        # Try to tranlate as is
+        try:
+            return context.fetch(label, description)
+        except TranslationIsNotExists:
+            return context.fallback(label, description)
+
+
+        
 

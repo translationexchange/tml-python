@@ -1,7 +1,9 @@
 # encoding: UTF-8
 from . import AbstractDictionary
-from tml.api.pagination import allpages
-from tml.translation import Translation
+from ..api.pagination import allpages
+from ..translation import Translation
+from ..api.client import ClientError
+from . import TranslationIsNotExists
 
 
 class Dictionary(AbstractDictionary):
@@ -13,8 +15,9 @@ class Dictionary(AbstractDictionary):
             Returns:
                 Translation
         """
-        return Translation.from_data(key,
-                                     allpages(key.client,
-                                              'translation_keys/%s/translations' % key.key,
-                                              {'locale': key.language.locale}))
+        try:
+            data = allpages(key.client, 'translation_keys/%s/translations' % key.key, {'locale': key.language.locale})
+            return Translation.from_data(key, data)
+        except ClientError as e:
+            raise TranslationIsNotExists(key, self)
 

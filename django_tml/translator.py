@@ -1,7 +1,7 @@
 # encoding: UTF-8
 from django.conf import settings
 from django.utils.translation.trans_real import to_locale, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re, _BROWSERS_DEPRECATED_LOCALES 
-from tml import Context
+from tml import build_context
 from tml.application import LanguageNotSupported, Application
 from django_tml.cache import CachedClient
 from tml import Key
@@ -10,6 +10,9 @@ from django.utils.translation import LANGUAGE_SESSION_KEY
 from tml.legacy import text_to_sprintf, suggest_label
 from types import FunctionType
 from django.utils.module_loading import import_string
+from tml.api.client import Client
+from tml.api.snapshot import open_snapshot
+from tml.render import RenderEngine
 
 
 def to_str(fn):
@@ -43,6 +46,7 @@ class Translator(object):
         self.locale = None
         self.source = None
         self.supports_inline_tranlation = False
+        self.cache = True
         self._context = None
         self._sources = []
         self._supported_locales = None
@@ -50,14 +54,24 @@ class Translator(object):
         self.used_sources = []
         self._build_preprocessors()
 
+    def turn_off_cache(self):
+        """ Cache policy: turn off """
+        self.cache = False
+        self.reset_context()
+
+    def turn_on_cache(self):
+        """ Cache policy: turn on """
+        self.cache = True
+        self.reset_context()
+
     def _build_preprocessors(self):
         """ Build translation preprocessors defined at TML_DATA_PREPROCESSORS """
         if hasattr(settings, 'TML_DATA_PREPROCESSORS'):
             for include in settings.TML_DATA_PREPROCESSORS:
-                Context.data_preprocessors.append(import_string(include))
+                RenderEngine.data_preprocessors.append(import_string(include))
         if hasattr(settings, 'TML_ENV_GENERATORS'):
             for include in settings.TML_ENV_GENERATORS:
-                Context.env_generators.append(import_string(include))
+                RenderEngine.env_generators.append(import_string(include))
 
 
     def build_context(self):
@@ -67,9 +81,9 @@ class Translator(object):
             Returns:
                 Context
         """
-        return Context(locale = self.locale,
-                       source = self.source,
-                       client = self.client)
+        return build_context(locale = self.locale, 
+                             source = self.source,
+                             client = self.client)
 
     def set_supports_inline_tranlation(self, value = True):
         """ Set is flag for inline translation """
@@ -101,7 +115,17 @@ class Translator(object):
             elif custom_client is object:
                 # custom client as is:
                 return custom_client
+        if not self.cache:
+            # No cache:
+            return Client(settings.TML['token'])
+        if self.use_snapshot:
+            # Use snapshot:
+            return CachedClient.wrap(open_snapshot(settings.TML['snapshot'])) 
         return CachedClient.instance()
+
+    @property
+    def use_snapshot(self):
+        return 'snapshot' in settings.TML and self.source
 
     @property
     def context(self):

@@ -1,7 +1,7 @@
 # encoding: UTF-8
 import unittest
 from tml.legacy import text_to_sprintf, suggest_label, translate
-from tml import Context
+from tml import build_context
 from tests.mock import Client
 from tml.language import Language
 from tml.application import Application
@@ -47,14 +47,13 @@ class TokenTest(unittest.TestCase):
     def test_translate(self):
         """ Support legacy """
         c = Client.read_all()
-        context = Context()
-        context.language = Language.load_by_locale(Application.load_default(c), 'ru')
+        context = build_context(client = c)
         context.dict = LanguageDictionary(context.language, [])
-        (t, k) = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
+        t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
         self.assertEquals(u'Хелло Bill', t)
         # Check old response syntax:
         context.dict.translations['8a7c891aa103e45e904a173f218cab9a'][0]['label'] = 'Привет %(name)s'
-        (t, k) = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
+        t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
         self.assertEquals(u'Привет Bill', t)
 
 if __name__ == '__main__':

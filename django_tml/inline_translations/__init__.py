@@ -1,15 +1,18 @@
 # encoding: UTF-8
+from .. import Translator
 enabled = False
 save = False
 
 def turn_on():
     """ Turn on inline tranlations """
     global enabled
+    Translator.instance().turn_off_cache()
     enabled = True
 
 def turn_off():
     """ Turn off inline translations """
     global enabled
+    Translator.instance().turn_on_cache()
     enabled = False
 
 
@@ -28,7 +31,8 @@ def turn_off_for_session():
 def wrap_string(text, key, translated):
     """ Wrap string with tranlation """
     global enabled
-    if enabled:
-        class_name = 'tml_translated' if translated else 'tml_not_translated'
-        return u'<tml:label class="tml_translatable %(class_name)s" data-translation_key="%(key)s" data-target_locale="%(locale)s">%(text)s</tml:label>' % ({'key':key.key, 'text':text, 'class_name': class_name, 'locale': key.language.locale})
-    return text
+    if not enabled:
+        return text
+    class_name = 'tml_translated' if translated else 'tml_not_translated'
+    return u'<tml:label class="tml_translatable %(class_name)s" data-translation_key="%(key)s" data-target_locale="%(locale)s">%(text)s</tml:label>' % ({'key':key.key, 'text':text, 'class_name': class_name, 'locale': key.language.locale})
+

@@ -64,5 +64,20 @@ class Hashtable(AbstractDictionary):
             Returns:
                 Tranlation
         """
-        return Translation.from_data(key, self.translations[key.key])
+        try:
+            return Translation.from_data(key, self.translations[key.key])
+        except KeyError:
+            raise TranslationIsNotExists(key, self)
 
+
+class TranslationIsNotExists(Error):
+    """ Translation for key is not found """
+    def __init__(self, key, dict):
+        self.key = key
+        self.dict = dict
+
+
+class NoneDict(AbstractDictionary):
+    """ Translate nothing """
+    def fetch(self, key):
+        raise TranslationIsNotExists(key, self)

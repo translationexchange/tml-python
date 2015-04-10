@@ -9,6 +9,6 @@ class SnapshotDictionary(Hashtable):
             data = language.client.get('%s/sources/%s' % (language.locale, source))
             super(SnapshotDictionary, self).__init__(data['results'])
         except Exception:
-            print 'wtf?'
+            # empty dictionary:
             super(SnapshotDictionary, self).__init__({})
 

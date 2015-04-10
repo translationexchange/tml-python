@@ -6,6 +6,7 @@ from .translations import Dictionary
 from hashlib import md5
 from ..translation.missed import MissedKeys
 from tml.api.client import ClientError
+from tml.dictionary import TranslationIsNotExists
 
 class SourceMissed(MissedKeys):
     def __init__(self, client, source):
@@ -36,17 +37,14 @@ class SourceDictionary(Hashtable):
 
     @property
     def api_query(self):
-        return ('sources/%s/translations' % (md5(self.source).hexdigest()), {'locale': self.language.locale}) 
+        return ('sources/%s/translations' % (md5(self.source).hexdigest()), {'locale': self.language.locale})
 
-    def fallback(self, key):
-        """ Translation for key does not found
-            Params:
-                key (Key): key which is not found
-            Returns:
-                Translation
-        """
-        self.missed_keys.append(key)
-        return super(SourceDictionary, self).fallback(key)
+    def fetch(self, key):
+        try:
+            return super(SourceDictionary, self).fetch(key)
+        except TranslationIsNotExists as e:
+            self.missed_keys.append(key)
+            raise e
 
     def __del__(self):
         self.flush()

@@ -38,6 +38,7 @@ import unittest
 from tml.dictionary.source import SourceDictionary
 from tml.tools import list as tml_list
 from tml.translation import Key
+from hashlib import md5
 
 __author__ = 'a@toukamnov.ru'
 
@@ -88,6 +89,22 @@ class api_test(unittest.TestCase):
         key = Key(label = label, description = '', language = c.language)
         self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
         self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
+
+    def test_fallback_source(self):
+        source = 'test_source_fallback'
+        label = 'Only in English'
+        # emulate empty source for ru
+        source_hash = md5(source).hexdigest()
+        self.client.read('sources/%s/translations' % source_hash, {'locale':'ru'}, 'sources/sources_empty.json', True)
+        # emulate source for en:
+        self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
+        c = Context(client = self.client, locale = 'ru', source = source)
+        self.assertEquals('Has english translation', c.tr(label),'Use fallback source for en')
+        del c
+        self.assertEquals(self.client.url, 'sources/register_keys', 'Submit missed keys url')
+        self.assertEquals({'source_keys': '[{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]'}, self.client.params, 'Submit missed key data')
+        c = Context(client = self.client, locale = 'ru', source = source)
+        self.assertEquals('Never translated', c.tr('Never translated'), 'Never tranlated parent fallback')
 
 if __name__ == '__main__':
     unittest.main()

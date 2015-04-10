@@ -10,6 +10,8 @@ from django.utils.translation import LANGUAGE_SESSION_KEY
 from tml.legacy import text_to_sprintf, suggest_label
 from types import FunctionType
 from django.utils.module_loading import import_string
+from tml.api.client import Client
+from tml.api.snapshot import open_snapshot
 
 
 def to_str(fn):
@@ -43,12 +45,23 @@ class Translator(object):
         self.locale = None
         self.source = None
         self.supports_inline_tranlation = False
+        self.cache = True
         self._context = None
         self._sources = []
         self._supported_locales = None
         self._client = None
         self.used_sources = []
         self._build_preprocessors()
+
+    def turn_off_cache(self):
+        """ Cache policy: turn off """
+        self.cache = False
+        self.reset_context()
+
+    def turn_on_cache(self):
+        """ Cache policy: turn on """
+        self.cache = True
+        self.reset_context()
 
     def _build_preprocessors(self):
         """ Build translation preprocessors defined at TML_DATA_PREPROCESSORS """
@@ -101,7 +114,17 @@ class Translator(object):
             elif custom_client is object:
                 # custom client as is:
                 return custom_client
+        if not self.cache:
+            # No cache:
+            return Client(settings.TML['token'])
+        if self.use_snapshot:
+            # Use snapshot:
+            return CachedClient.wrap(open_snapshot(settings.TML['snapshot'])) 
         return CachedClient.instance()
+
+    @property
+    def use_snapshot(self):
+        return 'snapshot' in settings.TML and self.source
 
     @property
     def context(self):

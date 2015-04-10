@@ -125,9 +125,8 @@ class LanguageContext(AbstractContext):
     def fallback(self, label, description):
         """ Fallback translation: try to use default language """
         try:
-            return self.fallback_dict.fetch(Key(label = label,
-                                                description = description,
-                                                language = self.default_language))
+            key = Key(label = label, description = description, language = self.default_language)
+            return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)
 

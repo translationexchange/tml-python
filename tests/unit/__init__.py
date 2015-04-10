@@ -37,6 +37,7 @@ from tests.mock import Client as ClientMock
 import unittest
 from tml.dictionary.source import SourceDictionary
 from tml.tools import list as tml_list
+from tml.translation import Key
 
 __author__ = 'a@toukamnov.ru'
 
@@ -81,6 +82,12 @@ class api_test(unittest.TestCase):
         hello_all = c.tr('Hello {name}', {'name': [u'Вася',u'Петя','Коля']})
         self.assertEquals(u'Привет Вася, Петя and Коля', hello_all, 'Preprocess lists')
 
+    def test_fallback_language(self):
+        label = u'Only english tranlation'
+        c = Context(client = self.client, locale = 'ru')
+        key = Key(label = label, description = '', language = c.language)
+        self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
+        self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
 
 if __name__ == '__main__':
     unittest.main()

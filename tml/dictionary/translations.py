@@ -18,6 +18,6 @@ class Dictionary(AbstractDictionary):
         try:
             data = allpages(key.client, 'translation_keys/%s/translations' % key.key, {'locale': key.language.locale})
             return Translation.from_data(key, data)
-        except ClientError:
+        except ClientError as e:
             raise TranslationIsNotExists(key, self)
 

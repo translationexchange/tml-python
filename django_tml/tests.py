@@ -21,7 +21,7 @@ class DjangoTMLTestCase(SimpleTestCase):
 
     def test_languages(self):
         """ Language switch """
-        t = Translator()
+        t = Translator.instance()
         # reset en tranlation:
         en_hello_url = t.client.build_url('translation_keys/90e0ac08b178550f6513762fa892a0ca/translations',
                                           {'locale':'en', 'page': 1})
@@ -41,7 +41,7 @@ class DjangoTMLTestCase(SimpleTestCase):
 
     def test_source(self):
         """ Test languages source """
-        t = Translator()
+        t = Translator.instance()
         t.activate('ru')
         t.activate_source('index')
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
@@ -54,7 +54,7 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
 
     def test_gettext(self):
-        t = Translator()
+        t = Translator.instance()
         t.activate('ru')
         t.activate_source('index')
         self.assertEqual(u'Привет %(name)s', t.ugettext('Hello {name}'), 'ugettext')
@@ -176,4 +176,7 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals('Mr', tr('honorific'))
         set_viewing_user('female')
         self.assertEquals('Ms', tr('honorific'))
+
+    def test_snapshot_context(self):
+        Translator.instance()
 

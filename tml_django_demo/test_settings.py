@@ -6,3 +6,5 @@ def get_client():
     return File(dirname(BASE_DIR) + '/tests/fixtures/').readdir('')
 
 TML['api_client'] = get_client
+TML['snapshot'] = None
+

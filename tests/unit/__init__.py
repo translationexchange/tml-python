@@ -31,7 +31,7 @@
 #++
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
-from tml import configure, tr, build_context, Gender, ContextNotConfigured, submit_missed, RenderEngine
+from tml import configure, tr, build_context, Gender, ContextNotConfigured, RenderEngine
 import tml
 from tests.mock import Client as ClientMock
 import unittest
@@ -53,8 +53,6 @@ class api_test(unittest.TestCase):
         tml.context = None
         with self.assertRaises(ContextNotConfigured):
             tr('Hello')
-        with self.assertRaises(ContextNotConfigured):
-            submit_missed()
 
     def test_configure(self):
         c = build_context(client = self.client)
@@ -69,9 +67,9 @@ class api_test(unittest.TestCase):
 
     def test_configure_globals(self):
         configure(locale = 'ru', application_id = None, client = self.client)
-        self.assertEquals('ru', tml.context.locale)
-        self.assertEquals(1, tml.context.language.application.id, 'Load default application')
-        self.assertEquals(type(tml.context.dict), Dictionary, 'No preload data')
+        self.assertEquals('ru', tml.DEFAULT_CONTEXT.locale)
+        self.assertEquals(1, tml.DEFAULT_CONTEXT.application.id, 'Load default application')
+        self.assertEquals(type(tml.DEFAULT_CONTEXT.dict), Dictionary, 'No preload data')
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
 

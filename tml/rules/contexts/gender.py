@@ -1,4 +1,31 @@
 # encoding: UTF-8
+"""
+# Gender variable
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
+
+
 from _ctypes import ArgumentError
 from tml.strings import to_string
 
@@ -14,23 +41,41 @@ class Gender(object):
 
     @classmethod
     def male(cls, value):
+        """ Male factory
+            Args:
+                value (string): wrapped value
+            Returns:
+                Gender
+        """
         return cls(Gender.MALE, value)
 
     @classmethod
     def female(cls, value):
+        """ Female factory
+            Args:
+                value (string): wrapped value
+            Returns:
+                Gender
+        """
         return cls(Gender.FEMALE, value)
 
     @classmethod
     def other(cls, value):
+        """ Other factory
+            Args:
+                value (string): wrapped value
+            Returns:
+                Gender
+        """
         return cls(Gender.OTHER, value)
 
-    def __unicode__(self, *args, **kwargs):
+    def __unicode__(self):
         return to_string(self.value)
 
     @classmethod
     def supported_gender(cls, gender):
         """ Check is gender string is valid gender """
-        if gender == Gender.MALE or gender == Gender.FEMALE or gender == Gender.OTHER:
+        if gender in (Gender.MALE, Gender.FEMALE, Gender.OTHER):
             return gender
         raise ArgumentError('Gender unsupported: %s' % gender)
 
@@ -53,7 +98,7 @@ class Gender(object):
         except Exception as e:
             raise ArgumentError('Fault to detect gender for %s' % object, e)
         if not gender:
-            raise ArgumentError('Fault to recognize gender to %s' % type(gender))
+            raise ArgumentError('No gender at %s' % type(gender))
         return Gender.supported_gender(gender)
 
 

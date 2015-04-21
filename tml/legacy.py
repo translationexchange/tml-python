@@ -1,8 +1,30 @@
 # encoding: UTF-8
+"""
+# Copyright (c) 2015, Translation Exchange, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
 from .token.parser import default_parser
 from .token import TextToken, VariableToken, RulesToken, CaseToken, PipeToken
 from .rules.options import fetch_default_arg
-from .translation import Key
 from .strings import to_string
 import re
 from tml.dictionary import TranslationIsNotExists
@@ -18,7 +40,8 @@ def render_token(token):
     elif token_type is RulesToken:
         return fetch_default_arg(token.rules)
     elif token_type is PipeToken:
-        return u'%s %s' %(sprintf_token(token), fetch_default_arg(token.rules.rules))
+        return u'%s %s' % (sprintf_token(token),
+                           fetch_default_arg(token.rules.rules))
     elif token_type is CaseToken:
         return sprintf_token(token)
     else:
@@ -26,18 +49,42 @@ def render_token(token):
 
 
 def sprintf_token(token):
+    """ Convert token to sprintf syncts %(variable)s 
+        Args:
+            token (VariableToken): token
+        Returns:
+            string
+    """
     return '%%(%s)s' % token.name
 
 def to_sprintf(tokens):
-    """ Parse tokens and convert as printf template """
+    """ Parse tokens and convert as printf template 
+        Args:
+            tokens (list): list of AbstractToken
+        Returns:
+            string: string 
+    """
     return u''.join((render_token(token) for token in tokens))
 
 def text_to_sprintf(text, language):
+    """ Convert text with tokens to sprintf template
+        Args:
+            text (string): text
+            language (language.Language): current language
+        Returns:
+            string
+    """
     return to_sprintf(default_parser.parse(to_string(text), language))
 
 LEGACY_TOKENS = re.compile('\%\((\w+?)\)s')
 
 def suggest_label(text):
+    """ Try to suggest tml label for spritnf template
+        Args:
+            text (string): original token
+        Returns:
+            string: suggested token
+    """
     return re.sub(LEGACY_TOKENS, '{\\1}', text)
 
 def translate(context, label, data, description, options):
@@ -50,23 +97,37 @@ def translate(context, label, data, description, options):
         Returns:
             text, key
     """
-    t = fetch(context, label, description)
-    o = t.fetch_option(data, options)
+    translation = fetch(context, label, description)
+    option = translation.fetch_option(data, options)
     # support %(name)s -> {name}
-    o.label = suggest_label(o.label)
-    return o.apply(data, options)
+    option.label = suggest_label(option.label)
+    return option.apply(data, options)
 
 def execute(translation, data, options):
-    """ Execute translation in legacy mode """
-    o = translation.fetch_option(data, options)
+    """ Execute translation in legacy mode 
+        Args:
+            translation (tranlation.Translation)
+            data (dict): template data
+            options (dict): render options
+        Returns:
+            string
+    """
+    option = translation.fetch_option(data, options)
     # support %(name)s -> {name}
-    o.label = suggest_label(o.label)
+    option.label = suggest_label(option.label)
     # apply translation:
-    return o.apply(data, options)
+    return option.apply(data, options)
 
 
 def fetch(context, label, description):
-    """ Fetch translation for old label """
+    """ Fetch translation for django i18n label 
+        Args:
+            context (context.AbstractContext): translation context
+            label (string): translated label
+            description (string): lalel descriptions
+        Returns:
+            translation.Translation
+    """
     try:
         # Try to suggest translation replace %(name)s -> {name}
         return context.fetch(suggest_label(label), description)
@@ -76,7 +137,4 @@ def fetch(context, label, description):
             return context.fetch(label, description)
         except TranslationIsNotExists:
             return context.fallback(label, description)
-
-
-        
 

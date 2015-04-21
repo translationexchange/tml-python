@@ -1,4 +1,30 @@
 # encoding: UTF-8
+"""
+# Date variable
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
+
 from _ctypes import ArgumentError
 from datetime import date, datetime
 
@@ -20,9 +46,9 @@ class Date(date):
         elif isinstance(data, date):
             return data
         elif type(data) is str or type(data) is unicode:
-            for format in cls.supported_formats:
+            for date_format in cls.supported_formats:
                 try:
-                    return datetime.strptime(data, format).date()
+                    return datetime.strptime(date_format, format).date()
                 except ValueError:
                     pass
         raise NotDate(data)

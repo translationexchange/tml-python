@@ -1,6 +1,6 @@
 # encoding: UTF-8
 from os.path import dirname
-from tml.api.mock import HttpError, File
+from tml.api.mock import File
 
 FIXTURES_PATH = '%s/fixtures' % dirname(dirname(__file__))
 

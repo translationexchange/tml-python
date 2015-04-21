@@ -1,15 +1,6 @@
 # encoding: UTF-8
-# --
+"""
 # Copyright (c) 2015, Translation Exchange, Inc.
-#
-#  _______                  _       _   _             ______          _
-# |__   __|                | |     | | (_)           |  ____|        | |
-#    | |_ __ __ _ _ __  ___| | __ _| |_ _  ___  _ __ | |__  __  _____| |__   __ _ _ __   __ _  ___
-#    | | '__/ _` | '_ \/ __| |/ _` | __| |/ _ \| '_ \|  __| \ \/ / __| '_ \ / _` | '_ \ / _` |/ _ \
-#    | | | | (_| | | | \__ \ | (_| | |_| | (_) | | | | |____ >  < (__| | | | (_| | | | | (_| |  __/
-#    |_|_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|______/_/\_\___|_| |_|\__,_|_| |_|\__, |\___|
-#                                                                                        __/ |
-#                                                                                       |___/
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -28,15 +19,14 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#++
-
-__author__ = 'randell'
-
-import requests, json
-from ..exceptions import Error
+"""
+__author__ = 'a@toukmanov.ru'
 
 
-class Client(object):
+import requests
+from . import AbstractClient, APIError, ClientError
+
+class Client(AbstractClient):
     """ API Client """
     API_HOST = 'https://api.translationexchange.com'
     API_PATH = 'v1'
@@ -92,30 +82,13 @@ class Client(object):
             params.update({'access_token': self.token})
             resp = requests.request(method, url, params = params)
             ret = resp.json()
-        except Exception as e:
-            raise HttpError(e, url = resp.url if resp is not None else url, client = self)
+        except Exception as http_error:
+            raise HttpError(http_error,
+                            url = resp.url if resp is not None else url,
+                            client = self)
         if 'error' in ret:
             raise APIError(ret['error'], url = resp.url, client = self)
         return ret
-
-    def reload(self, *args):
-        """ Drop cache stub """
-        pass
-
-class ClientError(Error):
-    """ Abstract API error """
-    def __init__(self, url, client):
-        """ Abtract API Error
-            Args:
-                url (string): rest URL
-                client (Client): client instance
-        """
-        self.client = client
-        self.url = url
-
-    def __str__(self):
-        """ String repr for error """
-        return 'TML API call fault to %s' % self.url
 
 
 class HttpError(ClientError):
@@ -124,15 +97,9 @@ class HttpError(ClientError):
         super(HttpError, self).__init__(url, client)
         self.error = error
 
+    MESSAGE = '%s with %s: %s'
     def __str__(self):
-        return '%s with %s: %s' % (super(HttpError, self).__str__(), self.error.__class__.__name__, self.error)
-
-
-class APIError(ClientError):
-    def __init__(self, error, url, client):
-        super(APIError, self).__init__(url, client)
-        self.error = error
-
-    def __str__(self):
-        return '%s with API error: %s' % (super(APIError, self).__str__(), self.error)
+        return self.MESSAGE % (super(HttpError, self).__str__(),
+                               self.error.__class__.__name__,
+                               self.error)
 

@@ -1,5 +1,29 @@
 # encoding: UTF-8
-""" Rules variables, like @gender, @n """
+"""
+# Rules variables, like @gender, @n
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
 from tml.exceptions import Error as BaseError
 from _ctypes import ArgumentError
 from .count import Count
@@ -10,7 +34,6 @@ from .genders import Genders
 from ..options import Parser as OptionsParser
 from tml.rules.options import TokenMapping
 from tml.rules import ContextRules
-from distutils.command.config import config
 from ...exceptions import Error
 from ...strings import to_string, suggest_string
 
@@ -18,6 +41,7 @@ class Value(object):
     """ Value contexts """
     @classmethod
     def match(cls, data):
+        """ Data is value """
         return to_string(suggest_string(data))
 
     def __call___(self, data):
@@ -25,6 +49,7 @@ class Value(object):
 
 
 class UnsupportedContext(BaseError):
+    """ Base error for context """
     pass
 
 class ValueIsNotMatchContext(UnsupportedContext):
@@ -36,12 +61,17 @@ class ValueIsNotMatchContext(UnsupportedContext):
                 context (Context): context instance
                 value (mixed): value
         """
+        super(ValueIsNotMatchContext, self).__init__()
         self.error = error
         self.context = context
         self.value = value
 
+    MESSAGE = 'Value is not match context %s. Unsupported %s "%s"'
+
     def __str__(self, *args, **kwargs):
-        return 'Value is not match context %s. Unsupported %s "%s"' % (str(self.context), type(self.value).__name__, self.value)
+        return self.MESSAGE % (str(self.context),
+                               type(self.value).__name__,
+                               self.value)
 
 
 SUPPORTED_CONTEXTS = [('date', Date),
@@ -88,8 +118,10 @@ class Context(object):
         # check context for value:
         try:
             data = {self.variable_name: self.match(value)}
-        except ArgumentError as e:
-            raise ValueIsNotMatchContext(error = e, context = self, value = value)
+        except ArgumentError as not_match:
+            raise ValueIsNotMatchContext(error = not_match,
+                                         context = self,
+                                         value = value)
         # execute rules for tokens, get a key for data:
         return self.rules.apply(data)
 
@@ -121,8 +153,11 @@ class Context(object):
                 context
         """
         return Context(pattern,
-                       OptionsParser(data['keys'], data['default_key'], TokenMapping.build(data['token_mapping'])),
-                       ContextRules.from_rules(data['rules'], data['default_key']),
+                       OptionsParser(data['keys'],
+                                     data['default_key'],
+                                     TokenMapping.build(data['token_mapping'])),
+                       ContextRules.from_rules(data['rules'],
+                                               data['default_key']),
                        data['variables'][0][1:])
 
 class Contexts(object):
@@ -135,7 +170,8 @@ class Contexts(object):
         """
         if not all([isinstance(el, Context) for el in contexts]):
             # Check that any element is context:
-            raise ArgumentError('Contexts list contains not context object', contexts)
+            raise ArgumentError('Contexts list contains not context object',
+                                contexts)
         self.contexts = contexts
         self.index = index
 
@@ -153,7 +189,8 @@ class Contexts(object):
                 return context.execute(token_options, value)
             except UnsupportedContext:
                 pass
-        raise ArgumentError('Could not detect context for object %s' % value, value)
+        raise ArgumentError('Could not detect context for object %s' % value,
+                            value)
 
     def option(self, value):
         """ Get context option for given value """
@@ -162,7 +199,8 @@ class Contexts(object):
                 return context.option(value)
             except UnsupportedContext:
                 pass
-        raise ArgumentError('Could not detect context for object %s' % value, value)
+        raise ArgumentError('Could not detect context for object %s' % value,
+                            value)
 
     def find_by_code(self, code):
         """ Find context by code
@@ -200,7 +238,9 @@ class Contexts(object):
 
 
 class ContextNotFound(Error):
+    """ Invalid context code """
     def __init__(self, code, contexts):
+        super(ContextNotFound, self).__init__()
         self.code = code
         self.contexts = contexts
 

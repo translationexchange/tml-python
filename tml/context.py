@@ -1,8 +1,29 @@
 # encoding: UTF-8
+"""
+# Copyright (c) 2015, Translation Exchange, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 from .application import Application
 from .translation import Key
 from .render import RenderEngine
-from .dictionary import return_label_fallback
 from .exceptions import Error
 from .dictionary import TranslationIsNotExists
 from .dictionary.snapshot import SnapshotDictionary
@@ -13,6 +34,7 @@ from .dictionary.source import SourceDictionary
 
 
 class ContextNotConfigured(Error):
+    """ Thrown if use not configured context """
     pass
 
 
@@ -21,14 +43,21 @@ class AbstractContext(RenderEngine):
     language = None
     dict = None
 
-    def __init__(self, language, dict, **kwargs):
+    def __init__(self, language, dictionary):
+        """ .ctor
+            Args:
+                language (language.Language): selected language
+                dictionary (dictionary.AbstractDictionary): dict object for translation
+        """
         self.language = language
-        self.dict = dict
-        super(AbstractContext, self).__init__(**kwargs)
+        self.dict = dictionary
+        super(AbstractContext, self).__init__()
 
     def build_key(self, label, description):
         """ Build key """
-        return Key(label = label, description = description, language = self.language)
+        return Key(label = label,
+                   description = description,
+                   language = self.language)
 
     def fetch(self, label, description):
         """ Fetch Translation 
@@ -75,7 +104,6 @@ class AbstractContext(RenderEngine):
 
 class LanguageContext(AbstractContext):
     """ Context with selected language """
-    application = None
     def __init__(self, client, locale = None, application_id = None, **kwargs):
         """ .ctor
             Args:
@@ -91,14 +119,20 @@ class LanguageContext(AbstractContext):
         language =  Language.load_by_locale(application, 
                                             locale if locale else application.default_locale)
 
-        super(LanguageContext, self).__init__(dict = self.build_dict(language), language = language, **kwargs)
+        super(LanguageContext, self).__init__(dictionary = self.build_dict(language),
+                                              language = language)
 
     def build_dict(self, language):
+        """ Dictionary factory """
         return Dictionary()
 
     _fallback_dict = None
     @property
     def fallback_dict(self):
+        """ Dictionary used if tranlation is not found in primary dictionary 
+            Returns:
+                dictionary.AbstractDictionary
+        """
         if not self._fallback_dict:
             if self.default_locale == self.locale:
                 # Use default language:
@@ -109,24 +143,46 @@ class LanguageContext(AbstractContext):
     _default_language = None
     @property
     def default_language(self):
+        """ Default languahr getter
+            Returns:
+                language.Language
+        """
         if not self._default_language:
             self._default_language = Language.load_by_locale(self.application, self.default_locale)
         return self._default_language
 
     @property
     def default_locale(self):
+        """ Default locale getter
+            Returns:
+                string: locale name (ru, en)
+        """
         return self.language.application.default_locale
 
     @property
     def locale(self):
+        """ Selected locale getter
+            Returns:
+                string: locale name
+        """
         return self.language.locale
 
     @property
     def application(self):
+        """ Application getter
+            Returns:
+                application.Application
+        """
         return self.language.application
 
     def fallback(self, label, description):
-        """ Fallback translation: try to use default language """
+        """ Fallback translation: try to use default language 
+            Args:
+                label (string): tranlated label
+                description (string): desctioption
+            Returns:
+                translation.Translation
+        """
         try:
             key = Key(label = label, description = description, language = self.default_language)
             return self.fallback_dict.fetch(key)
@@ -137,21 +193,30 @@ class LanguageContext(AbstractContext):
 class SourceContext(LanguageContext):
     """ Context with source """
     def __init__(self, source, **kwargs):
+        """ .ctor
+            Args:
+                source (string): source name
+        """
         self.source = source
         super(SourceContext, self).__init__(**kwargs)
 
     def build_dict(self, language):
-        """ Build dictionary for language """
+        """ Build source dictionary for language """
         return SourceDictionary(self.source, language)
 
 
 class SnapshotContext(LanguageContext):
     """ Snapshot usage """
     def __init__(self, source, **kwargs):
+        """ .ctor
+            Args:
+                source (string): source name
+        """
         self.source = source
         super(SnapshotContext, self).__init__(**kwargs)
 
     def build_dict(self, language):
+        """ Build snapshot dictionary """
         if not self.source:
             # Snapshot does not works out of source:
             return NoneDict()

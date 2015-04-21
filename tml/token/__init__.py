@@ -1,4 +1,30 @@
 # encoding: UTF-8
+"""
+# Label tokens
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
+
 import re
 from ..exceptions import Error, RequiredArgumentIsNotPassed
 from ..rules.contexts import Value
@@ -30,6 +56,12 @@ def escape_if_needed(text, options):
         return escape(to_string(text))
     return to_string(text)
 
+ESCAPE_CHARS = (('&', '&amp;'),
+                ('<', '&lt;'),
+                ('>', '&gt;'),
+                ('"', '&quot;'),
+                ("'", '&#39;'))
+
 def escape(text):
     """ Escape text 
         Args:
@@ -37,7 +69,9 @@ def escape(text):
         Returns:
             (string): escaped HTML
     """
-    return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
+    for find, replace in ESCAPE_CHARS:
+        text = text.replace(find, replace)
+    return text
 
 
 class AbstractToken(object):
@@ -87,7 +121,7 @@ class TextToken(AbstractToken):
         if text == '':
             # Empty text
             return TextToken(text)
-        if text[0]!='{':
+        if text[0] != '{':
             return TextToken(text)
 
 
@@ -110,7 +144,9 @@ class AbstractVariableToken(AbstractToken):
 
 class VariableToken(AbstractVariableToken):
     """ Token for variabel {name} """
-    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % AbstractVariableToken.IS_VARIABLE) # Regext to check objects
+    # Regext to check objects
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % AbstractVariableToken.IS_VARIABLE)
+
     def __init__(self, name):
         """
             Args:

@@ -1,10 +1,32 @@
 # encoding: UTF-8
-""" Rules functions """
+"""
+# Functions for rules engine 
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
 import re
 from _ctypes import ArgumentError
-from datetime import date, datetime
-import re
-from re import search
+from datetime import date
 from tml.strings import to_string
 
 
@@ -27,6 +49,16 @@ def to_int(text):
     raise ArgumentError('Invalid number string: "%s"' % text)
 
 
+class InvalidRange(ArgumentError):
+    """ Range error """
+    def __init__(self, min_value, max_value):
+        self.min = min_value
+        self.max = max_value
+
+    MESSAGE = 'Invalid range: max (%d) seems to be grater than min (%d)'
+    def __str__(self, *args, **kwargs):
+        return self.MESSAGE % (self.max, self.min)
+
 def to_range(text):
     """ Convert text to range tuple
         Args:
@@ -38,12 +70,14 @@ def to_range(text):
     """
     m = IS_RANGE.match(str(text).strip())
     if m:
-        min = int(m.group(1))
-        max = int(m.group(2))
-        if not max > min:
-            raise ArgumentError('Invalid range string: max value (%d) seems to be grater than min (%d)' % (max, min), min, max)
-        return (min, max)
+        min_value = int(m.group(1))
+        max_value = int(m.group(2))
+        if not max_value > min_value:
+            InvalidRange(min_value, max_value)
+        return (min_value, max_value)
     raise ArgumentError('Invalid range string %s' % text)
+
+
 
 def within_f(value, range):
     """ Check is value in range
@@ -55,9 +89,9 @@ def within_f(value, range):
         Returns:
             boolean
     """
-    (min, max) = to_range(range)
+    (min_value, max_value) = to_range(range)
     value = to_int(value)
-    return value >= min and value <= max
+    return value >= min_value and value <= max_value
 
 
 def in_f(set, find):
@@ -82,13 +116,6 @@ def in_f(set, find):
                 return True
     return False
 
-def f_and(*args):
-    """ Arg1 AND arg2 ..."""
-    return reduce(lambda a, b: bool(a) and bool(b), list)
-
-def f_or(*args):
-    """ Arg1 or arg2 ... """
-    reduce(lambda a, b: bool(a) or bool(b), list)
 
 IS_PCRE = re.compile('^\/(.*)\/(\w*)$')
 
@@ -103,7 +130,7 @@ def build_flags(flags):
     if flags is None:
         return ret
     flags = flags.upper()
-    for flag in ('A','I','L','M','S'):
+    for flag in ('A', 'I', 'L', 'M', 'S'):
         if flag in flags:
             ret |= getattr(re, flag)
     return ret
@@ -141,7 +168,7 @@ def f_eq(*args):
             return False
     return all([args[0] == arg for arg in args])
 
-def cmp(arg1, arg2):
+def cmp_args(arg1, arg2):
     if type(arg1) is date and type(arg2) is date:
         pass
     else:
@@ -192,9 +219,9 @@ SUPPORTED_FUNCTIONS = {
     'atom': lambda expr: isinstance(expr, (type(None), str, int, float, bool)),
     # Tr8n Extensions
     '=': f_eq,  # ['=', 1, 2]
-    '!=': lambda l, r: '=' != cmp(l, r),  # ['!=', 1, 2]
-    '<': lambda l, r: '<' == cmp(l, r),  # ['<', 1, 2]
-    '>': lambda l, r: '>' == cmp(l, r),  # ['>', 1, 2]
+    '!=': lambda l, r: '=' != cmp_args(l, r),  # ['!=', 1, 2]
+    '<': lambda l, r: '<' == cmp_args(l, r),  # ['<', 1, 2]
+    '>': lambda l, r: '>' == cmp_args(l, r),  # ['>', 1, 2]
     '+': lambda l, r: float(l) + float(r),  # ['+', 1, 2]
     '-': lambda l, r: float(l) - float(r),  # ['-', 1, 2]
     '*': lambda l, r: float(l) * float(r),  # ['*', 1, 2]

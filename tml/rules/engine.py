@@ -1,4 +1,29 @@
 # encoding: UTF-8
+"""
+# Rules engine: execute rule 
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
 from ..exceptions import Error as BaseError
 
 class RulesEngine(object):
@@ -10,6 +35,7 @@ class RulesEngine(object):
         """
         self.functions = functions
 
+
     def execute(self, rule, data):
         """ Execute rule 
             Args:
@@ -17,35 +43,37 @@ class RulesEngine(object):
                 data (dict): rule arguments kwargs
         """
         # Fetch functions:
-        fn_name = rule[0]
         try:
-            fn = self.functions[rule[0]]
+            func = self.functions[rule[0]]
         except KeyError:
             raise FunctionDoesNotExists(rule, data, 0)
         args = []
         part_number = 0
         for arg in rule[1:]:
-            """ Build args """
+            # Build args:
             part_number = part_number + 1
             if type(arg) is list:
                 # inner rule expressions (mod ^(sum @n 5) 10):
                 try:
                     args.append(self.execute(arg, data))
-                except Error as e:
-                    raise InnerExpressionCallFault(e, rule, data, part_number)
+                except Error as error:
+                    raise InnerExpressionCallFault(error,
+                                                   rule,
+                                                   data,
+                                                   part_number)
             elif arg[0] == '@':
                 # une data value (mod ^@n 10):
                 try:
                     args.append(data[arg[1:]])
-                except KeyError as e:
+                except KeyError:
                     raise ArgumentDoesNotExists(arg, rule, data, part_number)
             else:
                 # text arg (mod @n ^10)
                 args.append(arg)
         try:
-            return fn(*args)
-        except Exception as e:
-            raise FunctionCallFault(e, rule, data)
+            return func(*args)
+        except Exception as func_error:
+            raise FunctionCallFault(func_error, rule, data)
 
 
 class Error(BaseError):
@@ -57,6 +85,7 @@ class Error(BaseError):
                 data (dict): rule kwargs
                 part_number (int): part of rule where error occurs
         """
+        super(Error, self).__init__()
         self.rule = rule
         self.data = data
         self.part_number = part_number
@@ -76,6 +105,7 @@ class FunctionDoesNotExists(Error):
         return 'Function %s does not exists' % (self.rule[0])
 
 class ArgumentDoesNotExists(Error):
+    """ Function argument is not passed """
     def __init__(self, argment_name, rule, data, part_number = None):
         self.argument_name = argment_name
         super(ArgumentDoesNotExists, self).__init__(rule, data, part_number)
@@ -89,8 +119,12 @@ class FunctionCallFault(Error):
         super(FunctionCallFault, self).__init__(rule, data)
         self.exception = exception
 
+    MESSAGE = 'Function call fault in function %s with %s: %s'
+
     def __str__(self):
-        return 'Function call fault in function %s with %s: %s' % (self.rule[0], self.exception.__class__.__name__, self.exception)
+        return self.MESSAGE % (self.rule[0],
+                               self.exception.__class__.__name__,
+                               self.exception)
 
 class InnerExpressionCallFault(Error):
     """ Inner error """

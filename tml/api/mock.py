@@ -1,13 +1,36 @@
 # encoding: UTF-8
+"""
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
 from urllib import urlencode
-from .client import Client, HttpError
 from json import loads
 from os import listdir
 from os.path import isdir
+from . import AbstractClient, APIError
 import re
 
 
-class Hashtable(Client):
+class Hashtable(AbstractClient):
     """ Client mock: all data stored in hashtable """
     last_url = None
     def __init__(self, data = {}, strict = False):
@@ -16,6 +39,7 @@ class Hashtable(Client):
                 data (dict): responses key - URL, value - response
                 strict (boolean): key depends params (if False - return  
         """
+        super(Hashtable, self).__init__()
         self.data = data
         self.handle_nostrict = None if strict else KeyError
         # Log last request:
@@ -45,17 +69,27 @@ class Hashtable(Client):
                 return self.data[self.build_url(url, params)]
             except self.handle_nostrict:
                 return self.data[url]
-        except KeyError as e:
+        except KeyError as key_not_exists:
             self.status = 404
-            raise HttpError(e, url, self)
+            raise APIError(key_not_exists, url, self)
 
-    def build_url(self, url, params):
+    @classmethod
+    def build_url(cls, url, params):
+        """ Build full URL 
+            Args:
+                url (string): url
+                params (dict): get params
+            Returns:
+                string: url with joined get params
+        """
         if params is None:
             return url
         return url + '?' + urlencode(params)
+
     reloaded = []
+
     def reload(self, url, params):
-        self.reloaded.append(self.build_url(url, params))
+        self.reloaded.append(Hashtable.build_url(url, params))
 
 
 class File(Hashtable):
@@ -93,14 +127,14 @@ class File(Hashtable):
     def readdir(self, path):
         """ Read all files from directory """
         abspath = '%s/%s' % (self.basedir, path)
-        for f in listdir(abspath):
-            is_json = self.JSON_FILE.match(f)
+        for filename in listdir(abspath):
+            is_json = self.JSON_FILE.match(filename)
             if is_json:
-                is_json_paging = self.JSON_PAGING.match(f)
+                is_json_paging = self.JSON_PAGING.match(filename)
 
-            if isdir(abspath + f):
+            if isdir(abspath + filename):
                 # recursive:
-                self.readdir(path + f + '/')
+                self.readdir(path + filename + '/')
             elif is_json:
                 # url.json
                 if is_json_paging:
@@ -110,6 +144,6 @@ class File(Hashtable):
                 else:
                     url = path + is_json.group(1)
                     params = None
-                self.read(url, params, path + f)
+                self.read(url, params, path + filename)
         return self
 

@@ -1,22 +1,47 @@
 # encoding: UTF-8
-from .client import APIError, Client as BaseClient
+"""
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
+from . import AbstractClient, APIError
 from tarfile import TarFile
 from json import loads
 from os.path import isdir, exists
 from ..exceptions import Error
+
 
 LANGUAGE_PREFIX = 'languages/'
 LANGUAGE_RPEFIX_LENGTH = len(LANGUAGE_PREFIX)
 CURRENT_APPLICATION = 'applications/current'
 
 
-class SnapshotDir(BaseClient):
+class SnapshotDir(AbstractClient):
     """ Client which works with a snapshot """
     def __init__(self, path):
         """ .ctor
             Args:
                 path (string): path to dir with snapshot
         """
+        super(SnapshotDir, self).__init__()
         self.path = path
 
     def call(self, url, method, params = {}):
@@ -32,11 +57,13 @@ class SnapshotDir(BaseClient):
                 dict: response
         """
         if method != 'get':
-            raise MethodIsNotSupported('Only get allowed in snapshot mode', url, params)
+            raise MethodIsNotSupported('Only get allowed in snapshot mode',
+                                       url,
+                                       params)
         try:
-            return self.fetch(self.rewrite_path(url))
-        except Exception as e:
-            raise APIError(e, self, url)
+            return self.fetch(SnapshotDir.rewrite_path(url))
+        except Exception as invalid_path:
+            raise APIError(invalid_path, self, url)
 
     def fetch(self, path):
         """ Fetch data for path from file """
@@ -44,7 +71,8 @@ class SnapshotDir(BaseClient):
         with open(path) as fp:
             return loads(fp.read())
 
-    def rewrite_path(self, url):
+    @classmethod
+    def rewrite_path(cls, url):
         """ Build path from URL 
             Args:
                 url (string): API url
@@ -60,14 +88,15 @@ class SnapshotDir(BaseClient):
         return url
 
 class MethodIsNotSupported(APIError):
+    """ Try to execute not GET request """
+    MESSAGE = 'Method %s is not supported'
     def __init__(self, method,  url, client):
-        super(MethodIsNotSupported, self).__init__('Method %s is not supported' % method, client, url)
+        super(MethodIsNotSupported, self).__init__(self.MESSAGE % method,
+                                                   client,
+                                                   url)
 
 class SnapshotFile(SnapshotDir):
     """ .tar.gz snapshot file """
-    def __init__(self, path):
-        self.path = path
-
     @property
     def file(self):
         """ Open tar file on demand """
@@ -79,13 +108,17 @@ class SnapshotFile(SnapshotDir):
             ret = loads(fp.read())
             return ret
         finally:
-            try:
+            if fp:
                 fp.close()
-            except Exception:
-                pass
 
 
 def open_snapshot(path):
+    """ Open snapshot file or directory
+        Args:
+            path (string): path to file or dir
+        Returns:
+            SnapshotDir|SnapshotFile
+    """
     if not exists(path):
         raise Error('Snapshot %s does not exists' % path)
     if isdir(path):

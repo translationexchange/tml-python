@@ -1,26 +1,38 @@
 # encoding: UTF-8
+"""
+# Copyright (c) 2015, Translation Exchange, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
 from .decoration.parser import parse
 from .tools import Renderable
 from argparse import ArgumentError
 
 class RenderEngine(object):
     """ Engine to render translations """
-    # List of objects which preprocess data before translation (join lists for example)
+    # List of objects which preprocess data before translation
+    # (join lists for example)
     data_preprocessors = []
     # List of objects which add custom values to data (like viewing_user)
     env_generators = []
-
-    def __init__(self, data_preprocessors = None, env_generators = None):
-        """ .ctor
-            Args:
-                data_preprocessors (list): List of objects which preprocess data before translation (join lists for example)
-                env_generators (list): List of objects which add custom values to data (like viewing_user)
-        """
-        if data_preprocessors:
-            self.data_preprocessors = data_preprocessors
-        if env_generators:
-            self.env_generators = env_generators
-
 
     def render(self, translation, data, options):
         """ Render translation 
@@ -55,11 +67,11 @@ class Data(object):
         try:
             # get item for data:
             ret = self.data[key]
-        except KeyError as e:
+        except KeyError:
             return self.generate_item(key)
-        for p in self.context.data_preprocessors:
+        for preprocessor in self.context.data_preprocessors:
             # preprocess data ([] -> List etc)
-            ret = p(ret, self.context)
+            ret = preprocessor(ret, self.context)
         # Apply renderable data:
         if isinstance(ret, Renderable):
             ret = ret.render(self.context)
@@ -67,9 +79,9 @@ class Data(object):
 
     def generate_item(self, key):
         """ Generate item for key """
-        for g in self.context.env_generators:
+        for generator in self.context.env_generators:
             try:
-                ret = g(key, self.context, self.data)
+                ret = generator(key, self.context, self.data)
                 if not ret is None:
                     return ret
             except ArgumentError:

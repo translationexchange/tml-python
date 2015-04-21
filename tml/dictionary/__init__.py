@@ -1,4 +1,27 @@
 # encoding: UTF-8
+"""
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
 from ..translation import Translation
 from ..exceptions import Error
 
@@ -31,11 +54,17 @@ class AbstractDictionary(object):
         """
         try:
             return self.fetch(key)
-        except Exception as e:
+        except Exception:
             return self.fallback(key)
 
     def fetch(self, key):
-        raise NotImplemented()
+        """ Fetch tranlation for key
+            Args:
+                key (translation.Key): key to translate
+            Returns:
+                Translation
+        """
+        raise NotImplementedError()
 
     def fallback(self, key):
         """ Key is not found """
@@ -43,6 +72,10 @@ class AbstractDictionary(object):
 
     @property
     def fallback_function(self):
+        """ Fallback getter 
+            Returns:
+                FunctionType
+        """
         return self._fallback
 
 
@@ -56,7 +89,6 @@ class Hashtable(AbstractDictionary):
         self.translations = translations
         super(Hashtable, self).__init__(fallback)
 
-    """ Hash dictionary """
     def fetch(self, key):
         """ Tranlate key 
             Args:
@@ -73,6 +105,7 @@ class Hashtable(AbstractDictionary):
 class TranslationIsNotExists(Error):
     """ Translation for key is not found """
     def __init__(self, key, dict):
+        super(TranslationIsNotExists, self).__init__()
         self.key = key
         self.dict = dict
 
@@ -81,3 +114,4 @@ class NoneDict(AbstractDictionary):
     """ Translate nothing """
     def fetch(self, key):
         raise TranslationIsNotExists(key, self)
+

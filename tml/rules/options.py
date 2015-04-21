@@ -1,5 +1,30 @@
 # encoding: UTF-8
-""" Tools for parse tokens mapping """
+"""
+# Token options: parsing and mapping 
+#
+# Copyright (c) 2015, Translation Exchange, Inc.
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+__author__ = 'a@toukmanov.ru'
+
+
 from tml.exceptions import Error as BaseError
 import re
 
@@ -45,6 +70,7 @@ class TokenMapping(object):
 class Error(BaseError):
     """ Abstract options parse error """
     def __init__(self, rule):
+        super(Error, self).__init__()
         self.rule = rule
 
 
@@ -84,13 +110,25 @@ def parse_args(text):
     return (args, kwargs)
 
 def fetch_default_arg(text):
+    """ Fetch default argument from rule
+        Args:
+            text (string): list of options a,b,c or a:value1,b:value2
+        Returns:
+            string: first value (a or value1)
+    """
     return parse_kwarg(text.split(',')[-1])[1]
 
 def parse_kwarg(part):
+    """ Parse kwarg:
+        Args:
+            part (string): expression like key:value or just value
+        Returns:
+            tuple (key, value)
+    """
     part = part.strip()
-    m = IS_KWARG.match(part)
-    if m:
-        return (m.group(1).strip(), m.group(2).strip())
+    match = IS_KWARG.match(part)
+    if match:
+        return (match.group(1).strip(), match.group(2).strip())
     else:
         return (None, part)
 
@@ -167,6 +205,7 @@ class Parser(object):
 
 
 class MixOfNamedAndOrderedArgs(Error):
+    """ Options contains args and kwargs both """
     pass
 
 
@@ -176,8 +215,9 @@ class UnsupportedKey(Error):
         super(UnsupportedKey, self).__init__(rule)
         self.key = key
 
+    MESSAGE = 'Rule contains unsupported key %s in expression "%s"'
     def __str__(self, *args, **kwargs):
-        return 'Rule contains unsupported key %s in expression "%s"' % (self.key, self.rule)
+        return self.MESSAGE % (self.key, self.rule)
 
 
 class MissedKey(Error):
@@ -191,8 +231,9 @@ class MissedKey(Error):
         super(MissedKey, self).__init__(rule)
         self.key = key
 
+    MESSAGE = 'Rule does not contains key "%s" in expression "%s"'
     def __str__(self):
-        return 'Rule does not contains key "%s" in expression "%s"' % (self.key, self.rule)
+        return self.MESSAGE % (self.key, self.rule)
 
 class InvalidNumberOfArguments(Error):
     """ Args parser error """
@@ -208,5 +249,10 @@ class InvalidNumberOfArguments(Error):
     def __str__(self, *args, **kwargs):
         return 'Unsupported arguments count in expression "%s"'
 
-    def apply(self, args):
+    def apply(self):
+        """ Apply exception 
+            Raises:
+                InvalidNumberOfArguments
+        """
         raise self
+

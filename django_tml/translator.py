@@ -5,7 +5,7 @@ from tml import build_context
 from tml.application import LanguageNotSupported, Application
 from django_tml.cache import CachedClient
 from tml import Key
-from tml.translation import TranslationOption
+from tml.translation import TranslationOption, OptionIsNotFound
 from django.utils.translation import LANGUAGE_SESSION_KEY
 from tml.legacy import text_to_sprintf, suggest_label
 from types import FunctionType
@@ -252,7 +252,11 @@ class Translator(object):
         # prepare data for tranlation (apply env first):
         data = self.context.prepare_data(data)
         # fetch option depends env:
-        option = translation.fetch_option(data, {})
+        try:
+            option = translation.fetch_option(data, {})
+        except OptionIsNotFound:
+            option = self.context.fallback(label, description).fetch_option(data, {})
+
         # convert {name} -> %(name)s
         return text_to_sprintf(option.label, self.context.language)
 

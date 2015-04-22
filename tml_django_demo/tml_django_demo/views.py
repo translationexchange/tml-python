@@ -61,3 +61,31 @@ def auth(request):
         logout(request)
     return redirect('/')
     
+
+def welp(request):
+    # Translate current city:
+    city = tr(request.GET.get('city','Los Angeles'))
+
+    best = {'user': {'name':'Jane Smith', 'gender':'female'},
+            'reviews': 234,
+            'stars': 1,
+            'place':{'title':'Ricky\'s Fish Tacos',
+                     'url':'#rickyfishtacos'}}
+    reviews = [{'place':'Ricky\'s Fish Tacos',
+                'reviews':14,
+                'stars':1,
+                'review':'Luckily, the perfect hot day food is a fish taco.'},
+               {'place':'Genwa Korean Bbq',
+                'reviews':567,
+                'stars':3,
+                'review':'I love love love the fact that you get 25 side dishes.'},
+               {'place':'Kang Hodong Baekjeong',
+                'reviews':1,
+                'stars':2,
+                'review':'Thick slices of juicy pastrami on rye hits the spot every time.'},
+               {'place':'Guisados',
+                'reviews':2,
+                'stars':1,
+                'review':'I can\'t wait to introduce more people to these orgasmic tacos.'},
+               ]
+    return render_to_response('welp.html', locals())

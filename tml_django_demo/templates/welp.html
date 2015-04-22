@@ -1,0 +1,191 @@
+{% load tml %}
+{% load tml_inline %}
+
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" dir="ltr">
+
+<head>
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="google" value="notranslate">
+    <title>Welp</title>
+
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+    <script src="javascripts/jquery.min.js" type="text/javascript"></script>
+    <script src="javascripts/bootstrap.min.js"></script>
+    {% tml_inline_header %}
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">{% tr %}Toggle navigation{% endtr %}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><strong>Welp</strong></a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#">{% tr %}About Us{% endtr %}</a></li>
+                <li><a href="#">{% tr %}Search{% endtr %}</a></li>
+                <li><a href="#">{% tr %}Write a Review{% endtr %}</a></li>
+                <li><a href="#">{% tr %}Find Friends{% endtr %}</a></li>
+                <li><a href="#">{% tr %}Help{% endtr %}</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li data-tml-language-selector="bootstrap" data-tml-language-selector-element="none"></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% tr %}More{% endtr %} <b class="caret"></b></a>
+
+                    <ul class="dropdown-menu">
+                        <li class="divider"></li>
+                        <li><a href="#">Log in</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Sign Up</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!--<div class="container" style="padding:300px; background: white">-->
+
+<!--<div style="width:250px;padding:10px;border:1px solid #eee;">-->
+    <!--<div data-tml-language-selector="flags"></div>-->
+<!--</div>-->
+
+<!--</div>-->
+
+<div class="container">
+
+    <div class="content">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right"><br><a href="#">{% tr %}More Cities{% endtr %}</a></div>
+                <h4>{% tr %}Welp {city}{% endtr %}</h4>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-sm-7">
+
+                <div class="well">
+                    <h3 class="text-primary">
+                        {% tr %}The best way to find local businesses{% endtr %}
+                    </h3>
+                    <p class="text-muted">
+                        {% tr trimmed %}
+                        Search for everything from the city's tastiest burger to the most renowned cardiologist.
+                        What will you uncover in your neighborhood?
+                        {% endtr %}
+                    </p>
+                    <p>
+                        <a class="btn btn-primary" href="#">{% tr %}Create your free account{% endtr %}</a>
+                    </p>
+                </div>
+
+                <h3 class="text-primary">Best of Welp: Los Angeles</h3>
+                <hr>
+
+                <small class="pull-right"><a href="#">{% tr %}See More{% endtr %}</a></small>
+
+                <h5 class="text-primary">{% tr %}Restaurants{% endtr %}</h5>
+
+                {% for review in reviews %}
+                <div class="media">
+                    <a class="pull-left" href="#">
+                        <div class="media-object media-img"></div>
+                    </a>
+                    <div class="media-body">
+                        <strong>
+                            <span notranslate>{{forloop.counter}}.</span>
+                            <a href="">{{review.place}}</a>
+                        </strong>
+
+                        <div class="text-muted">
+                            <img src="images/{{review.stars}}-stars.png" title="{% tr nowrap with stars=review.stars %}{stars} out of 5 stars{% endtr %}">
+                            <var count>{{review.reviews}}</var> 
+                            {% tr with count=review.reviews %}{count|Review,Reviews}{% endtr %}
+                        </div>
+
+                        <div class="media">
+                            <a class="pull-left" href="#">
+                                <div class="media-object media-img-sm"></div>
+                            </a>
+                            <div class="media-body">
+                                <p>{{review.review}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="col-sm-5">
+
+                <form>
+                    <div class="form-group">
+                        <label><small>{% tr %}Find{% endtr %}</small></label>
+                        <input type="text" class="form-control" placeholder="{% tr nowrap %}tacos, cheap dinner, etc.{% endtr %}">
+                    </div>
+                    <div class="form-group">
+                        <label><small>{% tr %}Near{% endtr %}</small></label>
+                        <input type="text" name="city" class="form-control" value="{{city}}">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-default btn-sm">{% tr nowrap %}Search{% endtr %}</button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <h4 class="text-primary">{% tr %}Review of the day{% endtr %}</h4>
+
+                <div class="media">
+                    <a class="pull-left" href="#">
+                        <div class="media-object media-img"></div>
+                    </a>
+                    <div class="media-body">
+                        <strong>
+                            {% tr with user=best.user link_href=best.place.url place=best.place %}{user} reviewed{% endtr %} <a href="{{best.place.url}}">{{best.place.title}}</a>
+                        </strong>
+
+                        <div>
+                            <img src="images/1-stars.png" title="{% tr nowrap with stars=best.stars %}{stars} out of 5 stars{% endtr %}"/>
+                            <small class="text-muted"><!-- tr with number=best.reviews %}{number||Review:Reviews{% endtr --></small>
+                        </div>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima, architecto, laboriosam doloribus sequi tenetur maxime magni porro sunt facilis officia deserunt blanditiis vitae consectetur rerum alias dolorem et dignissimos...
+                            <a href="#">{% tr %}Read More{% endtr %}</a>
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h4 class="text-primary">{% tr %}Welp on the go{% endtr %}</h4>
+                <p>{% tr %}Get the Welp app on your mobile phone. It's free and helps you find great, local businesses on the go!{% endtr %}</p>
+                <button type="submit" class="btn btn-default btn-sm">{% tr %}Get it free now{% endtr %}</button>
+
+            </div>
+        </div>
+        <br><br><br>
+    </div>
+
+</div> <!-- /container -->
+{% tml_inline_footer %}
+
+</body>
+</html>
+

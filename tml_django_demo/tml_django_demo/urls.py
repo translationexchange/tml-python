@@ -7,6 +7,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
     url(r'^$', 'tml_django_demo.views.home'),
     url(r'^translate$', 'tml_django_demo.views.translate'),
+    url(r'^welp.html$', 'tml_django_demo.views.welp'),
     url(r'^inline_mode', 'tml_django_demo.views.inline_mode'),
     url(r'^auth', 'tml_django_demo.views.auth'),
 )

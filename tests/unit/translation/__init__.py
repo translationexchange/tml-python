@@ -12,7 +12,7 @@ from tml.exceptions import RequiredArgumentIsNotPassed
 from json import loads
 
 
-class translation_test(unittest.TestCase):
+class TranslationTest(unittest.TestCase):
     """ Test translations """
     def setUp(self):
         self.client = Client()

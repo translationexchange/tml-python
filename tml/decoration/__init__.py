@@ -72,7 +72,7 @@ class Tag(Set):
         first = True
         for key in self.attributes:
             try:
-                attributes[key] = self.fetch_attribute(key, attributes)
+                attributes[key] = self.fetch_attribute(key, data)
             except Exception as e:
                 raise AttributeIsNotSet(self.name, key)
             first = False
@@ -87,7 +87,7 @@ class Tag(Set):
             return attributes[long_key]
         if type(attributes[self.name]) is str and len(self.attributes) == 1:
             # just link
-            return attributes[self.name]
+            return attributes[self.name][key]
         # link.href
         return attributes[self.name][key]
 

@@ -1,7 +1,7 @@
 # encoding: UTF-8
 from tests.mock import Client
 from tml.translation import Key, TranslationOption, OptionIsNotSupported,\
-    Translation
+    Translation, OptionIsNotFound
 from tml.translation.context import Context
 import unittest
 from tml.application import Application
@@ -85,7 +85,8 @@ class TranslationTest(unittest.TestCase):
         sdata = '{"to":{"gender":"male","name":"Вася"}}'
         self.assertEquals(u"Васе", t.execute(loads(sdata), {}), 'Васе')
         t = Translation(key, [])
-        self.assertEquals('John give you 5 apples', t.execute({'actor':{'gender':'male','name':'John'},'count':5}, {}), 'Use label by default')
+        with self.assertRaises(OptionIsNotFound):
+            t.execute({'actor':{'gender':'male','name':'John'},'count':5}, {})
 
 if  __name__ == '__main__':
     unittest.main()

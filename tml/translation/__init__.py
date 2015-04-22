@@ -6,7 +6,7 @@ from .context import Context
 from ..exceptions import Error
 from ..strings import to_string
 from ..token.parser import default_parser
-from tml.exceptions import RequiredArgumentIsNotPassed
+from ..exceptions import RequiredArgumentIsNotPassed
 
 
 
@@ -109,14 +109,6 @@ class Translation(object):
         return cls(key,
                    [TranslationOption(label= option['label'], context = option['context'] if 'context' in option else {}, language = key.language) for option in data])
 
-    @property
-    def default(self):
-        """ Use key label as translation by default 
-            Returns:
-                TranslationOption
-        """
-        return TranslationOption(self.key.label, self.key.language, {})
-
     def fetch_option(self, data, options):
         for option in self.options:
             try:
@@ -125,11 +117,39 @@ class Translation(object):
                 pass
             except RequiredArgumentIsNotPassed:
                 pass
-        return self.default 
+        raise OptionIsNotFound(self.key) 
 
     def execute(self, data, options):
         """ Execute translation """
         return self.fetch_option(data, options).execute(data, options)
+
+class NoneTranslation(Translation):
+    def __init__(self, key):
+        self.key = key
+
+    def fetch_option(self, data, options):
+        """ Use key label as translation by default 
+            Returns:
+                TranslationOption
+        """
+        return TranslationOption(self.key.label, self.key.language, {})
+
+
+class OptionIsNotFound(Error):
+    """ Translation option is not found """
+    def __init__(self, key):
+        self.key = key
+
+    @property
+    def label(self):
+        return self.key.label
+
+    @property
+    def description(self):
+        return self.key.description
+
+    def __str__(self, *args, **kwargs):
+        return 'Transaltion option not found for %s on %s' % (self.label, self.key.language.locale)
 
 class OptionIsNotSupported(Error):
     pass

@@ -25,6 +25,8 @@
 from .decoration.parser import parse
 from .tools import Renderable
 from argparse import ArgumentError
+from tml.dictionary import TranslationIsNotExists
+from .translation import OptionIsNotFound
 
 class RenderEngine(object):
     """ Engine to render translations """
@@ -34,7 +36,7 @@ class RenderEngine(object):
     # List of objects which add custom values to data (like viewing_user)
     env_generators = []
 
-    def render(self, translation, data, options):
+    def render(self, translation, data, options, fallback = False):
         """ Render translation 
             Args:
                 translation (Transaltion): translation to render
@@ -43,11 +45,20 @@ class RenderEngine(object):
             Returns:
                 unicode
         """
+        # Wrap data:
         translation_data = self.prepare_data(data)
-        # Apply tokens:
-        ret = translation.execute(translation_data, options)
+        try:
+            # Apply tokens:
+            ret = translation.execute(translation_data, options)
+        except OptionIsNotFound as e:
+            # Option does not exists for data, use fallback translation:
+            translation = self.fallback(e.label, e.description)
+            ret = translation.execute(translation_data, options)
         # Apply decoration:
         return parse(ret).render(translation_data)
+
+    def fallback(self, label, description):
+        raise NotImplemented('Fallback is not implemented for context')
 
     def prepare_data(self, data):
         """ Render engine """

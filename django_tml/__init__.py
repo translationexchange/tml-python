@@ -33,6 +33,8 @@ def exit_source():
     """
     Translator.instance().exit_source()
 
+def get_languages():
+    return Translator.instance().languages
 
 if settings.TML.get('monkeypatch', False):
     translation._trans = Translator.instance()

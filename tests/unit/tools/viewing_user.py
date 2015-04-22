@@ -3,15 +3,15 @@ import unittest
 from tml.tools.viewing_user import get_viewing_user, set_viewing_user, reset_viewing_user
 from tml.tools.template import Template
 from tests.mock import Client
-from tml import Context, tr, configure
+from tml import build_context, tr, configure, RenderEngine
 from _ctypes import ArgumentError
 
 
-class list(unittest.TestCase):
+class ViewingUserTest(unittest.TestCase):
 
     def setUp(self):
         reset_viewing_user()
-        Context.env_generators.append(get_viewing_user)
+        RenderEngine.env_generators.append(get_viewing_user)
 
     def test_viewing_user(self):
         configure(client = Client.read_all())
@@ -29,3 +29,4 @@ class list(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

@@ -11,7 +11,7 @@ class WithLength(object):
 class WithoutLength(object):
     pass
 
-class count_test(unittest.TestCase):
+class CountTest(unittest.TestCase):
     """ Test count """
     def test_list(self):
         self.assertEquals(3, Count.match([1,2,3]), 'List')

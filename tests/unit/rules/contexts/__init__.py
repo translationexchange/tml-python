@@ -13,7 +13,7 @@ class Dumn(object):
         return 'qwerty'
 
 
-class rules_variables(unittest.TestCase):
+class ContextsTest(unittest.TestCase):
     """ Test for rules variables """
     def setUp(self):
         number_options = ['one','few','many','other']

@@ -19,7 +19,7 @@ class NoGender(object):
     pass
 
 
-class genders_test(unittest.TestCase):
+class GendersTest(unittest.TestCase):
     def test_list(self):
         self.assertEquals([Gender.MALE, Gender.FEMALE, Gender.OTHER],
                           Genders.match([Male(), 'female', Gender(Gender.OTHER, None)]),

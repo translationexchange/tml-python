@@ -11,7 +11,7 @@ class MyClass(object):
 class WithoutLength(object):
     pass
 
-class count_test(unittest.TestCase):
+class NumberTest(unittest.TestCase):
     """ Test count """
     def test_int(self):
         self.assertEquals(3, Number.match(3), 'Int')

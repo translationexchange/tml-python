@@ -7,7 +7,7 @@ from tml import Application
 from tml.language import Language
 
 
-class missed_test(unittest.TestCase):
+class MissedTest(unittest.TestCase):
     def setUp(self):
         self.c = Client()
         self.c.read('applications/current', {'definition':1})

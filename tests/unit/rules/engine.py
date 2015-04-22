@@ -9,7 +9,7 @@ def die():
     raise Exception('Die')
 
 
-class rules_engine(unittest.TestCase):
+class EngineTest(unittest.TestCase):
     """ Test of rules engine """
     def setUp(self):
         """ Use mock engine """
@@ -93,4 +93,8 @@ class rules_engine(unittest.TestCase):
         self.assertTrue(engine.execute(q, {'value': 8}))
         self.assertFalse(engine.execute(q, {'value': 3}))
         self.assertFalse(engine.execute(q, {'value': 14}))
+
+
+if __name__ == '__main__':
+    unittest.main()
 

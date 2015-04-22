@@ -11,7 +11,7 @@ from tests.mock.fallback import Fallback
 from json import dumps, loads
 
 
-class translations(unittest.TestCase):
+class SourceTest(unittest.TestCase):
     """ Test loading tranlations over API """
     def setUp(self):
         self.client = Client.read_all()

@@ -7,10 +7,9 @@ from tml import Application
 from tml.language import Language
 from tml.rules.contexts import Gender
 from tml.rules.case import Case
-from tml.rules import default_engine
 from tml.rules.parser import ParseError
 
-class case(unittest.TestCase):
+class CaseTest(unittest.TestCase):
     """ Test rules engine """
     def setUp(self):
         self.rules = [{'conditions': "(&& (= 'female' @gender) (match '/(ша)$/' @value))", "operations": "(replace '/а$/' 'и' @value)"},

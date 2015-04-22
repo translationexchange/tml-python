@@ -4,7 +4,7 @@ from tml.decoration import Text, Tag, Set, TagFactory, UnsupportedTag,\
     AttributeIsNotSet
 from tml.decoration.parser import parse, ParseError
 
-class decoration_test(unittest.TestCase):
+class DecorationTest(unittest.TestCase):
 
     def setUp(self):
         self.a_html = '<a href="http://translationexchange.com/">text</a>'
@@ -89,3 +89,4 @@ class decoration_test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

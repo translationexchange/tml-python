@@ -5,7 +5,7 @@ from tml.dictionary.snapshot import SnapshotDictionary
 from tml import Key, Language, Application
 from tests.mock import FIXTURES_PATH
 
-class SnapshotDictionaryTest(unittest.TestCase):
+class SnapshotTest(unittest.TestCase):
     """ Test loading tranlations over API """
     def setUp(self):
         self.client = open_snapshot('%s/snapshot.tar.gz' % FIXTURES_PATH)

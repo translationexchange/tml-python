@@ -5,7 +5,7 @@ from tml.token.parser import TokenParser, IS_TOKEN
 from tests.unit.token import FakeLanguage
 
 
-class TokenTest(unittest.TestCase):
+class ParserTest(unittest.TestCase):
     def test_parse(self):
         p = TokenParser(IS_TOKEN,
                         TokenMatcher([TextToken,

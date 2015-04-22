@@ -5,7 +5,7 @@ from tests.mock import Client
 
 LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
 
-class application(unittest.TestCase):
+class ApplicationTest(unittest.TestCase):
 
     def setUp(self):
         self.client = Client.read_all()

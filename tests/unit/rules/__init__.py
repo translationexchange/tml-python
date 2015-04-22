@@ -5,7 +5,7 @@ from tml.rules import *
 from unittest import case
 
 
-class rules(unittest.TestCase):
+class RulesTest(unittest.TestCase):
     """ Test for rules case """
     def test_conditions(self):
         case = ContextRules([

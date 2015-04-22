@@ -9,7 +9,7 @@ from tests.mock import Client
 
 LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
 
-class language(unittest.TestCase):
+class LanguageTest(unittest.TestCase):
     """ Language tests"""
     def setUp(self):
         self.client = Client()

@@ -10,7 +10,7 @@ from tml.rules.contexts.gender import Gender
 from tests.mock.fallback import Fallback
 
 
-class translations(unittest.TestCase):
+class TranslationsTest(unittest.TestCase):
     """ Test loading tranlations over API """
     def setUp(self):
         self.client = Client.read_all()

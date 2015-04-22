@@ -4,7 +4,7 @@ import unittest
 from tml.rules.parser import *
 
 
-class rules_parser(unittest.TestCase):
+class ParserTest(unittest.TestCase):
     """ Test rules engine """
     def test_parser(self):
         """ Check is parser works correct """

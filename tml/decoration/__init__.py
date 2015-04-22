@@ -55,7 +55,7 @@ class AttributeIsNotSet(Error):
         self.key = key
 
     def __str__(self):
-        return 'Attribute %s is not passed to '
+        return 'Attribute %s for %s is not passed' % (self.key, self.name)
 
 
 class Tag(Set):
@@ -69,14 +69,27 @@ class Tag(Set):
 
     def render(self, data = None):
         attributes = {}
+        first = True
         for key in self.attributes:
             try:
-                attributes[key] = data[self.name][key]
-            except Exception:
+                attributes[key] = self.fetch_attribute(key, attributes)
+            except Exception as e:
                 raise AttributeIsNotSet(self.name, key)
+            first = False
         if self.self_closed:
             return '<%s/>%s' % (self.tag, super(Tag, self).render(data))
         return '<%s%s>%s</%s>' % (self.tag, render_attributes(attributes), super(Tag, self).render(data), self.tag)
+
+    def fetch_attribute(self, key, attributes):
+        long_key = '%s_%s' % (self.name, key)
+        if long_key in attributes:
+            # link_href
+            return attributes[long_key]
+        if type(attributes[self.name]) is str and len(self.attributes) == 1:
+            # just link
+            return attributes[self.name]
+        # link.href
+        return attributes[self.name][key]
 
 
 class TagFactory(object):

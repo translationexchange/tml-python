@@ -30,7 +30,7 @@ class CaseMock(object):
         return data.upper()
 
 
-class TokenTest(unittest.TestCase):
+class LegacyTest(unittest.TestCase):
     def test_legacy(self):
         label = '{name||дал,дала,дал(а)} {to::dat} {count} {count|one:яблоко,few:яблока,many:яблок}'
         expected = u'%(name)s дал(а) %(to)s %(count)s яблок'

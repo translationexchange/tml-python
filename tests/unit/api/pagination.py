@@ -3,7 +3,7 @@ from tests.mock import Client
 from tml.api.pagination import allpages
 import unittest
 
-class pagination(unittest.TestCase):
+class PaginationTest(unittest.TestCase):
     def setUp(self):
         self.client = Client()
     

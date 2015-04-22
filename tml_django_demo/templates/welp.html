@@ -40,7 +40,7 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li data-tml-language-selector="bootstrap" data-tml-language-selector-element="none">
-                    <form method="get">
+                    <form method="get" class="inline-form" style="margin-top:15px">
                         <select name="language" onchange="this.form.submit();">
                             {% for l in languages %}
                             <option value="{{l.locale}}"{% if l.locale == language %} selected{% endif %}>{{l.native_name}}</option>
@@ -63,12 +63,6 @@
     </div>
 </div>
 
-<div class="container" style="padding:300px; background: white">
-
-<div style="width:250px;padding:10px;border:1px solid #eee;">
-    <div data-tml-language-selector="flags">
-    </div>
-</div>
 
 <div class="container">
 

@@ -28,6 +28,7 @@ from hashlib import md5
 from ..translation.missed import MissedKeys
 from tml.dictionary import TranslationIsNotExists
 
+
 class SourceMissed(MissedKeys):
     """ Set of missed keys in source """
     def __init__(self, client, source):
@@ -74,10 +75,14 @@ class SourceDictionary(Hashtable):
 
     def fetch(self, key):
         try:
-            return super(SourceDictionary, self).fetch(key)
+            ret = super(SourceDictionary, self).fetch(key)
         except TranslationIsNotExists as translation_not_exists:
             self.missed_keys.append(key)
             raise translation_not_exists
+        if len(ret) == 0:
+            """ Empty translation """
+            raise TranslationIsNotExists(key, self)
+        return ret
 
     def __del__(self):
         self.flush()

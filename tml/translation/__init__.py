@@ -123,6 +123,10 @@ class Translation(object):
         """ Execute translation """
         return self.fetch_option(data, options).execute(data, options)
 
+    def __len__(self):
+        """ Translation length """
+        return len(self.options)
+
 class NoneTranslation(Translation):
     def __init__(self, key):
         self.key = key

@@ -97,9 +97,7 @@ class Hashtable(AbstractDictionary):
                 Tranlation
         """
         try:
-            if len(self.translations[key.key]):
-                # Check non-empty translation:
-                return Translation.from_data(key, self.translations[key.key])
+            return Translation.from_data(key, self.translations[key.key])
         except KeyError:
             pass
         raise TranslationIsNotExists(key, self)

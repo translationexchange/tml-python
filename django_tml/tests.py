@@ -14,6 +14,7 @@ from tml.api.mock import Hashtable as DumbClient
 from tml.context import SourceContext
 from tml.exceptions import Error
 from tml.decoration import AttributeIsNotSet
+from tml.translation import Key
 
 class WithSnapshotSettings(object):
     def __init__(self):

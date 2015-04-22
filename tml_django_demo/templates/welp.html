@@ -1,6 +1,5 @@
 {% load tml %}
 {% load tml_inline %}
-
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" dir="ltr">
 
@@ -158,7 +157,7 @@
                     </a>
                     <div class="media-body">
                         <strong>
-                            {% tr with user=best.user link_href=best.place.url place=best.place %}{user} reviewed{% endtr %} <a href="{{best.place.url}}">{{best.place.title}}</a>
+                            {% tr with user=best.user link_href=best.place.url title=best.place.title %}{user} reviewed [link]{title}[/link]{% endtr %}</a>
                         </strong>
 
                         <div>

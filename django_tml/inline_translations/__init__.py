@@ -34,5 +34,5 @@ def wrap_string(text, key, translated):
     if not enabled:
         return text
     class_name = 'tml_translated' if translated else 'tml_not_translated'
-    return u'<tml:label class="tml_translatable %(class_name)s" data-translation_key="%(key)s" data-target_locale="%(locale)s">%(text)s</tml:label>' % ({'key':key.key, 'text':text, 'class_name': class_name, 'locale': key.language.locale})
+    return u'<tml:label class="tml_translatable %(class_name)s" data-translation_key="%(key)s" data-target_locale="%(locale)s">%(text)s</tml:label>' % ({'key':key.key, 'text':text, 'class_name': class_name, 'locale': Translator.instance().context.locale})
 

@@ -71,6 +71,27 @@ class AbstractContext(RenderEngine):
             return self.dict.fetch(self.build_key(label, description))
         raise ContextNotConfigured(self)
 
+    _default_language = None
+
+    @property
+    def default_language(self):
+        """ Default languahr getter
+            Returns:
+                language.Language
+        """
+        if not self._default_language:
+            self._default_language = Language.load_by_locale(self.application, self.default_locale)
+        return self._default_language
+
+
+    @property
+    def default_locale(self):
+        """ Default locale getter
+            Returns:
+                string: locale name (ru, en)
+        """
+        return self.language.application.default_locale
+
     def fallback(self, label, description):
         """ Fallback translation: returns label
             Args:
@@ -79,7 +100,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        return self.dict.fallback(self.build_key(label, description))
+        return self.dict.fallback(Key(label = label, description = description, language = self.default_language))
 
     def tr(self, label, data = {}, description = '', options = {}):
         """ Tranlate data
@@ -127,6 +148,7 @@ class LanguageContext(AbstractContext):
         return Dictionary()
 
     _fallback_dict = None
+
     @property
     def fallback_dict(self):
         """ Dictionary used if tranlation is not found in primary dictionary 
@@ -140,24 +162,6 @@ class LanguageContext(AbstractContext):
             self._fallback_dict = self.build_dict(self.default_language)
         return self._fallback_dict
 
-    _default_language = None
-    @property
-    def default_language(self):
-        """ Default languahr getter
-            Returns:
-                language.Language
-        """
-        if not self._default_language:
-            self._default_language = Language.load_by_locale(self.application, self.default_locale)
-        return self._default_language
-
-    @property
-    def default_locale(self):
-        """ Default locale getter
-            Returns:
-                string: locale name (ru, en)
-        """
-        return self.language.application.default_locale
 
     @property
     def locale(self):

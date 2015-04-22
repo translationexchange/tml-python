@@ -83,6 +83,9 @@ class Language(object):
         return cls.from_dict(application, data)
 
     @property
+    def default(self):
+        """ Default language for"""
+    @property
     def client(self):
         """ Client property
             Returns:

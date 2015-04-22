@@ -91,6 +91,12 @@ class DjangoTMLTestCase(SimpleTestCase):
         with self.assertRaises(Error) as context:
             t.render(Context({}))
 
+    def test_default_language(self):
+        activate('ru')
+        self.assertEquals('1 banana', tr('{count||banana,bananas}', {'count': 1}, 'Use default language in fallback'))
+        t = Template('{% load tml %}{% tr %}{count||apple,apples}{% endtr %}')
+        self.assertEquals('2 apples', t.render(Context({'count':2})), 'Render fallback with default language')
+
 
     def test_template_tags(self):
         """ Test for template tags """

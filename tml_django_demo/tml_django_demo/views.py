@@ -4,10 +4,12 @@ from django.utils import translation
 from django.http import HttpResponse
 from json import dumps, loads
 from django.views.decorators.csrf import csrf_exempt
-from django_tml import tr, activate, activate_source, deactivate_source, Translator
+from django_tml import tr, activate, activate_source, deactivate_source, Translator,\
+    get_languages
 from django_tml import inline_translations
 from django.contrib.auth import authenticate, login, logout
 from tml.tools.viewing_user import get_viewing_user
+from django.conf import settings
 
 
 def home(request):
@@ -63,7 +65,13 @@ def auth(request):
     
 
 def welp(request):
-    # Translate current city:
+    # Change language:
+    new_language = request.GET.get('language')
+    if new_language:
+        resp = redirect('/welp.html')
+        resp.set_cookie(settings.LANGUAGE_COOKIE_NAME, new_language)
+        return resp
+    # Get selected language:
     language = Translator.instance().get_language_from_request(request)
     activate(language)
     city = tr(request.GET.get('city','Los Angeles'))
@@ -90,4 +98,6 @@ def welp(request):
                 'stars':1,
                 'review':'I can\'t wait to introduce more people to these orgasmic tacos.'},
                ]
+
+    languages = get_languages()
     return render_to_response('welp.html', locals())

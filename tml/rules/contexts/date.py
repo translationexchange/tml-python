@@ -48,8 +48,8 @@ class Date(date):
         elif type(data) is str or type(data) is unicode:
             for date_format in cls.supported_formats:
                 try:
-                    return datetime.strptime(date_format, format).date()
-                except ValueError:
+                    return datetime.strptime(data, date_format).date()
+                except ValueError :
                     pass
         raise NotDate(data)
 

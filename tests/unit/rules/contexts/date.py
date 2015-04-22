@@ -5,7 +5,7 @@ from datetime import date, datetime
 from tml.rules.contexts.date import Date, NotDate
 from json import loads
 
-class date_test(unittest.TestCase):
+class DateTest(unittest.TestCase):
     """ Test date context """
     def setUp(self):
         self.d = date(2015, 02, 23)
@@ -32,3 +32,7 @@ class date_test(unittest.TestCase):
     def test_correct_format(self):
         with self.assertRaises(NotDate):
             Date.match('23.02.2015')
+
+if __name__ == '__main__':
+    unittest.main()
+

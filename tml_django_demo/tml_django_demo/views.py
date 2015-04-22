@@ -4,7 +4,7 @@ from django.utils import translation
 from django.http import HttpResponse
 from json import dumps, loads
 from django.views.decorators.csrf import csrf_exempt
-from django_tml import tr, activate, activate_source, deactivate_source
+from django_tml import tr, activate, activate_source, deactivate_source, Translator
 from django_tml import inline_translations
 from django.contrib.auth import authenticate, login, logout
 from tml.tools.viewing_user import get_viewing_user
@@ -64,6 +64,8 @@ def auth(request):
 
 def welp(request):
     # Translate current city:
+    language = Translator.instance().get_language_from_request(request)
+    activate(language)
     city = tr(request.GET.get('city','Los Angeles'))
 
     best = {'user': {'name':'Jane Smith', 'gender':'female'},

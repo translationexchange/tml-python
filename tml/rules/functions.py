@@ -72,8 +72,8 @@ def to_range(text):
     if m:
         min_value = int(m.group(1))
         max_value = int(m.group(2))
-        if not max_value > min_value:
-            InvalidRange(min_value, max_value)
+        if max_value < min_value:
+            raise InvalidRange(min_value, max_value)
         return (min_value, max_value)
     raise ArgumentError('Invalid range string %s' % text)
 

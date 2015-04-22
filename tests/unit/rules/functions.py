@@ -8,7 +8,7 @@ import re
 from tml.rules.parser import parse
 default_engine = RulesEngine(SUPPORTED_FUNCTIONS) # default engine
 
-class rules_functions(unittest.TestCase):
+class FunctionsTest(unittest.TestCase):
     def test_to_int(self):
         """ Test assinment to integer """
         self.assertEquals(1, to_int('1'), '1')
@@ -32,7 +32,7 @@ class rules_functions(unittest.TestCase):
             to_range('5..b')
         with self.assertRaises(ArgumentError) as context:
             to_range('05..08')
-        with self.assertRaises(ArgumentError) as context:
+        with self.assertRaises(InvalidRange) as context:
             to_range('8..5')
 
     def test_in_f(self):

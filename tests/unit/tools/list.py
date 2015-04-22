@@ -3,13 +3,13 @@ import unittest
 from tml.tools.list import List
 from tml.tools.template import Template
 from tests.mock import Client
-from tml import Context
+from tml import build_context
 
 
-class list(unittest.TestCase):
+class ListTest(unittest.TestCase):
 
     def setUp(self):
-        self.context = Context(client = Client.read_all(), locale = 'ru')
+        self.context = build_context(client = Client.read_all(), locale = 'ru')
 
 
     def test_render(self):

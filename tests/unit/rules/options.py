@@ -4,16 +4,15 @@ import unittest
 from tml.rules.options import *
 
 
-
-class options(unittest.TestCase):
+class OptionsTest(unittest.TestCase):
     """ Test for options """
     def test_parse_args(self):
         """ Test parser """
-        self.assertEquals((['a','b'],{}), parse_args('a, b'), 'a,b')
-        self.assertEquals((['a','b'],{}), parse_args(' a,b '), ' a,b ')
-        self.assertEquals(([],{'one':'1','two':'2'}), parse_args('one: 1, two: 2'), 'one: 1, two: 2')
-        self.assertEquals(([],{'one':'1','two':'2'}), parse_args(' one : 1, two : 2 '), 'more spaces: " one : 1, two : 2 "')
-        self.assertEquals((['a', 'b'],{'one':'1','two':'2'}), parse_args('a, one : 1, two : 2, b '), 'a, one : 1, two : 2, b ')
+        self.assertEquals((['a', 'b'],{}), parse_args('a, b'), 'a,b')
+        self.assertEquals((['a', 'b'],{}), parse_args(' a,b '), ' a,b ')
+        self.assertEquals(([],{'one':'1', 'two':'2'}), parse_args('one: 1, two: 2'), 'one: 1, two: 2')
+        self.assertEquals(([],{'one':'1', 'two':'2'}), parse_args(' one : 1, two : 2 '), 'more spaces: " one : 1, two : 2 "')
+        self.assertEquals((['a', 'b'],{'one':'1', 'two':'2'}), parse_args('a, one : 1, two : 2, b '), 'a, one : 1, two : 2, b ')
 
     def test_token_mapping(self):
         self.assertEquals({'one':'one','few':'few','many':'many','other':'many'},
@@ -66,3 +65,7 @@ class options(unittest.TestCase):
 
         with self.assertRaises(MissedKey):
             p.parse('male: he, female: she')
+
+
+if __name__ == '__main__':
+    unitest.run()

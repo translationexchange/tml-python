@@ -26,6 +26,7 @@ __author__ = 'a@toukmanov.ru'
 
 
 from tml.exceptions import Error as BaseError
+from ..strings import to_string
 import re
 
 
@@ -103,7 +104,7 @@ def parse_args(text):
     for part in text.split(','):
         key, value = parse_kwarg(part)
         if key is None:
-            args.append(part)
+            args.append(value)
         else:
             kwargs[key] = value
 
@@ -125,10 +126,10 @@ def parse_kwarg(part):
         Returns:
             tuple (key, value)
     """
-    part = part.strip()
+    part = to_string(part).strip(' ')
     match = IS_KWARG.match(part)
     if match:
-        return (match.group(1).strip(), match.group(2).strip())
+        return (match.group(1).strip(' '), match.group(2).strip(' '))
     else:
         return (None, part)
 

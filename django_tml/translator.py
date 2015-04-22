@@ -55,6 +55,10 @@ class Translator(object):
         self.used_sources = []
         self._build_preprocessors()
 
+    @property
+    def languages(self):
+        return self.context.application.languages
+
     def turn_off_cache(self):
         """ Cache policy: turn off """
         self.cache = False

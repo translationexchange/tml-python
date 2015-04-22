@@ -43,10 +43,11 @@ class RenderEngine(object):
             Returns:
                 unicode
         """
+        translation_data = self.prepare_data(data)
         # Apply tokens:
-        ret = translation.execute(self.prepare_data(data), options)
+        ret = translation.execute(translation_data, options)
         # Apply decoration:
-        return parse(ret).render(options)
+        return parse(ret).render(translation_data)
 
     def prepare_data(self, data):
         """ Render engine """

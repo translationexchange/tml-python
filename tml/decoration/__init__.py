@@ -51,6 +51,7 @@ class Set(object):
 
 class AttributeIsNotSet(Error):
     def __init__(self, name, key):
+        super(AttributeIsNotSet, self).__init__()
         self.name = name
         self.key = key
 
@@ -81,15 +82,26 @@ class Tag(Set):
         return '<%s%s>%s</%s>' % (self.tag, render_attributes(attributes), super(Tag, self).render(data), self.tag)
 
     def fetch_attribute(self, key, attributes):
+        """ Fetch attibute by key
+            Args:
+                key (string): attribute name
+            Retursn:
+                string: attribute links
+        """
         long_key = '%s_%s' % (self.name, key)
-        if long_key in attributes:
-            # link_href
+        try:
+            # Use long key like "link_href"
             return attributes[long_key]
+        except Exception:
+            pass
+        try:
+            # Use attribute as dict
+            return attributes[self.name][key]
+        except Exception:
+            pass
         if type(attributes[self.name]) is str and len(self.attributes) == 1:
             # just link
-            return attributes[self.name][key]
-        # link.href
-        return attributes[self.name][key]
+            return attributes[self.name]
 
 
 class TagFactory(object):

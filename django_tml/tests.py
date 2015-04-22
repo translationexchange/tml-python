@@ -12,6 +12,8 @@ from django.conf import settings
 from os.path import dirname
 from tml.api.mock import Hashtable as DumbClient
 from tml.context import SourceContext
+from tml.exceptions import Error
+from tml.decoration import AttributeIsNotSet
 
 class WithSnapshotSettings(object):
     def __init__(self):
@@ -80,6 +82,15 @@ class DjangoTMLTestCase(SimpleTestCase):
         self.assertEquals(u'%(number)s яблока', t.ungettext('One apple', '{number} apples', 22), 'ungettext + 22')
         self.assertEquals(u'%(number)s яблок', t.ungettext('One apple', '{number} apples', 5), 'ungettext + 5')
         self.assertEquals('%(number)s яблок', t.ngettext('One apple', '{number} apples', 12), 'ngettext + 12')
+
+    def test_format_attributes(self):
+        t = Template('{% load tml %}{% tr %}[link]Hello[/link]{% endtr %}')
+        self.assertEquals('<a href="url">Hello</a>', t.render(Context({'link_href':'url'})), 'Test format attributes')
+        self.assertEquals('<a href="url">Hello</a>', t.render(Context({'link':'url'})), 'Test format attributes')
+        self.assertEquals('<a href="url">Hello</a>', t.render(Context({'link':{'href':'url'}})), 'Test format attributes')
+        with self.assertRaises(Error) as context:
+            t.render(Context({}))
+
 
     def test_template_tags(self):
         """ Test for template tags """

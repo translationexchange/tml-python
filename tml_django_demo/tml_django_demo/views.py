@@ -65,6 +65,7 @@ def auth(request):
     
 
 def welp(request):
+
     # Change language:
     new_language = request.GET.get('language')
     if new_language:
@@ -101,3 +102,4 @@ def welp(request):
 
     languages = get_languages()
     return render_to_response('welp.html', locals())
+

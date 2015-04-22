@@ -103,6 +103,13 @@ class api_test(unittest.TestCase):
         self.assertEquals('en', f.key.language.locale, 'Fetch translation with default language')
         self.assertEquals('2 bananas', c.tr('{count||banana,bananas}',{'count':2}), 'Use fallback rules')
 
+    def test_defaults(self):
+        # completly empty en translation:
+        self.client.read('sources/5b7c7408d7cb048fc86170fdb3a691a8/translations',{'locale':'en'},'sources/2c1743a391305fbf367df8e4f069f9f9/translations.json',True)
+        c = build_context(source = 'empty_source', client = self.client, locale = 'ru')
+        self.assertEquals(u'яблока', c.tr('{count|apple,apples}',{'count':22}), 'Use few from translation')
+        self.assertEquals('apple', c.tr('{count|apple,apples}',{'count':1}), 'Use one from fallback')
+        self.assertEquals('apples', c.tr('{count|apple,apples}',{'count':12}), 'Use many from fallback')
 
 
 if __name__ == '__main__':

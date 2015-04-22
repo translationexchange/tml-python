@@ -102,7 +102,6 @@ TML = {
     'monkeypatch': True,
     'cache': 'default',
     'inline_wrapper_cookie': 'tml_inline_translation',
-    'snapshot': os.path.dirname(BASE_DIR) + '/tests/fixtures/snapshot.tar.gz'
 }
 
 TML_DATA_PREPROCESSORS = ['tml.tools.list.preprocess_lists',]

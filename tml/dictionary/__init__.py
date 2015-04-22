@@ -22,7 +22,7 @@
 """
 __author__ = 'a@toukmanov.ru'
 
-from ..translation import Translation
+from ..translation import Translation, NoneTranslation
 from ..exceptions import Error
 
 
@@ -33,7 +33,7 @@ def return_label_fallback(key):
         Returns:
             Translation
     """
-    return Translation(key, [])
+    return NoneTranslation(key)
 
 
 class AbstractDictionary(object):
@@ -97,9 +97,12 @@ class Hashtable(AbstractDictionary):
                 Tranlation
         """
         try:
-            return Translation.from_data(key, self.translations[key.key])
+            if len(self.translations[key.key]):
+                # Check non-empty translation:
+                return Translation.from_data(key, self.translations[key.key])
         except KeyError:
-            raise TranslationIsNotExists(key, self)
+            pass
+        raise TranslationIsNotExists(key, self)
 
 
 class TranslationIsNotExists(Error):

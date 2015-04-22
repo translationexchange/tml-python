@@ -176,7 +176,7 @@ class Parser(object):
             try:
                 return self.token_mapping[len(args) - 1].apply(args)
             except KeyError:
-                raise  InvalidNumberOfArguments(len(args), text)
+                raise  InvalidNumberOfArguments(text)
     
     def validate_kwargs(self, kwargs, text):
         """ Validate parsed kwargs
@@ -238,17 +238,9 @@ class MissedKey(Error):
 
 class InvalidNumberOfArguments(Error):
     """ Args parser error """
-    def __init__(self, text, arguments_count):
-        """ Invalid arguments count
-            Args:
-                text (string): expression
-                argument_count: unsupported argument count
-        """
-        super(InvalidNumberOfArguments, self).__init__(text)
-        self.arguments_count = arguments_count
 
     def __str__(self, *args, **kwargs):
-        return 'Unsupported arguments count in expression "%s"'
+        return 'Unsupported arguments count in expression "%s"' % (self.rule)
 
     def apply(self):
         """ Apply exception 

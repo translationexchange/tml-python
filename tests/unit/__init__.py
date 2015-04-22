@@ -43,7 +43,7 @@ class api_test(unittest.TestCase):
         self.client.read('applications/2/translations', {'locale':'ru','page':1}, 'applications/1/translations.json')
 
     def test_configure_first(self):
-        tml.context = None
+        tml.DEFAULT_CONTEXT = None
         with self.assertRaises(ContextNotConfigured):
             tr('Hello')
 

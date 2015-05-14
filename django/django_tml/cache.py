@@ -1,6 +1,6 @@
 # encoding: UTF-8
 from django.conf import settings
-from django.core.cache import get_cache
+from django.core.cache import caches
 from urllib import urlencode
 from tml.api.client import Client
 
@@ -20,7 +20,7 @@ class CachedClient(object):
         backend_name = settings.TML.get('cache', None)
         if backend_name is None:
             return client
-        return cls(client, get_cache(backend_name))
+        return cls(client, caches[backend_name])
 
     def key(self, url, params):
         return '%s?%s' % (url, urlencode(params))

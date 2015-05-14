@@ -13,8 +13,10 @@ import os
 import sys
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # add .. to pythonpath:
-sys.path.append(os.path.dirname(BASE_DIR))
-
+ROOT = os.path.dirname(BASE_DIR)
+sys.path.append(ROOT)
+# add ../.. to pythonpath (tml dir):
+sys.path.append(os.path.dirname(ROOT))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
@@ -102,7 +104,7 @@ TML = {
     'monkeypatch': True,
     'cache': 'default',
     'inline_wrapper_cookie': 'tml_inline_translation',
-    'snapshot': os.path.dirname(BASE_DIR) + '/tests/fixtures/snapshot.tar.gz'
+    'snapshot': os.path.dirname(ROOT) + '/tests/fixtures/snapshot.tar.gz'
 }
 
 TML_DATA_PREPROCESSORS = ['tml.tools.list.preprocess_lists',]

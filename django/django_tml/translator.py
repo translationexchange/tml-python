@@ -1,6 +1,6 @@
 # encoding: UTF-8
 from django.conf import settings
-from django.utils.translation.trans_real import to_locale, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re, _BROWSERS_DEPRECATED_LOCALES 
+from django.utils.translation.trans_real import to_locale, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re
 from tml import build_context
 from tml.application import LanguageNotSupported, Application
 from django_tml.cache import CachedClient
@@ -352,10 +352,6 @@ class Translator(object):
         """
         _supported = self.context.application.supported_locales
         if lang_code:
-            # some browsers use deprecated language codes -- #18419
-            replacement = _BROWSERS_DEPRECATED_LOCALES.get(lang_code)
-            if lang_code not in _supported and replacement in _supported:
-                return replacement
             # if fr-ca is not supported, try fr.
             generic_lang_code = lang_code.split('-')[0]
             for code in (lang_code, generic_lang_code):

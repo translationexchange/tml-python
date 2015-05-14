@@ -21,7 +21,7 @@ class WithSnapshotSettings(object):
         self.TML = {}
         for key in settings.TML:
             self.TML[key] = settings.TML[key]
-        self.TML['snapshot'] = dirname(settings.BASE_DIR) + '/tests/fixtures/snapshot.tar.gz'
+        self.TML['snapshot'] = dirname(settings.FIXTURES_PATH) + '/snapshot.tar.gz'
 
 
 class DjangoTMLTestCase(SimpleTestCase):

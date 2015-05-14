@@ -22,7 +22,10 @@
 """
 __author__ = 'a@toukmanov.ru'
 
-from urllib import urlencode
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
 from json import loads
 from os import listdir
 from os.path import isdir

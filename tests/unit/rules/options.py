@@ -1,5 +1,6 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from tml.rules.options import *
 
@@ -24,7 +25,7 @@ class OptionsTest(unittest.TestCase):
                           apply(['he','she']),
                           'He, she + template for other')
         m = self._build_mapping()
-        self.assertEquals([1,2], m.keys(), 'Map 2 keys')
+        self.assertEquals([1,2], list(m.keys()), 'Map 2 keys')
 
 
     def _build_mapping(self):
@@ -68,4 +69,4 @@ class OptionsTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unitest.run()
+    unittest.main()

@@ -119,10 +119,10 @@ class FunctionCallFault(Error):
         super(FunctionCallFault, self).__init__(rule, data)
         self.exception = exception
 
-    MESSAGE = 'Function call fault in function %s with %s: %s'
+    MESSAGE = 'Function call fault in %s with %s: %s'
 
     def __str__(self):
-        return self.MESSAGE % (self.rule[0],
+        return self.MESSAGE % (', '.join(self.rule),
                                self.exception.__class__.__name__,
                                self.exception)
 

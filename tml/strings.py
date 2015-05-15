@@ -21,6 +21,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import six
 
 def to_string(text):
     """ Safe string conversion 
@@ -29,7 +30,7 @@ def to_string(text):
         Returns:
             str
     """
-    if type(text) is unicode:
+    if type(text) is six.text_type:
         return text
     if hasattr(text, '__html__'):
         return unicode(text.__html__())

@@ -8,6 +8,7 @@ from json import loads
 import re
 from tml.rules.parser import parse
 import six
+from tml.strings import to_string
 default_engine = RulesEngine(SUPPORTED_FUNCTIONS) # default engine
 
 class FunctionsTest(unittest.TestCase):
@@ -87,7 +88,7 @@ class FunctionsTest(unittest.TestCase):
         sdata = loads('{"value":"Маша"}')
         rule = parse(srule['test'])
         self.assertTrue(default_engine.execute(rule, sdata), 'Re supports json encoding')
-        self.assertEquals(six.u("Маше"), default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
+        self.assertEquals(to_string("Маше"), default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
 
 
 if __name__ == '__main__':

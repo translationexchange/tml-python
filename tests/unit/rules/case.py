@@ -9,24 +9,27 @@ from tml.language import Language
 from tml.rules.contexts import Gender
 from tml.rules.case import Case
 from tml.rules.parser import ParseError
+from tml.strings import to_string
 
 class CaseTest(unittest.TestCase):
     """ Test rules engine """
     def setUp(self):
-        self.rules = [{'conditions': "(&& (= 'female' @gender) (match '/(ша)$/' @value))", "operations": "(replace '/а$/' 'и' @value)"},
-                      {'conditions': "(match '/а$/' @value)", "operations": "(replace '/а$/' 'ы' @value)"}]
+        self.rules = [{'conditions': to_string("(&& (= 'female' @gender) (match '/(ша)$/' @value))"),
+                       "operations": to_string("(replace '/а$/' 'и' @value)")},
+                      {'conditions': to_string("(match '/а$/' @value)"),
+                       "operations": to_string("(replace '/а$/' 'ы' @value)")}]
         self.invalid_rules = [{'conditions':'(mode 3 @value))', 'operations': ''}]
 
 
     def test_case(self):
         c = Case.from_rules(self.rules)
-        self.assertEquals('Маши',
-                          c.execute(Gender.female('Маша')),
+        self.assertEquals(to_string('Маши'),
+                          c.execute(Gender.female(to_string('Маша'))),
                           'Маша -> Маши')
-        self.assertEquals('Лены',
+        self.assertEquals(to_string('Лены'),
                           c.execute(Gender.female('Лена')),
                           'Лена -> Лены')
-        self.assertEquals('Вася',
+        self.assertEquals(to_string('Вася'),
                           c.execute(Gender.female('Вася')),
                           'Вася -> Вася')
 

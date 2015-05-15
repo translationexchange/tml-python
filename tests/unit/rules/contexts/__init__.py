@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 import unittest
 from tml.rules.contexts import *
-
+from tml.strings import to_string
 
 def die(object):
     raise Exception('Bad function')
@@ -67,19 +67,19 @@ class ContextsTest(unittest.TestCase):
         self.assertEquals('one', self.number.option(21), 'Check option')
         self.assertEquals('few', self.number.option(32), 'Check option')
         self.assertEquals('many', self.number.option(40), 'Check option')
-        self.assertEquals('тест', self.number.execute('тест, теста, тестов', 1), '1 тест')
-        self.assertEquals('тестов', self.number.execute('тест, теста, тестов', 11), '11 тестов')
-        self.assertEquals('теста', self.number.execute('тест, теста, тестов', 2), '2 теста')
+        self.assertEquals(to_string('тест'), self.number.execute('тест, теста, тестов', 1), '1 тест')
+        self.assertEquals(to_string('тестов'), self.number.execute('тест, теста, тестов', 11), '11 тестов')
+        self.assertEquals(to_string('теста'), self.number.execute('тест, теста, тестов', 2), '2 теста')
         with self.assertRaises(ValueIsNotMatchContext) as context:
             self.number.execute('тест, теста, тестов', 'AAA')
         self.assertEquals('AAA', context.exception.value, 'Store value')
-        self.assertEquals('пошел', self.gender.execute('пошел, пошла', 'male'))
+        self.assertEquals(to_string('пошел'), self.gender.execute('пошел, пошла', 'male'))
 
     def test_contexts(self):
         contexts = Contexts([self.gender, self.number])
-        self.assertEquals('тест', contexts.execute('тест, теста, тестов', 1), '1 тест')
-        self.assertEquals('пошел', contexts.execute('пошел, пошла', 'male'))
-        self.assertEquals('яблока', contexts.execute('one: яблоко, few: яблока, many: яблок', 22),'Check last option')
+        self.assertEquals(to_string('тест'), contexts.execute('тест, теста, тестов', 1), '1 тест')
+        self.assertEquals(to_string('пошел'), contexts.execute('пошел, пошла', 'male'))
+        self.assertEquals(to_string('яблока'), contexts.execute('one: яблоко, few: яблока, many: яблок', 22),'Check last option')
 
     def test_fetcher(self):
         contexts = Contexts.from_dict(self.api_response)

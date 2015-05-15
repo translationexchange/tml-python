@@ -14,11 +14,11 @@ from django.utils.module_loading import import_string
 from tml.api.client import Client
 from tml.api.snapshot import open_snapshot
 from tml.render import RenderEngine
-
+import six
 
 def to_str(fn):
     def tmp(*args, **kwargs):
-        return fn(*args, **kwargs).encode('utf-8')
+        return six.text_type(fn(*args, **kwargs))
     return tmp
 
 def fallback_locale(locale):
@@ -206,6 +206,8 @@ class Translator(object):
         return
 
     def reset_context(self):
+        if self._context:
+            self._context.deactivate()
         self._context = None
 
 

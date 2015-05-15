@@ -35,6 +35,7 @@ from tml.translation import Key
 from hashlib import md5
 import six
 from tml.strings import to_string
+import json
 
 __author__ = 'a@toukamnov.ru'
 
@@ -88,15 +89,17 @@ class api_test(unittest.TestCase):
         source = 'test_source_fallback'
         label = 'Only in English'
         # emulate empty source for ru
-        source_hash = md5(source).hexdigest()
+        source_hash = md5(source.encode('utf-8')).hexdigest()
         self.client.read('sources/%s/translations' % source_hash, {'locale':'ru'}, 'sources/sources_empty.json', True)
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
         c = build_context(client = self.client, locale = 'ru', source = source)
         self.assertEquals('Has english translation', c.tr(label),'Use fallback source for en')
-        del c
+        c.deactivate()
         self.assertEquals(self.client.url, 'sources/register_keys', 'Submit missed keys url')
-        self.assertEquals({'source_keys': '[{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]'}, self.client.params, 'Submit missed key data')
+        expected_keys = [{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]
+        submited_keys = json.loads(self.client.params['source_keys'])
+        self.assertEquals(expected_keys, submited_keys, 'Submit missed key data')
         c = build_context(client = self.client, locale = 'ru', source = source)
         self.assertEquals('Never translated', c.tr('Never translated'), 'Never tranlated parent fallback')
 

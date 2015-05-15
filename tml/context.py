@@ -122,6 +122,12 @@ class AbstractContext(RenderEngine):
         # Render result:
         return self.render(translation, data, options)
 
+    def deactivate(self):
+        pass
+
+    def __del__(self):
+        self.deactivate()
+
 
 class LanguageContext(AbstractContext):
     """ Context with selected language """
@@ -208,6 +214,9 @@ class SourceContext(LanguageContext):
         """ Build source dictionary for language """
         return SourceDictionary(self.source, language)
 
+    def deactivate(self):
+        self.dict.flush()
+
 
 class SnapshotContext(LanguageContext):
     """ Snapshot usage """
@@ -225,4 +234,5 @@ class SnapshotContext(LanguageContext):
             # Snapshot does not works out of source:
             return NoneDict()
         return SnapshotDictionary(self.source, language)
+
 

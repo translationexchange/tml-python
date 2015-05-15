@@ -21,6 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
+from tml.strings import to_string
 __author__ = 'a@toukmanov.ru'
 
 from . import AbstractClient, APIError
@@ -70,7 +71,7 @@ class SnapshotDir(AbstractClient):
         """ Fetch data for path from file """
         path = '%s/%s.json' % (self.path, path)
         with open(path) as fp:
-            return loads(fp.read())
+            return loads(to_string(fp.read()))
 
     @classmethod
     def rewrite_path(cls, url):
@@ -106,7 +107,8 @@ class SnapshotFile(SnapshotDir):
     def fetch(self, path):
         try:
             fp = self.file.extractfile('%s.json' % path)
-            ret = loads(fp.read())
+            data = fp.read()
+            ret = loads(to_string(data))
             return ret
         finally:
             if fp:

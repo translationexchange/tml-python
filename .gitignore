@@ -4,3 +4,4 @@
 .idea
 .settings
 test.py
+nohup.out

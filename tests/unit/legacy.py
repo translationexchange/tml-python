@@ -1,5 +1,5 @@
-from __future__ import absolute_import
 # encoding: UTF-8
+from __future__ import absolute_import
 import unittest
 from tml.legacy import text_to_sprintf, suggest_label, translate
 from tml import build_context
@@ -9,6 +9,7 @@ from tml.application import Application
 from tml.dictionary import Hashtable
 from tml.dictionary.language import LanguageDictionary
 import six
+from tml.strings import to_string
 
 class FakeLanguage(object):
     def __init__(self):
@@ -35,7 +36,7 @@ class CaseMock(object):
 class LegacyTest(unittest.TestCase):
     def test_legacy(self):
         label = '{name||дал,дала,дал(а)} {to::dat} {count} {count|one:яблоко,few:яблока,many:яблок}'
-        expected = six.u('%(name)s дал(а) %(to)s %(count)s яблок')
+        expected = to_string('%(name)s дал(а) %(to)s %(count)s яблок')
         format = text_to_sprintf(label, FakeLanguage())
         self.assertEquals(expected, format, 'Check legacy')
 
@@ -52,11 +53,11 @@ class LegacyTest(unittest.TestCase):
         context = build_context(client = c)
         context.dict = LanguageDictionary(context.language, [])
         t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
-        self.assertEquals(six.u('Хелло Bill'), t)
+        self.assertEquals(to_string('Хелло Bill'), t)
         # Check old response syntax:
         context.dict.translations['8a7c891aa103e45e904a173f218cab9a'][0]['label'] = 'Привет %(name)s'
         t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
-        self.assertEquals(six.u('Привет Bill'), t)
+        self.assertEquals(to_string('Привет Bill'), t)
 
 if __name__ == '__main__':
     unittest.main()

@@ -36,7 +36,6 @@ class SnapshotTest(unittest.TestCase):
     def check_load(self, client):
         app = Application.load_default(client)
         self.assertEquals(767, app.id, 'Load application')
-	print client.get('ru/sources/yyyy', {})
         self.assertEquals('ru', Language.load_by_locale(app, 'ru').locale, 'Load language')
         self.assertEquals({"results":{"90e0ac08b178550f6513762fa892a0ca":[{"label":to_string("Привет {name}")}]}},
                           client.get('ru/sources/yyyy', {}),

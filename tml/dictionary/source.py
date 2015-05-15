@@ -70,7 +70,7 @@ class SourceDictionary(Hashtable):
             Returns:
                 tuple: url, params
         """
-        uri = md5(self.source).hexdigest()
+        uri = md5(self.source.encode('utf-8')).hexdigest()
         return ('sources/%s/translations' % uri,
                 {'locale': self.language.locale})
 

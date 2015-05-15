@@ -9,7 +9,7 @@ from tml.translation import Key
 from tml.dictionary.language import LanguageDictionary
 from tml.rules.contexts.gender import Gender
 from tests.mock.fallback import Fallback
-
+from tml.strings import to_string
 
 class LanguageTest(unittest.TestCase):
     """ Test loading tranlations over API """
@@ -30,7 +30,7 @@ class LanguageTest(unittest.TestCase):
                               language = self.lang))
         self.assertEquals(0, len(f.missed_keys),'No missing keys')
         self.assertEquals(3, len(t.options), 'All options loaded')
-        self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
+        self.assertEquals(to_string('Маша любезно дала тебе 2 яблока'), t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
 
     def test_default(self):
         f = Fallback()

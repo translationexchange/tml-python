@@ -9,6 +9,7 @@ from tml.translation import Key
 from tml.dictionary.translations import Dictionary
 from tml.rules.contexts.gender import Gender
 from tests.mock.fallback import Fallback
+from tml.strings import to_string
 
 
 class TranslationsTest(unittest.TestCase):
@@ -30,7 +31,7 @@ class TranslationsTest(unittest.TestCase):
         t = dict.translate(self.apples_key())
         self.assertEquals(3, len(t.options), 'All options loaded')
         self.assertEquals(0, len(f.missed_keys), 'No missed keys')
-        self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
+        self.assertEquals(to_string('Маша любезно дала тебе 2 яблока'), t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
 
     def test_default(self):
         f = Fallback()

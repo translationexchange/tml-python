@@ -10,6 +10,7 @@ from tml.dictionary.source import SourceDictionary
 from tml.rules.contexts.gender import Gender
 from tests.mock.fallback import Fallback
 from json import dumps, loads
+from tml.strings import to_string
 
 
 class SourceTest(unittest.TestCase):
@@ -26,7 +27,7 @@ class SourceTest(unittest.TestCase):
                               description = 'somebody give you few apples',
                               language = self.lang))
         self.assertEquals(3, len(t.options), 'All options loaded')
-        self.assertEquals('Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
+        self.assertEquals(to_string('Маша любезно дала тебе 2 яблока'), t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
 
     def test_default(self):
         dict = SourceDictionary(language = self.lang, source = 'index')

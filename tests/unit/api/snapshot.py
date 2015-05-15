@@ -8,6 +8,8 @@ from tml.application import Application
 from tml.language import Language
 from tml.api.client import APIError
 from tml import Error
+from tml.strings import to_string
+
 
 class SnapshotTest(unittest.TestCase):
     """ Test for snapshot API client """
@@ -34,8 +36,9 @@ class SnapshotTest(unittest.TestCase):
     def check_load(self, client):
         app = Application.load_default(client)
         self.assertEquals(767, app.id, 'Load application')
+	print client.get('ru/sources/yyyy', {})
         self.assertEquals('ru', Language.load_by_locale(app, 'ru').locale, 'Load language')
-        self.assertEquals({"results":{"90e0ac08b178550f6513762fa892a0ca":[{"label":"Привет {name}"}]}},
+        self.assertEquals({"results":{"90e0ac08b178550f6513762fa892a0ca":[{"label":to_string("Привет {name}")}]}},
                           client.get('ru/sources/yyyy', {}),
                           'Load source')
         with self.assertRaises(APIError) as c:

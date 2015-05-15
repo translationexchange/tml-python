@@ -5,7 +5,8 @@ import unittest
 from tml.dictionary.snapshot import SnapshotDictionary
 from tml import Key, Language, Application
 from tests.mock import FIXTURES_PATH
-import six
+from tml.strings import to_string
+
 
 class SnapshotTest(unittest.TestCase):
     """ Test loading tranlations over API """
@@ -18,10 +19,10 @@ class SnapshotTest(unittest.TestCase):
         dict = SnapshotDictionary(language = self.lang, source = 'index')
         t = dict.translate(Key(label = 'Test',
                               language = self.lang))
-        self.assertEquals(six.u('Тест'), t.execute({}, {}), 'Test translate')
+        self.assertEquals(to_string('Тест'), t.execute({}, {}), 'Test translate')
         t = dict.translate(Key(label = 'Untranslated',
                               language = self.lang))
-        self.assertEquals(six.u('Untranslated'), t.execute({}, {}), 'Test fallback')
+        self.assertEquals(to_string('Untranslated'), t.execute({}, {}), 'Test fallback')
 
 
 if __name__ == '__main__':

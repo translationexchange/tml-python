@@ -44,7 +44,9 @@ class CaseTest(unittest.TestCase):
         cases_keys.sort()
         self.assertEquals(['gen', 'gen2'], cases_keys, 'Return only valid')
         self.assertEquals(str(context.exception), str(errors['err']), 'Store errors in errors')
-        self.assertEquals(['err2','err'], list(errors.keys()), 'Store all error')
+        errors_keys = list(errors.keys())
+        errors_keys.sort()
+        self.assertEquals(['err', 'err2'], errors_keys , 'Store all error')
 
 if __name__ == '__main__':
     unittest.main()

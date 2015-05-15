@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 import re
 from tml.token import TokenMatcher, data_matcher

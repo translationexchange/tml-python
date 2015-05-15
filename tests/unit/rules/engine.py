@@ -1,5 +1,6 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from tml.rules.engine import *
 from tml.rules.functions import SUPPORTED_FUNCTIONS

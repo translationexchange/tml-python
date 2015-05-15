@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 import unittest
 from tml.tools.viewing_user import get_viewing_user, set_viewing_user, reset_viewing_user

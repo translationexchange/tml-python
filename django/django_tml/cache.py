@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from django.conf import settings
 from django.core.cache import caches

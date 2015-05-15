@@ -22,6 +22,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from __future__ import absolute_import
+import six
 __author__ = 'a@toukmanov.ru'
 
 
@@ -45,7 +47,7 @@ class Date(date):
             return data.date()
         elif isinstance(data, date):
             return data
-        elif type(data) is str or type(data) is unicode:
+        elif type(data) is str or type(data) is six.text_type:
             for date_format in cls.supported_formats:
                 try:
                     return datetime.strptime(data, date_format).date()

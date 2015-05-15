@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from django.template import Node, Library
 from django.template.loader import render_to_string

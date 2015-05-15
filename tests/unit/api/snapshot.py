@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from tml.api.snapshot import SnapshotFile, SnapshotDir, MethodIsNotSupported,\
     open_snapshot

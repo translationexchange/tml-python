@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from tml.dictionary import return_label_fallback
 

@@ -22,6 +22,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from __future__ import absolute_import
+import six
 __author__ = 'a@toukmanov.ru'
 
 
@@ -296,5 +298,5 @@ class InvalidTokenSyntax(Error):
         self.text = text
 
     def __str__(self):
-        return u'Token syntax is not supported for token "%s"' % self.text
+        return six.u('Token syntax is not supported for token "%s"') % self.text
 

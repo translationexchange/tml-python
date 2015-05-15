@@ -1,6 +1,8 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from ..exceptions import Error
 from .__init__ import Set, system_tags, Tag, UnsupportedTag
+import six
 
 BEGIN_TOKEN = '['
 END_TOKEN = ']'
@@ -106,7 +108,7 @@ class ParseError(Error):
         self.error = error
 
     def __str__(self, *args, **kwargs):
-        return u'Decoration parsing fault on "%s" at %s with %s' % (self.text, self.pos, self.error)
+        return six.u('Decoration parsing fault on "%s" at %s with %s') % (self.text, self.pos, self.error)
 
 class UnexpectedToken(ParseError):
     def __init__(self, text, pos, token = None):

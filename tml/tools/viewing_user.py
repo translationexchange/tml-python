@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from tml.rules.contexts.gender import Gender
 _viewing_user = Gender.other(None)

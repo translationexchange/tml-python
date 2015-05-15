@@ -51,7 +51,7 @@ class BlockTranslateNode(BaseBlockTranslateNode):
             description = ''
  
         custom_data = {}
-        for var, val in self.extra_context.items():
+        for var, val in list(self.extra_context.items()):
             custom_data[var] = val.resolve(data)
         data.update(custom_data)
 

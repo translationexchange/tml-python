@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from django.utils import translation
 from .translator import Translator

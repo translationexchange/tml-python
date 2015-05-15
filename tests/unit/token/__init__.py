@@ -1,8 +1,10 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 import unittest
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax, CaseToken
 from tml.rules.contexts.gender import Gender
+import six
 
 class FakeLanguage(object):
     def __init__(self):
@@ -48,11 +50,11 @@ class TokenTest(unittest.TestCase):
         class Hello(object):
             def __str__(self, *args, **kwargs):
                 return 'Hello'
-        self.assertEquals(u'Hello', 
+        self.assertEquals(six.u('Hello'), 
                           v.execute({'name':Hello()}, {}),
                           'Fetch name')
         escape_me = '<John & "qouted\'>'
-        self.assertEquals(u'&lt;John &amp; &quot;qouted&#39;&gt;',
+        self.assertEquals(six.u('&lt;John &amp; &quot;qouted&#39;&gt;'),
                           v.execute({'name': escape_me}, {}),
                           'Escape data')
         self.assertEquals(escape_me,

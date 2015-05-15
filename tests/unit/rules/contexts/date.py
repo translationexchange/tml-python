@@ -1,5 +1,6 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from datetime import date, datetime
 from tml.rules.contexts.date import Date, NotDate
@@ -8,8 +9,8 @@ from json import loads
 class DateTest(unittest.TestCase):
     """ Test date context """
     def setUp(self):
-        self.d = date(2015, 02, 23)
-        self.dt = datetime(2015, 02, 23, 17, 5, 0)
+        self.d = date(2015, 0o2, 23)
+        self.dt = datetime(2015, 0o2, 23, 17, 5, 0)
 
     def test_date(self):
         """ Test that date is match """

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 import unittest
 from tml.application import Application, LanguageNotSupported

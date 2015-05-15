@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from . import activate_source
 from .translator import Translator

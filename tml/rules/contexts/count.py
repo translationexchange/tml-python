@@ -22,6 +22,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from __future__ import absolute_import
+import six
 __author__ = 'a@toukmanov.ru'
 
 from _ctypes import ArgumentError
@@ -33,7 +35,7 @@ class Count(object):
         """ Check is data list of genders """
         if type(data) in (list, tuple):
             return len(data)
-        if type(data) in (str, unicode):
+        if type(data) in (str, six.text_type):
             raise ArgumentError('String has no count')
         if hasattr(data, '__len__'):
             return len(data)

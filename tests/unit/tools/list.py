@@ -1,9 +1,11 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 import unittest
 from tml.tools.list import List
 from tml.tools.template import Template
 from tests.mock import Client
 from tml import build_context
+import six
 
 
 class ListTest(unittest.TestCase):
@@ -23,8 +25,8 @@ class ListTest(unittest.TestCase):
     def test_tpl(self):
         list = List(['a','b','c'], tpl = Template('<b>{$0}</b>'))
         self.assertEquals('<b>a</b>, <b>b</b>, <b>c</b>', list.render(self.context), 'Apply template')
-        list = List([{'name':'Вася','gender':'male'},{'name':'Андрей','gender':'male'},{'name':'Семен','gender':'male'}], tpl = Template('{$0::dat}'), last_separator = u'и')
-        self.assertEquals(u'Васе, Андрею и Семену', list.render(self.context), 'Apply context')
+        list = List([{'name':'Вася','gender':'male'},{'name':'Андрей','gender':'male'},{'name':'Семен','gender':'male'}], tpl = Template('{$0::dat}'), last_separator = six.u('и'))
+        self.assertEquals(six.u('Васе, Андрею и Семену'), list.render(self.context), 'Apply context')
 
 if __name__ == '__main__':
     unittest.main()

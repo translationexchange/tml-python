@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from .template import Variable
 from ..strings import to_string
 from . import Renderable
+import six
 
 class List(Renderable):
     """ Display list """
@@ -26,7 +28,7 @@ class List(Renderable):
         tpl = self.tpl.compile(context)
         if self.last_separator is None:
             return self.render_items(limit, tpl)
-        return u'%s %s %s' % (self.render_items(limit - 1, tpl), context.tr(self.last_separator), tpl(self.items[limit-1]))
+        return six.u('%s %s %s') % (self.render_items(limit - 1, tpl), context.tr(self.last_separator), tpl(self.items[limit-1]))
 
     @classmethod
     def from_list(self, items):

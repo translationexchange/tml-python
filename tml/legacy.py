@@ -21,6 +21,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from __future__ import absolute_import
 
 from .token.parser import default_parser
 from .token import TextToken, VariableToken, RulesToken, CaseToken, PipeToken
@@ -28,6 +29,7 @@ from .rules.options import fetch_default_arg
 from .strings import to_string
 import re
 from tml.dictionary import TranslationIsNotExists
+import six
 
 
 def render_token(token):
@@ -40,12 +42,12 @@ def render_token(token):
     elif token_type is RulesToken:
         return fetch_default_arg(token.rules)
     elif token_type is PipeToken:
-        return u'%s %s' % (sprintf_token(token),
+        return six.u('%s %s') % (sprintf_token(token),
                            fetch_default_arg(token.rules.rules))
     elif token_type is CaseToken:
         return sprintf_token(token)
     else:
-        return unicode(token)
+        return six.text_type(token)
 
 
 def sprintf_token(token):
@@ -64,7 +66,7 @@ def to_sprintf(tokens):
         Returns:
             string: string 
     """
-    return u''.join((render_token(token) for token in tokens))
+    return six.u('').join((render_token(token) for token in tokens))
 
 def text_to_sprintf(text, language):
     """ Convert text with tokens to sprintf template

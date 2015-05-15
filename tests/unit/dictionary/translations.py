@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from tests.mock import Client
 from tml.api.pagination import allpages

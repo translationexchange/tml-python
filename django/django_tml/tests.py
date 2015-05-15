@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from django.test import SimpleTestCase
 from .translator import Translator
@@ -15,6 +16,7 @@ from tml.context import SourceContext
 from tml.exceptions import Error
 from tml.decoration import AttributeIsNotSet
 from tml.translation import Key
+import six
 
 class WithSnapshotSettings(object):
     def __init__(self):
@@ -44,10 +46,10 @@ class DjangoTMLTestCase(SimpleTestCase):
         t.client.data[en_hello_url] = {'error':'Force error'}
         self.assertEquals(['en', 'id', 'ru'], t.supported_locales)
         self.assertEquals('en', t.get_language(), 'Use default language if not set')
-        self.assertEqual(u'Hello John', t.tr('Hello {name}', {'name':'John'}), 'Use fallback tranlation')
+        self.assertEqual(six.u('Hello John'), t.tr('Hello {name}', {'name':'John'}), 'Use fallback tranlation')
         t.activate('ru')
         self.assertEquals('ru', t.get_language(), 'Set custom language')
-        self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch tranlation')
+        self.assertEqual(six.u('Привет John'), t.tr('Hello {name}', {'name':'John'}), 'Fetch tranlation')
         t.activate('de')
         self.assertEquals('en', t.get_language(), 'If language is not supported reset to default')
         t.activate('id')
@@ -60,28 +62,28 @@ class DjangoTMLTestCase(SimpleTestCase):
         t = Translator.instance()
         t.activate('ru')
         t.activate_source('index')
-        self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
+        self.assertEqual(six.u('Привет John'), t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
         t.activate_source('alpha')
-        self.assertEqual(u'Hello John', t.tr('Hello {name}', {'name':'John'}), 'Use fallback translation')
+        self.assertEqual(six.u('Hello John'), t.tr('Hello {name}', {'name':'John'}), 'Use fallback translation')
         # flush missed keys on change context:
         client = t.context.language.client
         t.activate_source('index')
         self.assertEquals('sources/register_keys', client.url, 'Flush missed keys')
         # handle change:
-        self.assertEqual(u'Привет John', t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
+        self.assertEqual(six.u('Привет John'), t.tr('Hello {name}', {'name':'John'}), 'Fetch translation')
 
     def test_gettext(self):
         t = Translator.instance()
         t.activate('ru')
         t.activate_source('index')
-        self.assertEqual(u'Привет %(name)s', t.ugettext('Hello {name}'), 'ugettext')
+        self.assertEqual(six.u('Привет %(name)s'), t.ugettext('Hello {name}'), 'ugettext')
         self.assertEqual('Привет %(name)s', t.gettext('Hello {name}'), 'ugettext')
         self.assertEqual('Здорово %(name)s', t.pgettext('Greeting', 'Hi {name}'), 'ugettext')
-        self.assertEquals(u'Одно яблоко', t.ungettext('One apple', '{number} apples', 1), 'ungettext + 1')
+        self.assertEquals(six.u('Одно яблоко'), t.ungettext('One apple', '{number} apples', 1), 'ungettext + 1')
         self.assertEquals('Одно яблоко', t.ngettext('One apple', '{number} apples', 1), 'ngettext + 1')
-        self.assertEquals(u'%(number)s яблоко', t.ungettext('One apple', '{number} apples', 21), 'ungettext + 21')
-        self.assertEquals(u'%(number)s яблока', t.ungettext('One apple', '{number} apples', 22), 'ungettext + 22')
-        self.assertEquals(u'%(number)s яблок', t.ungettext('One apple', '{number} apples', 5), 'ungettext + 5')
+        self.assertEquals(six.u('%(number)s яблоко'), t.ungettext('One apple', '{number} apples', 21), 'ungettext + 21')
+        self.assertEquals(six.u('%(number)s яблока'), t.ungettext('One apple', '{number} apples', 22), 'ungettext + 22')
+        self.assertEquals(six.u('%(number)s яблок'), t.ungettext('One apple', '{number} apples', 5), 'ungettext + 5')
         self.assertEquals('%(number)s яблок', t.ngettext('One apple', '{number} apples', 12), 'ngettext + 12')
 
     def test_format_attributes(self):
@@ -104,7 +106,7 @@ class DjangoTMLTestCase(SimpleTestCase):
         activate('ru')
         t = Template('{%load tml %}{% tr %}Hello {name}{% endtr %}')
         c = Context({'name':'John'})
-        self.assertEquals(u'Привет John', t.render(c))
+        self.assertEquals(six.u('Привет John'), t.render(c))
         t = Template(
         '''
         {%load tml %}
@@ -112,14 +114,14 @@ class DjangoTMLTestCase(SimpleTestCase):
             Hello {name}
         {% endtr %}
         ''')
-        self.assertEquals(u'''Привет John''', t.render(c).strip(), 'Trimmed support')
-        t = Template(u'{%load tml %}{% tr with name="Вася" %}Hello {name}{% endtr %}')
-        self.assertEquals(u'Привет Вася', t.render(c), 'With syntax')
+        self.assertEquals(six.u('''Привет John'''), t.render(c).strip(), 'Trimmed support')
+        t = Template(six.u('{%load tml %}{% tr with name="Вася" %}Hello {name}{% endtr %}'))
+        self.assertEquals(six.u('Привет Вася'), t.render(c), 'With syntax')
 
         t = Template('{%load tml %}{% tr %}Hello {name}{% endtr %}')
-        self.assertEquals(u'Привет &lt;&quot;Вася&quot;&gt;', t.render(Context({'name':'<"Вася">'})))
-        t = Template(u'{%load tml %}{% tr with html|safe as name %}Hello {name}{% endtr %}')
-        self.assertEquals(u'Привет <"Вася">', t.render(Context({'html':'<"Вася">'})))
+        self.assertEquals(six.u('Привет &lt;&quot;Вася&quot;&gt;'), t.render(Context({'name':'<"Вася">'})))
+        t = Template(six.u('{%load tml %}{% tr with html|safe as name %}Hello {name}{% endtr %}'))
+        self.assertEquals(six.u('Привет <"Вася">'), t.render(Context({'html':'<"Вася">'})))
 
     def test_blocktrans(self):
         activate('ru')
@@ -127,48 +129,48 @@ class DjangoTMLTestCase(SimpleTestCase):
         c = Context({'name':'John'})
 
         t = Template('{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
-        self.assertEquals(u'Привет John', t.render(c))
+        self.assertEquals(six.u('Привет John'), t.render(c))
 
         t = Template('{%load tml %}{% blocktrans %}Hello {{name}}{% endblocktrans %}')
-        self.assertEquals(u'Привет John', t.render(c), 'Use new tranlation')
+        self.assertEquals(six.u('Привет John'), t.render(c), 'Use new tranlation')
 
         t = Template('{%load tml %}{% blocktrans %}Hey {{name}}{% endblocktrans %}') 
-        self.assertEquals(u'Эй John, привет John', t.render(c), 'Use old tranlation')
+        self.assertEquals(six.u('Эй John, привет John'), t.render(c), 'Use old tranlation')
 
         t = Template('{%load tml %}{% blocktrans count count=apples_count %}One apple{% plural %}{count} apples{% endblocktrans %}')
-        self.assertEquals(u'Одно яблоко', t.render(Context({'apples_count':1})),'Plural one')
-        self.assertEquals(u'2 яблока', t.render(Context({'apples_count':2})),'Plural 2')
-        self.assertEquals(u'21 яблоко', t.render(Context({'apples_count':21})),'Plural 21')
+        self.assertEquals(six.u('Одно яблоко'), t.render(Context({'apples_count':1})),'Plural one')
+        self.assertEquals(six.u('2 яблока'), t.render(Context({'apples_count':2})),'Plural 2')
+        self.assertEquals(six.u('21 яблоко'), t.render(Context({'apples_count':21})),'Plural 21')
 
     def test_inline(self):
         """ Inline tranlations wrapper """
         activate('ru')
         inline_translations.turn_on()
         c = Context({'name':'John'})
-        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
+        t = Template(six.u('{%load tml %}{% tr %}Hello {name}{% endtr %}'))
 
-        self.assertEquals(u'<tml:label class="tml_translatable tml_translated" data-translation_key="90e0ac08b178550f6513762fa892a0ca" data-target_locale="ru">Привет John</tml:label>',
+        self.assertEquals(six.u('<tml:label class="tml_translatable tml_translated" data-translation_key="90e0ac08b178550f6513762fa892a0ca" data-target_locale="ru">Привет John</tml:label>'),
                           t.render(c),
                           'Wrap translation')
-        t = Template(u'{%load tml %}{% tr nowrap %}Hello {name}{% endtr %}')
-        self.assertEquals(u'Привет John',
+        t = Template(six.u('{%load tml %}{% tr nowrap %}Hello {name}{% endtr %}'))
+        self.assertEquals(six.u('Привет John'),
                           t.render(c),
                           'Nowrap option')
 
-        t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
-        self.assertEquals(u'Привет John',
+        t = Template(six.u('{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}'))
+        self.assertEquals(six.u('Привет John'),
                           t.render(c),
                           'Nowrap blocktrans')
 
-        t = Template(u'{%load tml %}{% tr %}Untranslated{% endtr %}')
-        self.assertEquals(u'<tml:label class="tml_translatable tml_not_translated" data-translation_key="9bf6a924c9f25e53a6b07fc86783bb7d" data-target_locale="ru">Untranslated</tml:label>',
+        t = Template(six.u('{%load tml %}{% tr %}Untranslated{% endtr %}'))
+        self.assertEquals(six.u('<tml:label class="tml_translatable tml_not_translated" data-translation_key="9bf6a924c9f25e53a6b07fc86783bb7d" data-target_locale="ru">Untranslated</tml:label>'),
                           t.render(c),
                           'Untranslated')
         activate('ru')
         inline_translations.turn_off()
-        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
-        t = Template(u'{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}')
-        self.assertEquals(u'Привет John',
+        t = Template(six.u('{%load tml %}{% tr %}Hello {name}{% endtr %}'))
+        t = Template(six.u('{%load tml %}{% blocktrans %}Hello {name}{% endblocktrans %}'))
+        self.assertEquals(six.u('Привет John'),
                           t.render(c),
                           'Turn off inline')
 
@@ -197,9 +199,9 @@ class DjangoTMLTestCase(SimpleTestCase):
 
     def test_preprocess_data(self):
         activate('ru')
-        self.assertEquals(u'Привет Вася and Петя', tr('Hello {name}', {'name':['Вася','Петя']}))
-        t = Template(u'{%load tml %}{% tr %}Hello {name}{% endtr %}')
-        self.assertEquals(u'Привет Вася and Петя', t.render(Context({'name':['Вася','Петя']})))
+        self.assertEquals(six.u('Привет Вася and Петя'), tr('Hello {name}', {'name':['Вася','Петя']}))
+        t = Template(six.u('{%load tml %}{% tr %}Hello {name}{% endtr %}'))
+        self.assertEquals(six.u('Привет Вася and Петя'), t.render(Context({'name':['Вася','Петя']})))
 
     def test_viewing_user(self):
         activate('ru')
@@ -215,7 +217,7 @@ class DjangoTMLTestCase(SimpleTestCase):
         t.activate('ru')
         self.assertEquals('Test', t.context.tr('Test'), 'Stub translation without source')
         t.activate_source('xxxx')
-        self.assertEquals(u'Тест', t.context.tr('Test'), 'Works with source')
+        self.assertEquals(six.u('Тест'), t.context.tr('Test'), 'Works with source')
         t.activate_source('notexists')
-        self.assertEquals(u'Test', t.context.tr('Test'), 'Notexists source')
+        self.assertEquals(six.u('Test'), t.context.tr('Test'), 'Notexists source')
 

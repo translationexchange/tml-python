@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from tests.mock import Client
 from tml.translation import Key, TranslationOption, OptionIsNotSupported,\
@@ -10,6 +11,7 @@ from tml.rules.contexts.gender import Gender
 from tml.rules.contexts import ValueIsNotMatchContext
 from tml.exceptions import RequiredArgumentIsNotPassed
 from json import loads
+import six
 
 
 class TranslationTest(unittest.TestCase):
@@ -50,8 +52,8 @@ class TranslationTest(unittest.TestCase):
 
     def test_options(self):
         t = TranslationOption('{name||дал, дала, дало} {to::dat} {count} яблоко', self.lang, {'count':{'number':'one'}})
-        self.assertEquals(u'Вася дал Маше 21 яблоко', t.execute({'name': Gender.male('Вася'), 'to': Gender.female('Маша'), 'count': 21}, {}))
-        self.assertEquals(u'Лена дала Льву 21 яблоко', t.execute({'name': Gender.female('Лена'), 'to': Gender.male('Лев'), 'count': 21}, {}))
+        self.assertEquals(six.u('Вася дал Маше 21 яблоко'), t.execute({'name': Gender.male('Вася'), 'to': Gender.female('Маша'), 'count': 21}, {}))
+        self.assertEquals(six.u('Лена дала Льву 21 яблоко'), t.execute({'name': Gender.female('Лена'), 'to': Gender.male('Лев'), 'count': 21}, {}))
         with self.assertRaises(OptionIsNotSupported):
             t.execute({'name': Gender.male('John'),'count': 2}, {})
         with self.assertRaises(RequiredArgumentIsNotPassed):
@@ -69,21 +71,21 @@ class TranslationTest(unittest.TestCase):
         t = Translation.from_data(key,
                                   self.client.get(url, {'locale':'ru'})['results'])
 
-        self.assertEquals(u'Маша любезно дала тебе 2 яблока', t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
+        self.assertEquals(six.u('Маша любезно дала тебе 2 яблока'), t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
         male_one = {'actor':{'gender':'male','name':'Вася'},'count':1}
-        self.assertEquals(u'Вася дал тебе всего 1 яблоко, мужик!',
+        self.assertEquals(six.u('Вася дал тебе всего 1 яблоко, мужик!'),
                           t.execute(male_one, {}),
                           'Male one')
-        self.assertEquals(u'{actor} дал тебе всего {count} яблоко, мужик!',
+        self.assertEquals(six.u('{actor} дал тебе всего {count} яблоко, мужик!'),
                           t.fetch_option(male_one, {}).label,
                           'Check fetch')
-        self.assertEquals(u'{actor||дал, дала, дало} тебе {count||one: яблоко, few: яблока, many: яблок}',
+        self.assertEquals(six.u('{actor||дал, дала, дало} тебе {count||one: яблоко, few: яблока, many: яблок}'),
                   t.fetch_option({}, {}).label,
                   'fetch default')
-        self.assertEquals(u'Вася дал тебе 5 яблок', t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')
+        self.assertEquals(six.u('Вася дал тебе 5 яблок'), t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')
         t = Translation.from_data(key, [{"label":"{to::dat}"}])
         sdata = '{"to":{"gender":"male","name":"Вася"}}'
-        self.assertEquals(u"Васе", t.execute(loads(sdata), {}), 'Васе')
+        self.assertEquals(six.u("Васе"), t.execute(loads(sdata), {}), 'Васе')
         t = Translation(key, [])
         with self.assertRaises(OptionIsNotFound):
             t.execute({'actor':{'gender':'male','name':'John'},'count':5}, {})

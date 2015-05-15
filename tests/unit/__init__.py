@@ -21,6 +21,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from __future__ import absolute_import
 
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
@@ -32,6 +33,7 @@ from tml.dictionary.source import SourceDictionary
 from tml.tools import list as tml_list
 from tml.translation import Key
 from hashlib import md5
+import six
 
 __author__ = 'a@toukamnov.ru'
 
@@ -68,14 +70,14 @@ class api_test(unittest.TestCase):
 
     def test_renderable_items(self):
         c = build_context(client = self.client)
-        hello_all = c.tr('Hello {name}', {'name': tml_list.List([u'Вася',u'Петя','Коля'], last_separator='и')})
-        self.assertEquals(u'Привет Вася, Петя и Коля', hello_all, 'Pass List instance')
+        hello_all = c.tr('Hello {name}', {'name': tml_list.List([six.u('Вася'),six.u('Петя'),'Коля'], last_separator='и')})
+        self.assertEquals(six.u('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
         RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
-        hello_all = c.tr('Hello {name}', {'name': [u'Вася',u'Петя','Коля']})
-        self.assertEquals(u'Привет Вася, Петя and Коля', hello_all, 'Preprocess lists')
+        hello_all = c.tr('Hello {name}', {'name': [six.u('Вася'),six.u('Петя'),'Коля']})
+        self.assertEquals(six.u('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists')
 
     def test_fallback_language(self):
-        label = u'Only english tranlation'
+        label = six.u('Only english tranlation')
         c = build_context(client = self.client, locale = 'ru')
         key = Key(label = label, description = '', language = c.language)
         self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
@@ -107,7 +109,7 @@ class api_test(unittest.TestCase):
         # completly empty en translation:
         self.client.read('sources/5b7c7408d7cb048fc86170fdb3a691a8/translations',{'locale':'en'},'sources/2c1743a391305fbf367df8e4f069f9f9/translations.json',True)
         c = build_context(source = 'empty_source', client = self.client, locale = 'ru')
-        self.assertEquals(u'яблока', c.tr('{count|apple,apples}',{'count':22}), 'Use few from translation')
+        self.assertEquals(six.u('яблока'), c.tr('{count|apple,apples}',{'count':22}), 'Use few from translation')
         self.assertEquals('apple', c.tr('{count|apple,apples}',{'count':1}), 'Use one from fallback')
         self.assertEquals('apples', c.tr('{count|apple,apples}',{'count':12}), 'Use many from fallback')
 

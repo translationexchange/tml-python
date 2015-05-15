@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from tml.token.parser import default_parser
 from tml.token import execute_all
@@ -7,6 +8,7 @@ from ..exceptions import Error
 from ..strings import to_string
 from ..token.parser import default_parser
 from ..exceptions import RequiredArgumentIsNotPassed
+import six
 
 
 
@@ -39,7 +41,7 @@ class Key(object):
             description = self.description
         else:
             description = ''
-        key = u'%s;;;%s' % (to_string(self.label), to_string(description))
+        key = six.u('%s;;;%s') % (to_string(self.label), to_string(description))
         ret = md5(key.encode('utf-8')).hexdigest()
         return ret
 

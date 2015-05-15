@@ -1,7 +1,9 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from tml.rules.contexts.count import *
+import six
 
 
 class WithLength(object):
@@ -28,7 +30,7 @@ class CountTest(unittest.TestCase):
         with self.assertRaises(ArgumentError):
             Count.match('Hello world')
         with self.assertRaises(ArgumentError):
-            Count.match(u'Hello world')
+            Count.match(six.u('Hello world'))
 
     def test_dict(self):
         self.assertEquals(2, Count.match({'a':'A', 'b':'B'}), 'Count dict')

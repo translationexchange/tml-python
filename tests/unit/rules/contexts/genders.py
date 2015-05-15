@@ -1,7 +1,9 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from tml.rules.contexts.genders import *
+from six.moves import range
 
 class Male(object):
     """ Male class """

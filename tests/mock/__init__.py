@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from os.path import dirname
 from tml.api.mock import File

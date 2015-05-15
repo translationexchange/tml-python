@@ -1,9 +1,11 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from django.contrib.auth.models import User
 from django_tml.utils import ViewingUserMiddleware
 
 from tml import Gender
 from hashlib import md5
+import six
 
 GENDERS = {}
 
@@ -11,7 +13,7 @@ class LoginBackend(object):
     def authenticate(self, name, gender = None):
         gender = Gender.supported_gender(gender)
 
-        username = u'%s:%s' % (gender, name)
+        username = six.u('%s:%s') % (gender, name)
         username = md5(username.encode('utf-8')).hexdigest()
         try:
             return User.objects.get(username = username)

@@ -1,5 +1,7 @@
+from __future__ import absolute_import
 # encoding: UTF-8
 from ..exceptions import Error
+import six
 
 def render_attributes(attributes):
     if attributes is None or len(attributes) == 0:
@@ -33,7 +35,7 @@ class Set(object):
         self.text = Text()
 
     def append(self, el):
-        if type(el) is str or type(el) is unicode:
+        if type(el) is str or type(el) is six.text_type:
             self.text.append(el)
         else:
             self.flush_text()
@@ -123,7 +125,7 @@ class TagFactory(object):
 
     @property
     def supported_tags(self):
-        return self.allowed_tags.keys()
+        return list(self.allowed_tags.keys())
 
 
 class UnsupportedTag(Error):

@@ -1,11 +1,13 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from tml.rules.functions import *
 from tml.rules.engine import RulesEngine
 from json import loads
 import re
 from tml.rules.parser import parse
+import six
 default_engine = RulesEngine(SUPPORTED_FUNCTIONS) # default engine
 
 class FunctionsTest(unittest.TestCase):
@@ -51,10 +53,10 @@ class FunctionsTest(unittest.TestCase):
     def test_build_preg(self):
         self.assertEqual(re.I, build_flags('i'), 'Regexp i flag')
         self.assertEqual(re.I|re.M, build_flags('mi'), 'Regexp im flag')
-        self.assertEquals(re.compile(u'\d+'), build_regexp('\d+'), '\d+')
-        self.assertEquals(re.compile(u'[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
-        self.assertEquals(re.compile(u'[a-z]+', re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
-        self.assertEquals(re.compile(u'[a-z]+'), build_regexp('/[a-z]+/'), '/[a-z]+/')
+        self.assertEquals(re.compile(six.u('\d+')), build_regexp('\d+'), '\d+')
+        self.assertEquals(re.compile(six.u('[a-z]+'), re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
+        self.assertEquals(re.compile(six.u('[a-z]+'), re.I|re.M), build_regexp('/[a-z]+/im'), '/[a-z]+/im')
+        self.assertEquals(re.compile(six.u('[a-z]+')), build_regexp('/[a-z]+/'), '/[a-z]+/')
 
     def test_all(self):
         self.assertTrue(SUPPORTED_FUNCTIONS['all'](['male','male','male'], 'male'),'All is male')
@@ -66,7 +68,7 @@ class FunctionsTest(unittest.TestCase):
 
     def test_cmp(self):
         self.assertTrue(SUPPORTED_FUNCTIONS['<']('3', 10), '"3" < 10')
-        self.assertFalse(SUPPORTED_FUNCTIONS['>'](date(2015, 01, 20), date(2015, 02, 22)), 'Cmp dates')
+        self.assertFalse(SUPPORTED_FUNCTIONS['>'](date(2015, 0o1, 20), date(2015, 0o2, 22)), 'Cmp dates')
 
     def test_eq(self):
         self.assertTrue(f_eq(10, '10'), '10 == "10"')
@@ -85,7 +87,7 @@ class FunctionsTest(unittest.TestCase):
         sdata = loads('{"value":"Маша"}')
         rule = parse(srule['test'])
         self.assertTrue(default_engine.execute(rule, sdata), 'Re supports json encoding')
-        self.assertEquals(u"Маше", default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
+        self.assertEquals(six.u("Маше"), default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
 
 
 if __name__ == '__main__':

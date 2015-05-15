@@ -1,5 +1,6 @@
 # encoding: UTF-8
 """ Test rules built-in functions """
+from __future__ import absolute_import
 import unittest
 from tml.rules import parse
 from tests.mock import Client
@@ -39,9 +40,9 @@ class CaseTest(unittest.TestCase):
             Case.from_data(data, False)
         cases, errors = Case.from_data(data, True)
         self.assertEquals(Case, type(cases['gen']), 'Return get Case')
-        self.assertEquals(['gen2','gen'], cases.keys(), 'Return only valid')
+        self.assertEquals(['gen2','gen'], list(cases.keys()), 'Return only valid')
         self.assertEquals(str(context.exception), str(errors['err']), 'Store errors in errors')
-        self.assertEquals(['err2','err'], errors.keys(), 'Store all error')
+        self.assertEquals(['err2','err'], list(errors.keys()), 'Store all error')
 
 if __name__ == '__main__':
     unittest.main()

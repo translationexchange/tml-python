@@ -40,7 +40,9 @@ class CaseTest(unittest.TestCase):
             Case.from_data(data, False)
         cases, errors = Case.from_data(data, True)
         self.assertEquals(Case, type(cases['gen']), 'Return get Case')
-        self.assertEquals(['gen2','gen'], list(cases.keys()), 'Return only valid')
+        cases_keys = list(cases.keys())
+        cases_keys.sort()
+        self.assertEquals(['gen', 'gen2'], cases_keys, 'Return only valid')
         self.assertEquals(str(context.exception), str(errors['err']), 'Store errors in errors')
         self.assertEquals(['err2','err'], list(errors.keys()), 'Store all error')
 

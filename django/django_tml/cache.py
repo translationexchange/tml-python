@@ -2,9 +2,12 @@ from __future__ import absolute_import
 # encoding: UTF-8
 from django.conf import settings
 from django.core.cache import caches
-from urllib import urlencode
 from tml.api.client import Client
-
+try:
+    from urllib import urlencode
+except ImportError:
+    # PY3
+    from urllib.parse import urlencode
 
 class CachedClient(object):
     def __init__(self, client, backend):

@@ -66,13 +66,14 @@ class Case(ContextRules):
                 (dict, dict): list of rules, list of errors
         
         """
-        catch = Exception if safe else None
         ret = {}
         errors = {}
         for key in data:
             try:
                 ret[key] = cls.from_rules(data[key]['rules'])
-            except catch as rule_parse_fault:
+            except Exception as rule_parse_fault:
+                if not safe:
+                    raise rule_parse_fault
                 errors[key] = rule_parse_fault
         return (ret, errors)
 

@@ -107,8 +107,7 @@ class SnapshotFile(SnapshotDir):
     def fetch(self, path):
         try:
             fp = self.file.extractfile('%s.json' % path)
-            data = fp.read()
-            ret = loads(to_string(data))
+            ret = loads(fp.read().decode('utf-8'))
             return ret
         finally:
             if fp:

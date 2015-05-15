@@ -37,7 +37,10 @@ def to_string(text):
         return six.text_type(text.__html__())
     if hasattr(text, '__unicode__'):
         return text.__unicode__()
-    return six.text_type(str(text).decode('utf-8'))
+    if six.PY3:
+        return six.text_type(text)
+    else:
+        return six.text_type(str(text).decode('utf-8'))
 
 
 SUGGEST_STRING_KEYS = ['title', 'name', 'html', 'text']

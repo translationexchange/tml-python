@@ -1,5 +1,5 @@
-from __future__ import absolute_import
 # encoding: UTF-8
+from __future__ import absolute_import
 from tml.api.snapshot import SnapshotFile, SnapshotDir, MethodIsNotSupported,\
     open_snapshot
 from tests.mock import FIXTURES_PATH

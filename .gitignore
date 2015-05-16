@@ -5,3 +5,5 @@
 .settings
 test.py
 nohup.out
+dist
+django/dist

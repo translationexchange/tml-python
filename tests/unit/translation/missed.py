@@ -1,9 +1,10 @@
-from __future__ import absolute_import
 # encoding: UTF-8
+from __future__ import absolute_import
 from tests.mock import Client
 from tml.translation import Key
 from tml.translation.missed import MissedKeys
 import unittest
+from json import dumps, loads
 from tml import Application
 from tml.language import Language
 
@@ -25,7 +26,9 @@ class MissedTest(unittest.TestCase):
         m.append(Key(language = self.lang, level = 2, label = 'Hello again', description = 'greeting'))
         m.submit_all()
         self.assertEquals('sources/register_keys', self.c.url, 'Post')
-        self.assertEquals({'source_keys':'[{"keys": [{"locale": "ru", "level": 2, "description": "greeting", "label": "Hello"}, {"locale": "ru", "level": 2, "description": "greeting", "label": "Hello again"}]}]'}, self.c.params, 'Submit 2 keys')
+        expected = [{"keys": [{"locale": "ru", "level": 2, "description": "greeting", "label": "Hello"},{"locale": "ru", "level": 2, "description": "greeting", "label": "Hello again"}]}]
+        submited_keys = loads(self.c.params['source_keys'])
+        self.assertEquals(expected, submited_keys, 'Submit 2 keys')
         self.c.url = None
         m.submit_all()
         self.assertEquals(None, self.c.url, 'No not submit twice')

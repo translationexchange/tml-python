@@ -77,3 +77,18 @@ class Case(ContextRules):
                 errors[key] = rule_parse_fault
         return (ret, errors)
 
+class LazyCases(object):
+    """ Compile case on demand """
+    def __init__(self, data):
+        self.data = data
+        self.cache = {}
+
+    def __getitem__(self, key):
+        if not key in self.cache:
+            # compile on demand:
+            self.cache[key] = Case.from_rules(self.data[key]['rules'])
+        return self.cache[key]
+
+    def __len__(self):
+        return len(self.data)
+

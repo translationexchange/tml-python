@@ -7,7 +7,7 @@ from tests.mock import Client
 from tml import Application
 from tml.language import Language
 from tml.rules.contexts import Gender
-from tml.rules.case import Case
+from tml.rules.case import Case, LazyCase
 from tml.rules.parser import ParseError
 from tml.strings import to_string
 
@@ -33,11 +33,16 @@ class CaseTest(unittest.TestCase):
                           c.execute(Gender.female('Вася')),
                           'Вася -> Вася')
 
-    def test_from_data(self):
-        data = {'gen': {'rules': self.rules},
+    @property
+    def data(self):
+        return {'gen': {'rules': self.rules},
                 'err':{'rules': self.invalid_rules},
                 'gen2':{'rules':self.rules},
                 'err2':{'rules':self.invalid_rules}}
+        
+
+    def test_from_data(self):
+        data = self.data
         with self.assertRaises(ParseError) as context:
             # Unsafe call raises exceptions
             Case.from_data(data, False)
@@ -50,6 +55,16 @@ class CaseTest(unittest.TestCase):
         errors_keys = list(errors.keys())
         errors_keys.sort()
         self.assertEquals(['err', 'err2'], errors_keys , 'Store all error')
+
+    def test_lazy(self):
+        """ Test lazy case """
+        cases = LazyCases(self.data)
+        self.assertEqual(4, len(cases), 'All rules is in case')
+        self.assertEquals(Case, type(cases['gen']), 'good case (gen)')
+        self.assertEquals(Case, type(cases['gen2']), 'another good case (gen)')
+        with self.assertRaises(ParseError) as context:
+            # Error case
+            cases['err']
 
 if __name__ == '__main__':
     unittest.main()

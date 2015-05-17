@@ -23,7 +23,7 @@
 """
 
 from .rules.contexts import Contexts
-from .rules.case import Case
+from .rules.case import Case, LazyCases
 
 
 __author__ = 'a@toukmanov.ru'
@@ -50,11 +50,16 @@ class Language(object):
         self.cases = cases
 
     @classmethod
-    def from_dict(cls, application, data, safe = True):
+    def from_dict(cls, application, data, safe = True, lazy = True):
         """ Build language instance from API response """
-        cases, case_errors = Case.from_data(data['cases'], safe = True)
-        if len(case_errors) and not safe:
-            raise Exception('Language contains invalid cases', case_errors)
+        if lazy:
+            # Use lazy cases (do not compile all)
+            cases = LazyCases(data['cases'])
+        else:
+            # Compile all cases:
+            cases, case_errors = Case.from_data(data['cases'], safe = True)
+            if len(case_errors) and not safe:
+                raise Exception('Language contains invalid cases', case_errors)
         return cls(application,
                    data['id'],
                    data['locale'],

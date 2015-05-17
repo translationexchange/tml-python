@@ -7,7 +7,7 @@ from tests.mock import Client
 from tml import Application
 from tml.language import Language
 from tml.rules.contexts import Gender
-from tml.rules.case import Case, LazyCase
+from tml.rules.case import Case, LazyCases
 from tml.rules.parser import ParseError
 from tml.strings import to_string
 

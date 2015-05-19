@@ -105,7 +105,7 @@ def in_f(set, find):
         Returns:
             boolean
     """
-    find = str(find).strip()
+    find = to_string(find).strip()
     for e in set.split(','):
         e = to_string(e.strip())
         if to_string(find) == to_string(e):

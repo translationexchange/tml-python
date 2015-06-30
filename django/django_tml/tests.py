@@ -7,6 +7,7 @@ from django.template import Template
 from django.template.context import Context
 from django_tml import activate, activate_source, inline_translations, tr,\
     deactivate_source
+from tml.api.cdn import Client as CDNClient
 from tml.tools.viewing_user import set_viewing_user
 from copy import copy
 from django.conf import settings
@@ -17,7 +18,10 @@ from tml.exceptions import Error
 from tml.decoration import AttributeIsNotSet
 from tml.translation import Key
 from tml.strings import to_string
+from tml.context import SnapshotContext
 import six
+import requests_mock
+from tests.mock import FIXTURES_PATH
 
 class WithSnapshotSettings(object):
     def __init__(self):
@@ -25,6 +29,14 @@ class WithSnapshotSettings(object):
         for key in settings.TML:
             self.TML[key] = settings.TML[key]
         self.TML['snapshot'] = dirname(settings.FIXTURES_PATH) + '/snapshot.tar.gz'
+
+class WithCDNSettings(object):
+    def __init__(self):
+        self.TML = {}
+        for key in settings.TML:
+            if True:#key != 'api_client':
+                self.TML[key] = settings.TML[key]
+        self.TML['cdn'] = True
 
 
 class DjangoTMLTestCase(SimpleTestCase):
@@ -140,7 +152,7 @@ class DjangoTMLTestCase(SimpleTestCase):
         t = Template('{%load tml %}{% blocktrans %}Hello {{name}}{% endblocktrans %}')
         self.assertEquals(to_string('Привет John'), t.render(c), 'Use new tranlation')
 
-        t = Template('{%load tml %}{% blocktrans %}Hey {{name}}{% endblocktrans %}') 
+        t = Template('{%load tml %}{% blocktrans %}Hey {{name}}{% endblocktrans %}')
         self.assertEquals(to_string('Эй John, привет John'), t.render(c), 'Use old tranlation')
 
         t = Template('{%load tml %}{% blocktrans count count=apples_count %}One apple{% plural %}{count} apples{% endblocktrans %}')
@@ -227,3 +239,21 @@ class DjangoTMLTestCase(SimpleTestCase):
         t.activate_source('notexists')
         self.assertEquals(to_string('Test'), t.context.tr('Test'), 'Notexists source')
 
+    @requests_mock.mock()
+    def test_cdn_context(self, m):
+        from tml.api.cdn import CDN_VERSION_URL, Client as CDNClient
+
+        t = Translator(WithCDNSettings())
+        t.activate('ru')
+        t.activate_source('alpha')
+        self.assertFalse(t.use_snapshot)
+        self.assertTrue(t.use_cdn)
+        self.assertTrue(t.use_snapshot_context)
+        cdn_client = t.build_client()
+        self.assertEquals(CDNClient, type(cdn_client),'Check CDN client')
+        for url in ['application','ru/language','ru/sources/alpha']:
+            with open(FIXTURES_PATH + '/snapshot/' + url + '.json') as fp:
+                m.get(CDNClient.URL % (cdn_client.token, cdn_client.version, url),
+                      content = fp.read())
+        self.assertEquals(SnapshotContext, type(t.build_context()),'Use snapshot context')
+        self.assertEquals(to_string('Привет Вася'), t.tr('Hello {name}', {'name':to_string('Вася')}))

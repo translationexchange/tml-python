@@ -10,7 +10,14 @@ except ImportError:
     from urllib.parse import urlencode
 
 class CachedClient(object):
+    """ Кэширующий клиент """
     def __init__(self, client, backend):
+        """
+        .ctor
+        :param client: API client
+        :param backend: Django cache backend
+        :return:
+        """
         self.client = client
         self.backend = backend
 
@@ -54,3 +61,4 @@ class CachedClient(object):
     def reload(self, url, params):
         """ Drop cache """
         self.backend.delete(self.key(url, params))
+

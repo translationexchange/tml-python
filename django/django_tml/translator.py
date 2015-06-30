@@ -4,7 +4,8 @@ from django.conf import settings
 from django.utils.translation.trans_real import to_locale, templatize, deactivate_all, parse_accept_lang_header, language_code_re, language_code_prefix_re
 from tml import build_context
 from tml.application import LanguageNotSupported, Application
-from django_tml.cache import CachedClient
+from .cache import CachedClient
+from .cdn import build_client as build_cdn_client
 from tml import Key
 from tml.translation import TranslationOption, OptionIsNotFound
 from django.utils.translation import LANGUAGE_SESSION_KEY
@@ -13,8 +14,12 @@ from types import FunctionType
 from django.utils.module_loading import import_string
 from tml.api.client import Client
 from tml.api.snapshot import open_snapshot
+from tml.api.cdn import Client as CDNClient
 from tml.render import RenderEngine
+from logging import getLogger
 import six
+
+LOGGER = getLogger(__name__)
 
 def to_str(fn):
     def tmp(*args, **kwargs):
@@ -90,7 +95,7 @@ class Translator(object):
         return build_context(locale = self.locale, 
                              source = self.source,
                              client = self.build_client(),
-                             use_snapshot = self.use_snapshot)
+                             use_snapshot = self.use_snapshot_context)
 
     def set_supports_inline_tranlation(self, value = True):
         """ Set is flag for inline translation """
@@ -106,9 +111,27 @@ class Translator(object):
         return self.build_client()
 
     def build_client(self):
+        """ Build API client with current settings
+            :return: APIClient instance
+            :rtype: tml.api.AbstractClient
+        """
         if self.use_snapshot:
             # Use snapshot:
-            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot'])) 
+            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot']))
+
+        if self.use_cdn:
+            # Use CDN:
+            return self.use_cache(
+                CDNClient(
+                    self.settings.TML.get('token'),
+                    CDNClient.current_version(self.build_api_client())
+                )
+            )
+
+        return self.build_api_client()
+
+    def build_api_client(self):
+        """ Build API client """
         if 'api_client' in self.settings.TML:
             # Custom client:
             custom_client = self.settings.TML['api_client']
@@ -123,14 +146,28 @@ class Translator(object):
             elif custom_client is object:
                 # custom client as is:
                 return custom_client
+        return self.use_cache(Client(self.settings.TML['token']))
+
+    def use_cache(self, client):
+        """"""
         if not self.cache:
             # No cache:
-            return Client(self.settings.TML['token'])
-        return CachedClient.instance()
+            return client
+        return CachedClient.wrap(client)
 
     @property
     def use_snapshot(self):
+        """ Use snapshot file """
         return 'snapshot' in self.settings.TML and self.settings.TML['snapshot'] and self.cache
+
+    @property
+    def use_cdn(self):
+        """ Use CDN client """
+        return self.settings.TML.get('cdn', False) and self.cache
+
+    @property
+    def use_snapshot_context(self):
+        return self.use_snapshot or self.use_cdn
 
     @property
     def context(self):

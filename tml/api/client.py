@@ -87,7 +87,7 @@ class Client(AbstractClient):
             raise HttpError(http_error,
                             url = resp.url if resp is not None else url,
                             client = self)
-        if 'error' in ret:
+        if type(ret) is dict and 'error' in ret:
             raise APIError(ret['error'], url = resp.url, client = self)
         return ret
 

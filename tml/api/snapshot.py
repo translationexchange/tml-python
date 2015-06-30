@@ -35,6 +35,29 @@ LANGUAGE_PREFIX = 'languages/'
 LANGUAGE_RPEFIX_LENGTH = len(LANGUAGE_PREFIX)
 CURRENT_APPLICATION = 'applications/current'
 
+def rewrite_path(url):
+    """ Build path from URL
+        Args:
+            url (string): API url
+        Returns:
+            string: path in snapshot matches API URL
+    """
+    if url == CURRENT_APPLICATION:
+        # /application/current -> application.json
+        return 'application'
+    if url[0:LANGUAGE_RPEFIX_LENGTH] == LANGUAGE_PREFIX:
+        # get language info /language/{locale} -> {locale}.json
+        return '%s/language' % url[LANGUAGE_RPEFIX_LENGTH:]
+    return url
+
+def wrap_call(fn):
+    def tmp(self, url, method, params = {}):
+        if method != 'get':
+            raise MethodIsNotSupported('Only get allowed in snapshot mode',
+                                       url,
+                                       params)
+        return fn(self, rewrite_path(url))
+    return tmp
 
 class SnapshotDir(AbstractClient):
     """ Client which works with a snapshot """
@@ -46,7 +69,8 @@ class SnapshotDir(AbstractClient):
         super(SnapshotDir, self).__init__()
         self.path = path
 
-    def call(self, url, method, params = {}):
+    @wrap_call
+    def call(self, path):
         """ Make request to API 
             Args:
                 url (string): URL
@@ -58,14 +82,10 @@ class SnapshotDir(AbstractClient):
             Returns:
                 dict: response
         """
-        if method != 'get':
-            raise MethodIsNotSupported('Only get allowed in snapshot mode',
-                                       url,
-                                       params)
         try:
-            return self.fetch(SnapshotDir.rewrite_path(url))
+            return self.fetch(path)
         except Exception as invalid_path:
-            raise APIError(invalid_path, self, url)
+            raise APIError(invalid_path, self, path)
 
     def fetch(self, path):
         """ Fetch data for path from file """
@@ -73,21 +93,6 @@ class SnapshotDir(AbstractClient):
         with open(path) as fp:
             return loads(to_string(fp.read()))
 
-    @classmethod
-    def rewrite_path(cls, url):
-        """ Build path from URL 
-            Args:
-                url (string): API url
-            Returns:
-                string: path in snapshot matches API URL 
-        """
-        if url == CURRENT_APPLICATION:
-            # /application/current -> application.json
-            return 'application'
-        if url[0:LANGUAGE_RPEFIX_LENGTH] == LANGUAGE_PREFIX:
-            # get language info /language/{locale} -> {locale}.json
-            return '%s/language' % url[LANGUAGE_RPEFIX_LENGTH:]
-        return url
 
 class MethodIsNotSupported(APIError):
     """ Try to execute not GET request """

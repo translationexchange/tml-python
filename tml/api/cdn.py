@@ -28,7 +28,7 @@ import requests
 
 __author__ = 'a@toukmanov.ru'
 
-CDN_VERSION_URL = 'applications/current/version/'
+CDN_VERSION_URL = 'applications/current/version'
 
 class Client(BaseClient):
     """ CDN client """

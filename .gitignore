@@ -1,7 +1,7 @@
 *.pyc
 .project
 .pydevproject
-.idea
+.idea/*
 .settings
 test.py
 nohup.out

@@ -47,12 +47,24 @@ class CachedClient(object):
             Returns:
                 dict: response
         """
-        key = self.key(url, params)
-        ret = self.backend.get(key)
-        if not ret is None:
+        try:
+            key = self.key(url, params)
+            return self.read(key)
+        except NotCached as readme:
+            ret = self.client.get(url, params)
+            self.log(url, params)
+            self.backend.set(key, ret)
             return ret
-        ret = self.client.get(url, params)
-        self.backend.set(key, ret)
+
+    def read(self, key):
+        """
+        Read data from cache
+        :param key:
+        :return:
+        """
+        ret = self.backend.get(key)
+        if ret is None:
+            raise NotCached(key)
         return ret
 
     def post(self, url, params):
@@ -61,4 +73,61 @@ class CachedClient(object):
     def reload(self, url, params):
         """ Drop cache """
         self.backend.delete(self.key(url, params))
+
+    @property
+    def log_key(self):
+        return 'tml_cache_log_%s.%s' % (self.client.__module__, self.client.__class__.__name__)
+
+    def log(self, *request):
+        """
+        Log key usage
+        :param url:
+        :param params:
+        :return:
+        """
+        log_size = settings.TML.get('log_size')
+        if log_size is None:
+            return # Do not log:
+        print self.log_key
+        log = self.backend.get(self.log_key, default = [])
+        if request in log:
+            # URL already in log:
+            return self
+        log.append(request)
+        if len(log) > log_size:
+            # Rotate log:
+            log = log[1:]
+        self.backend.set(self.log_key, log)
+
+
+class NotCached(Exception):
+    def __init__(self, key):
+        self.key = key
+
+
+class Writeonly(CachedClient):
+    """ Writeonly cache (for warmup) """
+    def read(self, key):
+        """
+        Do not read any from cache
+        :param key:
+        :return:
+        """
+        raise NotCached(key)
+
+    @property
+    def keys(self):
+        print self.log_key
+        return self.backend.get(self.log_key, [])
+
+    def warmup(self, *request):
+        """
+        Warmup cache
+        :return:
+        """
+        self.get(*request)
+
+    def log(self, *request):
+        # Do not log:
+        return self
 

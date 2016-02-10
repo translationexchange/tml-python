@@ -2,59 +2,62 @@
 """ Test rules built-in functions """
 from __future__ import absolute_import
 import unittest
+from mock import patch
 from tml.rules.engine import *
 from tml.rules.functions import SUPPORTED_FUNCTIONS
 from tml.rules.parser import parse
 
-def die():
-    raise Exception('Die')
+def die_op():
+    raise Exception('dummy exception')
 
 
 class EngineTest(unittest.TestCase):
     """ Test of rules engine """
     def setUp(self):
         """ Use mock engine """
-        self.engine = RulesEngine({'sum': lambda a, b: int(a) + int(b),
-                                   'mod': lambda a, b: int(a) % int(b),
-                                   'die': die})
+        self.engine = RulesEngine(SUPPORTED_FUNCTIONS)
 
     def test_number_rules(self):
-        engine = RulesEngine(SUPPORTED_FUNCTIONS)
         self.assertEquals(
                         1,
-                        engine.execute(
+                        self.engine.execute(
                                        parse('(mod @n 10)'),
                                        {'n': 1}),
                         '@n = 1 -> (mod @n 10)')
         self.assertTrue(
-                        engine.execute(
+                        self.engine.execute(
                                        parse('(= 1 @n)'),
                                        {'n': 1}),
                         '@n = 1 -> (= 1 @n)')
 
         self.assertTrue(
-                        engine.execute(
+                        self.engine.execute(
                                        parse('(= 1 (mod @n 10))'),
                                        {'n': 1}),
                         '@n = 1 -> (= 1 (mod @n 10))')
 
         self.assertTrue(
-                        engine.execute(
+                        self.engine.execute(
                                        parse('(&& (= 1 (mod @n 10)) (!= 11 (mod @n 100)))'),
                                        {'n': 1}))
 
     def test_execution(self):
         """ Test rules engine"""
-        self.assertEquals(5, self.engine.execute(['sum', '2', '3'], {}), '(sum 2 3)')
-
+        self.assertEquals(5, self.engine.execute(['+', '2', '3'], {}), '(+ 2 3)')
+        
     def test_arguments(self):
         """ Pass arguments """
-        self.assertEquals(5, self.engine.execute(['sum', '@a', '@b'], {'a':2, 'b':3}), '(sum @a @b)')
+        self.assertEquals(5, self.engine.execute(['+', '@a', '@b'], {'a':2, 'b':3}), '(+ @a @b)')
+        self.assertTrue(
+            self.engine.execute(
+                parse('(&& (= @a (mod @n @b)) (!= @c (mod @n @d)))'),
+                    {'n': 1, 'a': 1, 'b': 10, 'c': 2, 'd': 100}))
+
 
     def test_inner(self):
         """ Inner expression """
-        self.assertEquals(3, self.engine.execute(['mod', ['sum', '8', '5'], '10'], {}), '(mod (sum 8 5) 10)')
-        self.assertEquals(3, self.engine.execute(['mod', ['sum', '@a', '5'], '@b'], {'a':18, 'b':10}), '(mod (sum @a 5) @b)')
+        self.assertEquals(3, self.engine.execute(['mod', ['+', '8', '5'], '10'], {}), '(mod (+ 8 5) 10)')
+        self.assertEquals(3, self.engine.execute(['mod', ['+', '@a', '5'], '@b'], {'a':18, 'b':10}), '(mod (+ @a 5) @b)')
 
     def test_function_not_suported(self):
         with self.assertRaises(FunctionDoesNotExists) as context:
@@ -62,10 +65,11 @@ class EngineTest(unittest.TestCase):
 
     def test_argument_does_not_exists(self):
         with self.assertRaises(ArgumentDoesNotExists) as context:
-            self.engine.execute(['sum', '@e', '3'], {})
+            self.engine.execute(['+', '@e', '3'], {})
         self.assertEquals('@e', context.exception.argument_name, 'Store argument name')
         self.assertEquals(1, context.exception.part_number, 'In first argument')
 
+    @patch.dict(SUPPORTED_FUNCTIONS, {'die': die_op})
     def test_function_error(self):
         """ Check that engine handle function error """
         with self.assertRaises(FunctionCallFault) as context:
@@ -79,6 +83,7 @@ class EngineTest(unittest.TestCase):
             self.engine.execute(['mod', '1', '10', '100'], {})
         self.assertEquals(TypeError, context.exception.exception.__class__, 'Store original exception')
 
+    @patch.dict(SUPPORTED_FUNCTIONS, {'die': die_op})
     def test_inner_function_call(self):
         with self.assertRaises(InnerExpressionCallFault) as context:
             self.engine.execute(['mod', '10', ['die']], {})

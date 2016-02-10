@@ -33,6 +33,7 @@ NO_EXPRESSION = '(quote @%s)'
 
 QUOTES = ['"',"'"]
 
+
 def parse(text):
     """ Parse rule 
         Args:

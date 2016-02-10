@@ -80,6 +80,7 @@ class Client(AbstractClient):
         resp = None
         try:
             url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
+            print "API REQUEST[%s]: %s, params=%s" % (method, url, params)
             params.update({'access_token': self.token})
             resp = requests.request(method, url, params = params)
             ret = resp.json()

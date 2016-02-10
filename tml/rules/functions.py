@@ -92,14 +92,14 @@ def within_f(value, range):
     """
     (min_value, max_value) = to_range(range)
     value = to_int(value)
-    return value >= min_value and value <= max_value
+    return min_value <= value <= max_value
 
 
 def in_f(set, find):
     """ Check is value in set
         Args:
-            find (string): string to find
             set (string): comma separated list of value of ranges 1,2,8..10
+            find (string): string to find
         Throws:
             ArgumentError
         Returns:
@@ -127,13 +127,13 @@ def build_flags(flags):
         Returns:
             int:
     """
+    U = set(('A', 'I', 'L', 'M', 'S'))
     ret = 0
     if flags is None:
         return ret
     flags = flags.upper()
-    for flag in ('A', 'I', 'L', 'M', 'S'):
-        if flag in flags:
-            ret |= getattr(re, flag)
+    for flag in set(flags) & U:
+        ret |= getattr(re, flag)
     return ret
 
 def build_regexp(pattern, flags = None):
@@ -214,7 +214,8 @@ def f_replace(search, replace, subject):
 SUPPORTED_FUNCTIONS = {
     # McCarthy's Elementary S-functions and Predicates
     'quote': lambda expr: expr,
-    'car': lambda list: list[1],
+    'car': lambda lst: lst[0],
+    'cdr': lambda lst: lst[1:],
     'cons': lambda e, cell: [e] + cell,
     'eq': lambda l, r: l == r,
     'atom': lambda expr: isinstance(expr, (type(None), str, int, float, bool)),

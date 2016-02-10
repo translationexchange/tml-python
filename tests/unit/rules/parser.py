@@ -35,6 +35,9 @@ class ParserTest(unittest.TestCase):
         self.assertEquals(['upper','Single "quotes"'],
                           parse("(upper 'Single \"quotes\"')"),
                           'Single quotes')
+        self.assertEquals(['mod', '1', ['+', '3', ['div', '6', '3']]],
+                          parse('(mod  1 (  + 3 (div   6 3) )  )'),
+                          'double space')
 
     def test_errors(self):
         # Check parse errrors:

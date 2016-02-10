@@ -17,18 +17,18 @@ class FunctionsTest(unittest.TestCase):
         self.assertEquals(1, to_int('1'), '1')
         self.assertEquals(100, to_int('100'), '100')
         self.assertEquals(0, to_int('0'), '0')
-        with self.assertRaises(ArgumentError) as context:
+        with self.assertRaises(ArgumentError):
             to_int('a')
-        with self.assertRaises(ArgumentError) as context:
+        with self.assertRaises(ArgumentError):
             to_int('1a')
-        with self.assertRaises(ArgumentError) as context:
+        with self.assertRaises(ArgumentError):
             to_int('05')
-        with self.assertRaises(ArgumentError) as context:
+        with self.assertRaises(ArgumentError):
             to_int('00')
 
     def test_to_range(self):
         self.assertEquals((0, 10), to_range('0..10'), '0..10')
-        self.assertEquals((100, 500), to_range('100..500'), '100.500')
+        self.assertEquals((100, 500), to_range('100..500'), '100..500')
         with self.assertRaises(ArgumentError) as context:
             to_range('a..100')
         with self.assertRaises(ArgumentError) as context:
@@ -40,6 +40,8 @@ class FunctionsTest(unittest.TestCase):
 
     def test_in_f(self):
         """ Test in_f implementation """
+        self.assertFalse(in_f('a', 'b'), 'b in a')
+        self.assertTrue(in_f('a', 'a'), 'a in a')
         self.assertTrue(in_f('a,b,c', 'b'), 'b in a,b,c')
         self.assertFalse(in_f('aa,bb,cc', 'a'), 'a not in aa,bb,cc')
         self.assertTrue(in_f('1,2,3', 1), '1 in 1,2,3')
@@ -89,6 +91,16 @@ class FunctionsTest(unittest.TestCase):
         rule = parse(srule['test'])
         self.assertTrue(default_engine.execute(rule, sdata), 'Re supports json encoding')
         self.assertEquals(to_string("Маше"), default_engine.execute(parse(srule['replace']), sdata), 'Маша -> Маше')
+
+    def test_atom(self):
+        self.assertTrue(SUPPORTED_FUNCTIONS['atom'](1))
+        self.assertTrue(SUPPORTED_FUNCTIONS['atom'](1.))
+        self.assertTrue(SUPPORTED_FUNCTIONS['atom']('hi'))
+        self.assertTrue(SUPPORTED_FUNCTIONS['atom'](None))
+        self.assertTrue(SUPPORTED_FUNCTIONS['atom'](False))
+        self.assertFalse(SUPPORTED_FUNCTIONS['atom']([]))
+        self.assertFalse(SUPPORTED_FUNCTIONS['atom'](tuple()))
+
 
 
 if __name__ == '__main__':

@@ -28,7 +28,11 @@ class Key(object):
 
     @property
     def as_dict(self):
-        return {'label':self.label, 'description': self.description, 'locale': self.locale, 'level': self.level}
+        return {
+            'label':self.label,
+            'description': self.description,
+            'locale': self.locale,
+            'level': self.level}
 
     @property
     def locale(self):

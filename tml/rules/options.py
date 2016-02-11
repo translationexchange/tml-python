@@ -34,6 +34,9 @@ import re
 
 class TokenMapping(object):
     """ Class which maps list of args to assoc args"""
+    
+    UNSUPPORTED = 'unsupported'
+
     def __init__(self, mapping):
         """ .ctor
             mapping (dict): key - mapped argument name, value - expression to fetch from args
@@ -52,8 +55,6 @@ class TokenMapping(object):
             ret[key] = apply_mapping_rule(self.mapping[key], args)
 
         return ret
-
-    UNSUPPORTED = 'unsupported'
 
     @classmethod
     def build(cls, settings):
@@ -139,7 +140,7 @@ class Parser(object):
     """ Parser for options """
     def __init__(self, keys, default_key, token_mapping):
         """ .ctor
-            rules (list): list of rules
+            keys (list): list of keys
             token_mapping (TokenMapping[]): list of token mappings
             default_key (string): default
         """

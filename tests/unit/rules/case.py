@@ -14,11 +14,13 @@ from tml.strings import to_string
 class CaseTest(unittest.TestCase):
     """ Test rules engine """
     def setUp(self):
-        self.rules = [{'conditions': to_string("(&& (= 'female' @gender) (match '/(ша)$/' @value))"),
-                       "operations": to_string("(replace '/а$/' 'и' @value)")},
-                      {'conditions': to_string("(match '/а$/' @value)"),
-                       "operations": to_string("(replace '/а$/' 'ы' @value)")}]
-        self.invalid_rules = [{'conditions':'(mode 3 @value))', 'operations': ''}]
+        self.rules = [{
+            "conditions": to_string("(&& (= 'female' @gender) (match '/(ша)$/' @value))"),
+            "operations": to_string("(replace '/а$/' 'и' @value)")},{
+            "conditions": to_string("(match '/а$/' @value)"),
+            "operations": to_string("(replace '/а$/' 'ы' @value)")}]
+        self.invalid_rules = [{
+            "conditions": "(mode 3 @value))", "operations": ""}]
 
 
     def test_case(self):

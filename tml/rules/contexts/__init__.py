@@ -40,6 +40,7 @@ from ...strings import to_string, suggest_string
 
 class Value(object):
     """ Value contexts """
+    
     @classmethod
     def match(cls, data):
         """ Data is value """
@@ -52,6 +53,7 @@ class Value(object):
 class UnsupportedContext(BaseError):
     """ Base error for context """
     pass
+    
 
 class ValueIsNotMatchContext(UnsupportedContext):
     """ Raises when try to fetch option for invalid value """

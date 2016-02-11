@@ -65,9 +65,12 @@ class ContextRules(object):
             operation = ['quote', key]
             if 'conditions' in rule:
                 # has conditions:
-                ret.choices.append((parse(rules[key]['conditions']), operation))
+                ret._append(parse(rules[key]['conditions']), operation)
             else:
                 # no conditions - default:
                 ret.default = operation
         return ret
+
+    def _append(self, condition, operation):
+        self.choices.append((condition, operation))
 

@@ -58,6 +58,6 @@ def suggest_string(data):
                 return data[key]
         for key in data:
             # Return first key:
-            return dict[key]
+            return data[key]
     return data
 

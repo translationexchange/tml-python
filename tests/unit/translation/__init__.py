@@ -40,6 +40,19 @@ class TranslationTest(unittest.TestCase):
         self.assertEquals('2c868dcba5cd6e9f06dc77397b5a77b1', Key(label='{name} give you {count} apples', description='apple', language=self.lang).key, 'Key with description')
         self.assertEquals('f9048053ea53b494f948b88b334f7ad0', Key(label='Submit', description='Submit recipe', language=self.lang).key)
 
+    def test_options(self):
+        t = TranslationOption('{name||дал, дала, дало} {to::dat} {count} яблоко', self.lang, {'count':{'number':'one'}})
+        self.assertEquals(to_string('Вася дал Маше 21 яблоко'), t.execute({'name': Gender.male('Вася'), 'to': Gender.female('Маша'), 'count': 21}, {}))
+        self.assertEquals(to_string('Лена дала Льву 21 яблоко'), t.execute({'name': Gender.female('Лена'), 'to': Gender.male('Лев'), 'count': 21}, {}))
+        with self.assertRaises(OptionIsNotSupported):
+            t.execute({'name': Gender.male('John'),'count': 2}, {})
+        with self.assertRaises(RequiredArgumentIsNotPassed):
+            t.execute({}, {})
+        with self.assertRaises(RequiredArgumentIsNotPassed):
+            t.execute({'count': 1}, {})
+        t = TranslationOption('Anyway', self.lang, {})
+        self.assertEquals('Anyway', t.execute({}, {}), 'Anyway execute')
+
     def test_context(self):
         c = Context({"count":{"number":"few"}})
         self.assertTrue(c.check({'count':3}, {}, self.lang), 'Test 3 is few')
@@ -54,19 +67,6 @@ class TranslationTest(unittest.TestCase):
         # test empty:
         c = Context({})
         self.assertTrue(c.check({'count':100}, {}, self.lang), 'Empty context - right anyway')
-
-    def test_options(self):
-        t = TranslationOption('{name||дал, дала, дало} {to::dat} {count} яблоко', self.lang, {'count':{'number':'one'}})
-        self.assertEquals(to_string('Вася дал Маше 21 яблоко'), t.execute({'name': Gender.male('Вася'), 'to': Gender.female('Маша'), 'count': 21}, {}))
-        self.assertEquals(to_string('Лена дала Льву 21 яблоко'), t.execute({'name': Gender.female('Лена'), 'to': Gender.male('Лев'), 'count': 21}, {}))
-        with self.assertRaises(OptionIsNotSupported):
-            t.execute({'name': Gender.male('John'),'count': 2}, {})
-        with self.assertRaises(RequiredArgumentIsNotPassed):
-            t.execute({}, {})
-        with self.assertRaises(RequiredArgumentIsNotPassed):
-            t.execute({'count': 1}, {})
-        t = TranslationOption('Anyway', self.lang, {})
-        self.assertEquals('Anyway', t.execute({}, {}), 'Anyway execute')
 
     def test_tranlation(self):
         url = 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations'

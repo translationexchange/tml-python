@@ -32,7 +32,7 @@ class GendersTest(unittest.TestCase):
 
     def test_not_gender(self):
         with self.assertRaises(ArgumentError):
-            Genders.match([Male(),':(', Gender.MALE])
+            Genders.match([Male(), ':(', Gender.MALE])
 
     def test_string(self):
         with self.assertRaises(ArgumentError):
@@ -42,3 +42,6 @@ class GendersTest(unittest.TestCase):
         with self.assertRaises(ArgumentError):
             Genders.match(Male())
 
+
+if __name__ == '__main__':
+    unittest.main()

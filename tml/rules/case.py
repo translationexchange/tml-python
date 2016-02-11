@@ -52,8 +52,7 @@ class Case(ContextRules):
         """
         ret = cls([], ['quote', '@value'])
         for rule in rules:
-            ret.choices.append((parse(rule['conditions']),
-                                parse(rule['operations'])))
+            ret._append(rule['conditions'], rule['operations'])
         return ret
 
     @classmethod
@@ -76,6 +75,7 @@ class Case(ContextRules):
                     raise rule_parse_fault
                 errors[key] = rule_parse_fault
         return (ret, errors)
+
 
 class LazyCases(object):
     """ Compile case on demand """

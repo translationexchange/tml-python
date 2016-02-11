@@ -49,21 +49,23 @@ class CaseTest(unittest.TestCase):
             # Unsafe call raises exceptions
             Case.from_data(data, False)
         cases, errors = Case.from_data(data, True)
-        self.assertEquals(Case, type(cases['gen']), 'Return get Case')
+        self.assertEquals(Case, type(cases['gen']), 'return get Case')
         cases_keys = list(cases.keys())
         cases_keys.sort()
-        self.assertEquals(['gen', 'gen2'], cases_keys, 'Return only valid')
+        self.assertEquals(['gen', 'gen2'], cases_keys, 'return only valid')
         self.assertEquals(str(context.exception), str(errors['err']), 'Store errors in errors')
         errors_keys = list(errors.keys())
         errors_keys.sort()
-        self.assertEquals(['err', 'err2'], errors_keys , 'Store all error')
+        self.assertEquals(['err', 'err2'], errors_keys , 'store all error')
 
     def test_lazy(self):
         """ Test lazy case """
         cases = LazyCases(self.data)
-        self.assertEqual(4, len(cases), 'All rules is in case')
+        self.assertEqual(4, len(cases), 'all rules is in case')
+        self.assertEqual(cases.cache, {}, 'really lazy')
         self.assertEquals(Case, type(cases['gen']), 'good case (gen)')
         self.assertEquals(Case, type(cases['gen2']), 'another good case (gen)')
+        self.assertTrue(len(cases.cache) > 0, 'cases evaluated')
         with self.assertRaises(ParseError) as context:
             # Error case
             cases['err']

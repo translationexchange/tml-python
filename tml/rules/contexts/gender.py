@@ -33,9 +33,8 @@ from tml.strings import to_string
 
 class Gender(object):
     """ Gender data """
-    MALE = 'male'
-    FEMALE = 'female'
-    OTHER = 'other'
+    GENDERS = MALE, FEMALE, OTHER = ('male', 'female', 'other')
+    
     def __init__(self, gender, value):
         self.value = value
         self.gender = Gender.supported_gender(gender)
@@ -76,7 +75,7 @@ class Gender(object):
     @classmethod
     def supported_gender(cls, gender):
         """ Check is gender string is valid gender """
-        if gender in (Gender.MALE, Gender.FEMALE, Gender.OTHER):
+        if gender in Gender.GENDERS:
             return gender
         raise ArgumentError('Gender unsupported: %s' % gender)
 

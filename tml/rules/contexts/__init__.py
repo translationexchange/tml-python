@@ -180,7 +180,7 @@ class Contexts(object):
 
 
     def execute(self, token_options, value):
-        """ Execute token options for value at firs supported context
+        """ Execute token options for value at first supported context
             Args:
                 token_options (string): token options as 'he, she, it'
                 value: token value

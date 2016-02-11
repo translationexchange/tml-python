@@ -28,6 +28,7 @@ from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
 from tml.rules.contexts.gender import Gender
 import six
 
+
 class FakeLanguage(object):
     def __init__(self):
         self.contexts = self
@@ -36,14 +37,6 @@ class FakeLanguage(object):
     def execute(self, rule, value):
         return rule
 
-class ContextsMock(object):
-    """ Stupid class to test context matching """
-    @property
-    def contexts(self):
-        return self
-
-    def execute(self, rules, data):
-        return data.__class__.__name__
 
 class CaseMock(object):
     def execute(self, data):
@@ -67,11 +60,12 @@ class TokenTest(unittest.TestCase):
 
 
     def test_execute_variable(self):
-        v = VariableToken('name')
-        self.assertEquals('John', v.execute({'name':'John'}, {}), 'Fetch name')
         class Hello(object):
             def __str__(self, *args, **kwargs):
                 return 'Hello'
+        
+        v = VariableToken('name')
+        self.assertEquals('John', v.execute({'name':'John'}, {}), 'Fetch name')
         self.assertEquals(six.u('Hello'), 
                           v.execute({'name':Hello()}, {}),
                           'Fetch name')
@@ -108,7 +102,7 @@ class TokenTest(unittest.TestCase):
 
     def test_execute_piped(self):
         """ Execute piped token """
-        v =PipeToken('name', 'somerule', self.language)
+        v = PipeToken('name', 'somerule', self.language)
         self.assertEquals('John somerule', v.execute({'name':'John'},{}), 'Execute piped token')
 
     def test_parse_piped(self):
@@ -128,20 +122,32 @@ class TokenTest(unittest.TestCase):
         self.assertEquals('Token syntax is not supported for token "{invalid~token}"', str(context.exception), 'Check exception message')
 
     def test_variable_token(self):
-        token = VariableToken(name = 'user')
+        token = VariableToken(name='user')
         self.assertEquals('John', token.execute({'user':'John'}, {}), 'Pass string')
         self.assertEquals('John', token.execute({'user': Gender.male('John')}, {}), 'Pass Gender')
         self.assertEquals('John', token.execute({'user': {'name':'John'}},{}), 'Pass dict')
         self.assertEquals('John', token.execute({'user': {'title':'John'}},{}), 'Pass string')
 
     def test_rules_token(self):
-        cm = ContextsMock()
-        token = RulesToken(name = 'obj', rules = None, language = ContextsMock())
+        class DumbLanguage(object):
+            """ Stupid class to test context matching """
+            def __init__(self):
+                self.contexts = self
+            def execute(self, rules, data):
+                return str(hash(data))
+
+        cm = DumbLanguage()
+        token = RulesToken(name='obj', rules=None, language=DumbLanguage())
         self.assertEquals(cm.execute(None, cm), token.execute({'obj': cm}, {}), 'Test object passed to RulesToken')
 
     def test_case_token(self):
-        token = CaseToken(name = 'obj', case = 'upper', language = self.language)
+        token = CaseToken(name='obj', case='upper', language=self.language)
         self.assertEquals('HELLO', token.execute({'obj':'Hello'}, {}), 'Test case token')
+        escape_obj = '<John & "qouted\'>'
+        self.assertEquals(
+            six.u('&lt;JOHN &amp; &quot;QOUTED&#39;&gt;'),
+            token.execute({'obj': escape_obj}, {'escape': True}),
+            'escape data')
 
 if __name__=='__main__':
     unittest.main()

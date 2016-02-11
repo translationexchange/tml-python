@@ -8,3 +8,5 @@ nohup.out
 dist
 django/dist
 *.egg-info/
+*.swp
+.coverage

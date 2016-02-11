@@ -198,8 +198,10 @@ class RulesToken(AbstractVariableToken):
         self.rules = rules
         self.language = language
 
-    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + '\|([^\|]{1}(.*))',))
+    TOKEN_TYPE_REGEX = '\|([^\|]{1}(.*))'
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + TOKEN_TYPE_REGEX,))
     """ Compiler for rules """
+    
     @classmethod
     def validate(cls, text, language):
         m = cls.IS_TOKEN.match(text)
@@ -222,7 +224,8 @@ class CaseToken(RulesToken):
 
     def execute(self, data, options):
         """ Execute with rules options """
-        return escape_if_needed(self.case.execute(self.fetch(data)), options)
+        return escape_if_needed(
+            self.case.execute(self.fetch(data)), options)
 
 
 class UnsupportedCase(Error):

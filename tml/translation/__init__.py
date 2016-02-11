@@ -133,6 +133,7 @@ class Translation(object):
         """ Translation length """
         return len(self.options)
 
+
 class NoneTranslation(Translation):
     def __init__(self, key):
         self.key = key

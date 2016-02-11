@@ -38,6 +38,15 @@ Usage
 
 The library can be invoked from the python command. To use tr8n client you must require it, and instantiate the application with the key and secret of your app from tr8nhub.com:
 
+Code Coverage
+=============
+
+* Install coverage package with `pip install -r requires_dev.txt`
+
+* Execute `nosetests tests/unit/* --all --verbose --with-coverage --cover-package=tml`
+
+* Enjoy the numbers
+
 
 Links
 ==================
@@ -54,7 +63,7 @@ Links
 
 
 Copyright and license
-==================
+=====================
 
 Copyright (c) 2015 Translation Exchange Inc
 

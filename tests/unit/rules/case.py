@@ -70,6 +70,27 @@ class CaseTest(unittest.TestCase):
             # Error case
             cases['err']
 
+    def test_acceptence_ordinal(self):
+        rules = [{
+            'conditions': '(= 1 @value)',
+            'operations': "(replace 1 'first' @value)"
+        }, {
+            'conditions': '(= 2 @value)',
+            'operations': "(replace 2 'second' @value)"
+        }, {
+            'conditions': '(= 3 @value)',
+            'operations': "(replace 3 'third' @value)"
+        }]
+        test_cases = (
+            ('first', '1'),
+            ('second', '2'),
+            ('third', '3'),
+            ('4', '4')
+        )
+        case = Case.from_rules(rules)
+        for expected, val in test_cases:
+            self.assertEqual(expected, case.apply({'value': val}))
+
 if __name__ == '__main__':
     unittest.main()
 

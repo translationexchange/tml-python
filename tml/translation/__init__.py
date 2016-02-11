@@ -11,20 +11,27 @@ from ..exceptions import RequiredArgumentIsNotPassed
 import six
 
 
+def generate_key(label, description=''):
+    """Generates unique hash key for the translation key using label and description"""
+    key = six.u('%s;;;%s') % (to_string(label), to_string(description))
+    ret = md5(key.encode('utf-8')).hexdigest()
+    return ret
+
 
 class Key(object):
     """ Translation key """
-    def __init__(self, language, label, description = '', level = 0):
+    def __init__(self, language, label, description='', level=0, key=None):
         """ .ctor
             Args:
-                label (string): tranlated string f.ex. "{name} take me {count||apple, apples}"
-                description (string): translation description
+                label (string): text to be translated f.ex. "{name} take me {count||apple, apples}"
+                description (string): Description of the text to be translated
                 language (Language): language instance
         """
         self.label = label
         self.description = description
         self.language = language
         self.level = level
+        self.key = self.build_key(key) # unique key (md5 hash) identifying this translation key
 
     @property
     def as_dict(self):
@@ -39,19 +46,14 @@ class Key(object):
         return str(self.language.locale)
 
     @property
-    def key(self):
-        """ Key property """
-        if self.description:
-            description = self.description
-        else:
-            description = ''
-        key = six.u('%s;;;%s') % (to_string(self.label), to_string(description))
-        ret = md5(key.encode('utf-8')).hexdigest()
-        return ret
-
-    @property
     def client(self):
         return self.language.client
+
+    def build_key(self, key=None):
+        if key is None:
+            return generate_key(self.label, description=self.description)
+        else:
+            return key
 
 
 class TranslationOption(Context):

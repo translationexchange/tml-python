@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from tests.mock import Client
 from tml.translation import Key, TranslationOption, OptionIsNotSupported,\
-    Translation, OptionIsNotFound
+    Translation, OptionIsNotFound, generate_key
 from tml.translation.context import Context
 import unittest
 from tml.application import Application
@@ -29,11 +29,16 @@ class TranslationTest(unittest.TestCase):
         self.assertEquals('apple', k.description, 'description')
         self.assertEquals(self.lang.locale, k.language.locale, 'language')
         self.assertEquals({'locale':'ru', 'level':5,'description':'apple','label':'{name} give you {count} apples'}, k.as_dict, 'As dict function')
+        self.assertEquals('1', k.build_key('1'), 'build key with key')
+        self.assertEquals('2c868dcba5cd6e9f06dc77397b5a77b1', k.build_key(), 'generate key')
 
     def test_key_hash(self):
         """ Test translation key """
-        self.assertEquals('5174f88691edb354a9f46af6e7455bb8', Key(label = 'Test', language = self.lang).key, 'Key without description')
-        self.assertEquals('2c868dcba5cd6e9f06dc77397b5a77b1', Key(label = '{name} give you {count} apples', description = 'apple', language= Language).key, 'Key with description')
+        self.assertEquals('5174f88691edb354a9f46af6e7455bb8', generate_key('Test'), 'without description')
+        self.assertEquals('2c868dcba5cd6e9f06dc77397b5a77b1', generate_key('{name} give you {count} apples', description='apple'), 'with description')
+        self.assertEquals('5174f88691edb354a9f46af6e7455bb8', Key(label='Test', language=self.lang).key, 'Key without description')
+        self.assertEquals('2c868dcba5cd6e9f06dc77397b5a77b1', Key(label='{name} give you {count} apples', description='apple', language=self.lang).key, 'Key with description')
+        self.assertEquals('f9048053ea53b494f948b88b334f7ad0', Key(label='Submit', description='Submit recipe', language=self.lang).key)
 
     def test_context(self):
         c = Context({"count":{"number":"few"}})

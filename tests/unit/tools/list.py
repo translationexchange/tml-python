@@ -12,7 +12,6 @@ class ListTest(unittest.TestCase):
     def setUp(self):
         self.context = build_context(client = Client.read_all(), locale = 'ru')
 
-
     def test_render(self):
         self.assertEquals('a, b, c', List(['a','b','c']).render(self.context), 'Just list')
         self.assertEquals('a;b;c', List(['a','b','c'], separator = ';').render(self.context), 'Custom separator')

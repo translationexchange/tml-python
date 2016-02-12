@@ -37,6 +37,7 @@ from .context import (LanguageContext,
                       SnapshotContext)
 from .api.snapshot import open_snapshot
 from .render import RenderEngine
+from .utils import enable_warnings
 
 __author__ = 'a@toukmanov.ru'
 
@@ -89,6 +90,7 @@ def configure(**kwargs):
     """ Build context and set as default """
     global DEFAULT_CONTEXT
     DEFAULT_CONTEXT = build_context(**kwargs)
+    enable_warnings()
 
 def get_context():
     """ Get current context """
@@ -105,9 +107,11 @@ def tr(label, data = {}, description = '', options = {}):
             language (Language):
             options (dict): options 
     """
-    return get_context().tr(label,
-                            DEFAULT_CONTEXT.prepare_data(data),
-                            description,
-                            options)
+    context = get_context()
+    return context.tr(
+        label,
+        context.prepare_data(data),
+        description,
+        options)
 
 

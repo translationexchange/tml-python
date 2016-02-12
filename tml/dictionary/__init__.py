@@ -24,6 +24,7 @@ __author__ = 'a@toukmanov.ru'
 
 from ..translation import Translation, NoneTranslation
 from ..exceptions import Error
+from ..utils import deprecated
 
 
 def return_label_fallback(key):
@@ -45,8 +46,18 @@ class AbstractDictionary(object):
         """
         self._fallback = fallback if fallback else return_label_fallback
 
+    @deprecated
     def translate(self, key):
-        """ Get key tranlation
+        """ Get key translation
+            Args:
+                key (Key): tranlated key
+            Returns:
+                Translation
+        """
+        return self.get_translation(key)
+        
+    def get_translation(self, key):
+        """Get key translation
             Args:
                 key (Key): tranlated key
             Returns:

@@ -23,7 +23,7 @@
 """
 from __future__ import absolute_import
 
-from .decoration.parser import parse
+from .decoration.parser import parse as decoration_parser
 from .tools import Renderable
 from argparse import ArgumentError
 from tml.dictionary import TranslationIsNotExists
@@ -56,7 +56,7 @@ class RenderEngine(object):
             translation = self.fallback(e.label, e.description)
             ret = translation.execute(translation_data, options)
         # Apply decoration:
-        return parse(ret).render(translation_data)
+        return decoration_parser(ret).render(translation_data)
 
     def fallback(self, label, description):
         raise NotImplemented('Fallback is not implemented for context')
@@ -77,6 +77,7 @@ class Data(object):
         self.context = context
 
     def __getitem__(self, key, *args, **kwargs):
+        # raise
         try:
             # get item for data:
             ret = self.data[key]

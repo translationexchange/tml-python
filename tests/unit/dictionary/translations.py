@@ -28,7 +28,7 @@ class TranslationsTest(unittest.TestCase):
     def test_translate(self):
         f = Fallback()
         dict = Dictionary(f)
-        t = dict.translate(self.apples_key())
+        t = dict.get_translation(self.apples_key())
         self.assertEquals(3, len(t.options), 'All options loaded')
         self.assertEquals(0, len(f.missed_keys), 'No missed keys')
         self.assertEquals(to_string('Маша любезно дала тебе 2 яблока'), t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
@@ -38,7 +38,7 @@ class TranslationsTest(unittest.TestCase):
         dict = Dictionary(f)
         label = 'No translation'
         key = Key(label = label, language = self.lang)
-        t = dict.translate(key)
+        t = dict.get_translation(key)
         self.assertEquals(1, len(f.missed_keys), 'Key marked as missed')
         self.assertEquals(key, f.missed_keys[0], 'Key added to missed')
         self.assertEquals(label, t.execute({}, {}), 'Use default tranlation')

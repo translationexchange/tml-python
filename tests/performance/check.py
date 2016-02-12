@@ -49,11 +49,11 @@ def main():
     print('Load language %f' % t.per_action())
     ru = Language.load_by_locale(app, 'ru')
     dict = SourceDictionary(language = ru, source = 'index')
-    t = dict.translate(Key(label = '{actor} give you {count}',
+    t = dict.get_translation(Key(label = '{actor} give you {count}',
                       description = 'somebody give you few apples',
                       language = ru))
     def translate():
-        t = dict.translate(Key(label = '{actor} give you {count}',
+        t = dict.get_translation(Key(label = '{actor} give you {count}',
                       description = 'somebody give you few apples',
                       language = ru))
         actors = [{'name':'Анна','gender':'female'}, {'name':'Мария','gender':'female'}, {'name':'Вася','gender':'male'}, {'name':'Артем','gender':'male'}]

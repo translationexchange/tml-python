@@ -17,10 +17,10 @@ class SnapshotTest(unittest.TestCase):
 
     def test_translate(self):
         dict = SnapshotDictionary(language=self.lang, source='index')
-        t = dict.translate(Key(label='Test',
+        t = dict.get_translation(Key(label='Test',
                               language=self.lang))
         self.assertEquals(to_string('Тест'), t.execute({}, {}), 'Test translate')
-        t = dict.translate(Key(label='Untranslated',
+        t = dict.get_translation(Key(label='Untranslated',
                               language=self.lang))
         self.assertEquals(to_string('Untranslated'), t.execute({}, {}), 'Test fallback')
 

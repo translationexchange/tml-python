@@ -23,7 +23,7 @@ class SourceTest(unittest.TestCase):
     def test_translate(self):
         f = Fallback()
         dict = SourceDictionary(language = self.lang, source = 'index')
-        t = dict.translate(Key(label = '{actor} give you {count}',
+        t = dict.get_translation(Key(label = '{actor} give you {count}',
                               description = 'somebody give you few apples',
                               language = self.lang))
         self.assertEquals(3, len(t.options), 'All options loaded')
@@ -33,7 +33,7 @@ class SourceTest(unittest.TestCase):
         dict = SourceDictionary(language = self.lang, source = 'index')
         label = 'No translation'
         key = Key(label = label, language = self.lang, level = 2)
-        t = dict.translate(key)
+        t = dict.get_translation(key)
         self.assertEquals(label, t.execute({}, {}), 'Use default tranlation')
         del dict
         self.assertEquals('sources/register_keys', self.client.url, 'Post')

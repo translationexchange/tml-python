@@ -25,6 +25,9 @@ class LanguageTest(unittest.TestCase):
     def test_translate(self):
         f = Fallback()
         dict = LanguageDictionary(self.lang, f)
+        k = Key(label = '{actor} give you {count}',
+                              description = 'somebody give you few apples',
+                              language = self.lang)
         t = dict.translate(Key(label = '{actor} give you {count}',
                               description = 'somebody give you few apples',
                               language = self.lang))
@@ -40,7 +43,7 @@ class LanguageTest(unittest.TestCase):
         t = dict.translate(key)
         self.assertEquals(1, len(f.missed_keys), 'Key marked as missed')
         self.assertEquals(key, f.missed_keys[0], 'Key added to missed')
-        self.assertEquals(label, t.execute({}, {}), 'Use default tranlation')
+        self.assertEquals(label, t.execute({}, {}), 'Use default translation (fallback)')
 
 
 if __name__ == '__main__':

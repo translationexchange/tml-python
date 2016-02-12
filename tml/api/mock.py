@@ -131,14 +131,14 @@ class File(Hashtable):
     def readdir(self, path):
         """ Read all files from directory """
         abspath = '%s/%s' % (self.basedir, path)
-        for filename in listdir(abspath):
-            is_json = self.JSON_FILE.match(filename)
+        for dir_or_fname in listdir(abspath):
+            is_json = self.JSON_FILE.match(dir_or_fname)
             if is_json:
-                is_json_paging = self.JSON_PAGING.match(filename)
+                is_json_paging = self.JSON_PAGING.match(dir_or_fname)
 
-            if isdir(abspath + filename):
+            if isdir(abspath + dir_or_fname):
                 # recursive:
-                self.readdir(path + filename + '/')
+                self.readdir(path + dir_or_fname + '/')
             elif is_json:
                 # url.json
                 if is_json_paging:
@@ -148,6 +148,6 @@ class File(Hashtable):
                 else:
                     url = path + is_json.group(1)
                     params = None
-                self.read(url, params, path + filename)
+                self.read(url, params, path + dir_or_fname)
         return self
 

@@ -63,7 +63,6 @@ class SourceDictionary(Hashtable):
         data = self.language.client.get(*self.api_query)
         super(SourceDictionary, self).__init__(data['results'], fallback)
 
-
     @property
     def api_query(self):
         """ Params to API call 

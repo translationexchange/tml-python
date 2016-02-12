@@ -265,7 +265,9 @@ class PipeToken(RulesToken):
 
     def execute(self, data, options):
         """ Execute token """
-        return to_string(self.token.execute(data, options))+' '+to_string(self.rules.execute(data, options))
+        return '%s %s' % (
+            to_string(self.token.execute(data, options)),
+            to_string(self.rules.execute(data, options)))
 
     def __str__(self):
         return "PipeToken: token=%s, rules=%s" % (self.token, self.rules)

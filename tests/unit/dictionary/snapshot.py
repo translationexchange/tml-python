@@ -16,12 +16,12 @@ class SnapshotTest(unittest.TestCase):
         self.lang = Language.load_by_locale(self.app, 'ru')
 
     def test_translate(self):
-        dict = SnapshotDictionary(language = self.lang, source = 'index')
-        t = dict.translate(Key(label = 'Test',
-                              language = self.lang))
+        dict = SnapshotDictionary(language=self.lang, source='index')
+        t = dict.translate(Key(label='Test',
+                              language=self.lang))
         self.assertEquals(to_string('Тест'), t.execute({}, {}), 'Test translate')
-        t = dict.translate(Key(label = 'Untranslated',
-                              language = self.lang))
+        t = dict.translate(Key(label='Untranslated',
+                              language=self.lang))
         self.assertEquals(to_string('Untranslated'), t.execute({}, {}), 'Test fallback')
 
 

@@ -126,6 +126,9 @@ class TextToken(AbstractToken):
         if text[0] != '{':
             return TextToken(text)
 
+    def __str__(self):
+        return "TextToken[%s]" % self.text
+
 
 class AbstractVariableToken(AbstractToken):
 
@@ -178,7 +181,7 @@ class VariableToken(AbstractVariableToken):
             return VariableToken(m.group(1))
 
     def __str__(self):
-        return '{%s}' % self.name
+        return 'VariableToken[%s]' % self.name
 
 
 class RulesToken(AbstractVariableToken):
@@ -212,6 +215,9 @@ class RulesToken(AbstractVariableToken):
         """ Execute token with var """
         return self.language.contexts.execute(self.rules, self.fetch(data)).strip()
 
+    def __str__(self):
+        return "RulesToken[%s, choices=%s]" % (self.name, self.rules)
+
 
 class CaseToken(RulesToken):
     """ Language keys {name::nom} """
@@ -226,6 +232,9 @@ class CaseToken(RulesToken):
         """ Execute with rules options """
         return escape_if_needed(
             self.case.execute(self.fetch(data)), options)
+
+    def __str__(self):
+        return "CaseToken[%s, case=%s]" % (self.name, self.case)
 
 
 class UnsupportedCase(Error):
@@ -257,6 +266,9 @@ class PipeToken(RulesToken):
     def execute(self, data, options):
         """ Execute token """
         return to_string(self.token.execute(data, options))+' '+to_string(self.rules.execute(data, options))
+
+    def __str__(self):
+        return "PipeToken: token=%s, rules=%s" % (self.token, self.rules)
 
 
 class TokenMatcher(object):

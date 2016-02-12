@@ -59,8 +59,8 @@ class TranslationTest(unittest.TestCase):
         self.assertFalse(c.check({'count':1}, {}, self.lang), 'Test 1 is not few')
         # test multi context:
         c = Context({"count":{"number":"other"},"actor":{"gender":"male"}})
-        self.assertTrue(c.check({'count':5, 'actor':Gender.male('Adam')}, {}, self.lang), 'many + male: OK')
-        self.assertFalse(c.check({'count':5, 'actor':Gender.female('Eve')}, {}, self.lang), 'many + female: WRONG')
+        self.assertTrue(c.check({'count':5, 'actor': Gender.male('Adam')}, {}, self.lang), 'many + male: OK')
+        self.assertFalse(c.check({'count':5, 'actor': Gender.female('Eve')}, {}, self.lang), 'many + female: WRONG')
         # test invalid value:
         with self.assertRaises(ValueIsNotMatchContext) as context:
             self.assertFalse(c.check({'count':5, 'actor': 'Eve'}, {}, self.lang), 'many + female: WRONG')

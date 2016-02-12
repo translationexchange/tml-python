@@ -18,6 +18,10 @@ def generate_key(label, description=''):
     return ret
 
 
+def parse_tokens(label, language):
+    return default_parser.parse(label, language)
+
+
 class Key(object):
     """ Translation key """
     def __init__(self, language, label, description='', level=0, key=None):
@@ -92,7 +96,8 @@ class TranslationOption(Context):
         return self.check(data, options).apply(data, options)
 
     def apply(self, data, options = {}):
-        return execute_all(default_parser.parse(self.label, self.language), data, options) # execute with data
+        extracted_tokens = parse_tokens(self.label, self.language)
+        return execute_all(extracted_tokens, data, options) # execute with data
 
 
 class Translation(object):

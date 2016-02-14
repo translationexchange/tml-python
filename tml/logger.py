@@ -33,8 +33,8 @@ class Logger(Singleton):
     backup_count = 30
     mode = 'a'
     namespace = 'trex.TML'
-
-    def __init__(self, path=None, log_level=None, **kwargs):
+        
+    def init(self, path=None, log_level=None, **kwargs):
         self.path = Logger.default_path if path is None else path
         dirname = os.path.dirname(self.path)
         if not os.path.exists(dirname):
@@ -57,10 +57,11 @@ class Logger(Singleton):
         self.logger.addHandler(file_handler)
         self.logger.propagate = False
 
-    @classmethod
-    def instance(cls, **kwargs):
-        return Logger(**kwargs)
-
 
 class LoggerNotConfigured(Error):
     pass
+
+
+def get_logger(**kwargs):
+    return Logger.instance(**kwargs)
+

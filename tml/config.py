@@ -6,12 +6,9 @@ from .utils import APP_DIR, rel, merge
 
 class BaseConfig(dict, Singleton):
 
-    def __init__(self, **kwargs):
-        if getattr(self, 'configured', False):
-            return
+    def init(self, **kwargs):
         self.init_config()
         self.override_config(**kwargs)
-        self.configured = True
 
     def __setitem__(self, name, value):
         super(BaseConfig, self).__setitem__(name.lower(), value)
@@ -29,10 +26,6 @@ class BaseConfig(dict, Singleton):
         name = name.lower()
         del self[name]
 
-    @classmethod
-    def instance(cls, **kwargs):
-        return Config(**kwargs)
-
     def init_config(self):
 
         def is_builtin(k):
@@ -44,7 +37,6 @@ class BaseConfig(dict, Singleton):
             if is_builtin(k) or is_callable(k):
                 continue
             self.__setattr__(k, v)
-
 
     def override_config(self, **kwargs):
         for k, v in kwargs.iteritems():

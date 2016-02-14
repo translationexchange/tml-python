@@ -89,14 +89,9 @@ class ClientTest(unittest.TestCase):
         error = Exception('My error')
         client.requests = RequestFault(error)
         c = client.Client('qwerty')
-        with self.assertRaises(client.HttpError) as context:
+        with self.assertRaises(Exception) as context:
             c.get('test', {'param':'value'})
-
-        self.assertEquals(
-                          'TML API call fault to https://api.translationexchange.com/v1/test with Exception: My error',
-                          str(context.exception),
-                          'Check exception message')
-        self.assertEquals(error, context.exception.error, 'Check error proxy')
+        self.assertEquals(error, context.exception, 'Check error')
 
     def test_api_error(self):
         """ Test error from API """

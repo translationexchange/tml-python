@@ -35,7 +35,6 @@ class CachedClient(object):
                 url (string): URL
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response

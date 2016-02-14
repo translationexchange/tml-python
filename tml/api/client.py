@@ -21,15 +21,20 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = 'a@toukmanov.ru, xepa4ep'
 
-
+import sys
+import time
 import requests
+import contextlib
 from . import AbstractClient, APIError, ClientError
+from ..logger import get_logger
+
 
 class Client(AbstractClient):
     """ API Client """
     API_HOST = 'https://api.translationexchange.com'
+    CDN_HOST = 'https://cdn.translationexchange.com'
     API_PATH = 'v1'
 
     def __init__(self, token):
@@ -45,7 +50,6 @@ class Client(AbstractClient):
                 url (string): URL
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response
@@ -58,50 +62,53 @@ class Client(AbstractClient):
                 url (string): URL
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response
         """
         return self.call(url, 'post', params)
 
-    def call(self, url, method, params = {}):
+    def call(self, url, method, params=None):
         """ Make request to API 
             Args:
                 url (string): URL
                 method (string): HTTP method (get|post|put|delete)
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response
         """
+        params = {} if params is None else params
         resp = None
-        try:
-            url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
-            print "API REQUEST[%s]: %s, params=%s" % (method, url, params)
-            params.update({'access_token': self.token})
-            resp = requests.request(method, url, params = params)
-            ret = resp.json()
-        except Exception as http_error:
-            raise HttpError(http_error,
-                            url = resp.url if resp is not None else url,
-                            client = self)
+        url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
+        params.update({'access_token': self.token})
+        with self.trace_call(url, method, params):
+            resp = requests.request(method, url, params=params)
+        ret = resp.json()
         if 'error' in ret:
             raise APIError(ret['error'], url = resp.url, client = self)
         return ret
 
 
-class HttpError(ClientError):
-    """ Something wrong whith HTTP """
-    def __init__(self, error, url, client):
-        super(HttpError, self).__init__(url, client)
-        self.error = error
+    @contextlib.contextmanager
+    def trace_call(self, url, method, params):
+        tml_logger = get_logger()
+        line, log_tpl = '', '%(method)s: %(url)s/%(query)s takes %(sec)s seconds.'
+        method = method.upper()
+        query = params and self.to_query(params) or ''
+        t0 = time.time()
+        try:
+            yield
+        except Exception as e:
+            tml_logger.exception(e)
+            exc_info = sys.exc_info()
+            raise exc_info[0], exc_info[1], exc_info[2]
+        else:
+            t1 = time.time()
+            tml_logger.debug(log_tpl % dict(method=method.upper(), url=url, query=self.to_query(params), sec=int(t1 - t0)))
 
-    MESSAGE = '%s with %s: %s'
-    def __str__(self):
-        return self.MESSAGE % (super(HttpError, self).__str__(),
-                               self.error.__class__.__name__,
-                               self.error)
+    def to_query(self, params):
+        querystr = ['%s=%s' % (k, v) for k, v in params.iteritems()]
+        return '&'.join(querystr)
 

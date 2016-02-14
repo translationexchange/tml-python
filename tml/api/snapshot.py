@@ -53,7 +53,6 @@ class SnapshotDir(AbstractClient):
                 method (string): HTTP method (get|post|put|delete)
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response

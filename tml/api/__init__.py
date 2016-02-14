@@ -24,15 +24,16 @@ __author__ = 'a@toukmanov.ru'
 
 from ..exceptions import Error
 
+
 class AbstractClient(object):
     """ Basic API client """
+
     def get(self, url, params = {}):
         """ GET request to API 
             Args:
                 url (string): URL
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response
@@ -45,7 +46,6 @@ class AbstractClient(object):
                 url (string): URL
                 params (dict): params
             Raises:
-                HttpError: something wrong with connection
                 APIError: API returns error
             Returns:
                 dict: response

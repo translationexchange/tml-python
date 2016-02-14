@@ -36,6 +36,7 @@ class ApplicationTest(unittest.TestCase):
             logger.debug('hi')
             logger.logger = orig_logger
 
+
     def test_logging(self):
         logger = DummyLogger(path=self.path)
         expected_line = 'This is debug message'

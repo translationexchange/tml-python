@@ -1,5 +1,16 @@
+import os
+import logging
+import logging.handlers
 import functools
 import warnings
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def rel(*x):
+    return os.path.join(os.path.abspath(BASE_DIR), *x)
+
+APP_DIR = rel('tml')
 
 
 def deprecated(fn):
@@ -23,3 +34,5 @@ def deprecated(fn):
 
 def enable_warnings():
     warnings.simplefilter('always', DeprecationWarning)
+
+

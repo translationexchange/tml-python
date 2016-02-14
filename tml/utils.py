@@ -36,3 +36,15 @@ def enable_warnings():
     warnings.simplefilter('always', DeprecationWarning)
 
 
+def merge(a, b):
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge(a[key], b[key])
+            else:
+                a[key] = b[key]
+        else:
+            a[key] = b[key]
+    return a
+
+multi_merge = functools.partial(reduce, merge)

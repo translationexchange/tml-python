@@ -15,9 +15,9 @@ class LanguageTest(unittest.TestCase):
     """ Test loading tranlations over API """
     def setUp(self):
         self.client = Client()
-        self.client.read('languages/ru', {'definition': 1})
-        self.client.read('applications/current', {'definition': 1})
-        self.client.read('applications/1/translations', {'locale':'ru', 'page': 1})
+        self.client.read('languages/ru/definition', None)
+        self.client.read('projects/current', None)
+        self.client.read('projects/1/translations', {'locale':'ru', 'page': 1})
         self.app = Application.load_default(self.client)
         self.lang = Language.load_by_locale(self.app, 'ru')
 
@@ -41,6 +41,7 @@ class LanguageTest(unittest.TestCase):
         label = 'No translation'
         key = Key(label = label, language = self.lang)
         t = dict.get_translation(key)
+        print dict._fallback
         self.assertEquals(1, len(f.missed_keys), 'Key marked as missed')
         self.assertEquals(key, f.missed_keys[0], 'Key added to missed')
         self.assertEquals(label, t.execute({}, {}), 'Use default translation (fallback)')

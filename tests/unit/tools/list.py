@@ -10,7 +10,7 @@ from tml.strings import to_string
 class ListTest(unittest.TestCase):
 
     def setUp(self):
-        self.context = build_context(client = Client.read_all(), locale = 'ru')
+        self.context = build_context(client=Client.read_all(), locale='ru')
 
     def test_render(self):
         self.assertEquals('a, b, c', List(['a','b','c']).render(self.context), 'Just list')
@@ -23,8 +23,8 @@ class ListTest(unittest.TestCase):
     def test_tpl(self):
         list = List(['a','b','c'], tpl = Template('<b>{$0}</b>'))
         self.assertEquals('<b>a</b>, <b>b</b>, <b>c</b>', list.render(self.context), 'Apply template')
-        list = List([{'name':to_string('Вася'),'gender':'male'},{'name':to_string('Андрей'),'gender':'male'},{'name':to_string('Семен'),'gender':'male'}], tpl = Template('{$0::dat}'), last_separator = to_string('и'))
-        self.assertEquals(to_string('Васе, Андрею и Семену'), list.render(self.context), 'Apply context')
+        list = List([{'name':to_string('Вася'),'gender':'male'},{'name':to_string('Андрей'),'gender':'male'},{'name':to_string('Анна'),'gender':'female'}], tpl = Template('{$0::dat}'), last_separator = to_string('и'))
+        self.assertEquals(to_string('Васе, Андрею и Анне'), list.render(self.context))
 
 if __name__ == '__main__':
     unittest.main()

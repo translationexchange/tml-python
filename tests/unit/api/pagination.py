@@ -20,8 +20,8 @@ class PaginationTest(unittest.TestCase):
 
     def test_dict_pagination(self):
         for page in range(1, 4):
-            self.client.read('applications/2/translations', {'locale':'ru', 'page':page}, 'applications/2/translations_%d.json' % page)
-        full_list = allpages(self.client, 'applications/2/translations', {'locale':'ru'})
+            self.client.read('projects/2/translations', {'locale':'ru', 'page':page}, 'projects/2/translations_%d.json' % page)
+        full_list = allpages(self.client, 'projects/2/translations', {'locale':'ru'})
         self.assertEquals(5, len(full_list), 'Test paging')
         self.assertEquals(to_string("{actor} любезно дала тебе {count||яблоко, яблока, яблок}"), full_list['8ad5a7fe0a12729764e31a1e3ca80059'][0]['label'], 'Check first')
         self.assertEquals(to_string("Тест"), full_list['5174f88691edb354a9f46af6e7455bb8'][0]['label'], 'Check last')

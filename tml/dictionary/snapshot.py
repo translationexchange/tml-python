@@ -29,12 +29,23 @@ from ..api import ClientError
 
 class SnapshotDictionary(Hashtable):
     """ .ctor """
-    def __init__(self, source, language, fallback = None):
+    def __init__(self, source, language, fallback = None, translations=None):
+        self.source = source
+        self.language = language
         try:
-            url = '%s/sources/%s' % (language.locale, source)
-            data = language.client.get(url)
-            super(SnapshotDictionary, self).__init__(data['results'])
+            translations = translations or self.fetch_translations()
+            super(SnapshotDictionary, self).__init__(translations=translations)
         except ClientError:
             # empty dictionary:
             super(SnapshotDictionary, self).__init__({})
+
+    def load_translations(self):
+        self.translations = self.fetch_translations()
+
+    def fetch_translations(self):
+        return self.language.client.get(*self.api_query)['results']
+
+    @property
+    def api_query(self):
+        return ('%s/sources/%s' % (self.language.locale, self.source),)
 

@@ -55,7 +55,7 @@ class AbstractDictionary(object):
                 Translation
         """
         return self.get_translation(key)
-        
+    
     def get_translation(self, key):
         """Get key translation
             Args:
@@ -92,7 +92,7 @@ class AbstractDictionary(object):
 
 class Hashtable(AbstractDictionary):
     """ Dictionary with translation store in hash """
-    def __init__(self, translations = None, fallback = None):
+    def __init__(self, fallback=None, translations=None):
         """ .ctor
             Args:
                 tranlations (dict): key- tranlation code, value - tranlation options

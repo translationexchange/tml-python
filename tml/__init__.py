@@ -60,11 +60,11 @@ def build_client(client, snapshot_path, token):
     # Get data from API:
     return Client(token)
 
-def build_context(token = None,
-                  source = None,
-                  client = None,
-                  snapshot_path = None,
-                  use_snapshot = False,
+def build_context(token=None,
+                  source=None,
+                  client=None,
+                  snapshot_path=None,
+                  use_snapshot=False,
                   **kwargs):
     """ Build context for settings
         Args:

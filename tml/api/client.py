@@ -79,7 +79,7 @@ class Client(AbstractClient):
             Returns:
                 dict: response
         """
-        params = {} if params is None else params
+        params = {} if params is None else self._compact_params(params)
         resp = None
         url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
         params.update({'access_token': self.token})
@@ -87,7 +87,7 @@ class Client(AbstractClient):
             resp = requests.request(method, url, params=params)
         ret = resp.json()
         if 'error' in ret:
-            raise APIError(ret['error'], url = resp.url, client = self)
+            raise APIError(ret['error'], url=resp.url, client=self)
         return ret
 
 

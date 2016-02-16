@@ -44,7 +44,7 @@ class api_test(unittest.TestCase):
     """ Test configuration """
     def setUp(self):
         self.client = ClientMock.read_all()
-        self.client.read('applications/2/translations', {'locale':'ru','page':1}, 'applications/1/translations.json')
+        self.client.read('projects/2/translations', {'locale':'ru','page':1}, 'projects/1/translations.json')
 
     def test_configure_first(self):
         tml.DEFAULT_CONTEXT = None
@@ -94,7 +94,7 @@ class api_test(unittest.TestCase):
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
         c = build_context(client = self.client, locale = 'ru', source = source)
-        self.assertEquals('Has english translation', c.tr(label),'Use fallback source for en')
+        self.assertEquals('Only in English', c.tr(label),'Use fallback source for en')
         c.deactivate()
         self.assertEquals(self.client.url, 'sources/register_keys', 'Submit missed keys url')
         expected_keys = [{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]

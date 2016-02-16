@@ -21,6 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
+import re
 from tml.strings import to_string
 __author__ = 'a@toukmanov.ru'
 
@@ -31,9 +32,10 @@ from os.path import isdir, exists
 from ..exceptions import Error
 
 
-LANGUAGE_PREFIX = 'languages/'
-LANGUAGE_RPEFIX_LENGTH = len(LANGUAGE_PREFIX)
-CURRENT_APPLICATION = 'applications/current'
+REWRITE_RULES = (
+    ('projects/current/definition', 'application'),
+    (r'^languages\/(\w+)\/definition$', '%(0)s/language')
+)
 
 
 class SnapshotDir(AbstractClient):
@@ -80,12 +82,16 @@ class SnapshotDir(AbstractClient):
             Returns:
                 string: path in snapshot matches API URL 
         """
-        if url == CURRENT_APPLICATION:
-            # /application/current -> application.json
-            return 'application'
-        if url[0:LANGUAGE_RPEFIX_LENGTH] == LANGUAGE_PREFIX:
-            # get language info /language/{locale} -> {locale}.json
-            return '%s/language' % url[LANGUAGE_RPEFIX_LENGTH:]
+        for pattern, replacer in REWRITE_RULES:
+            if pattern == url:  # if equal
+                return replacer
+            else: # if match by regex
+                match_obj = re.compile(pattern).match(url)
+                if not match_obj:
+                    continue
+                ctx = dict([(str(idx), v) for idx, v
+                            in enumerate(match_obj.groups())])
+                return replacer % ctx
         return url
 
 class MethodIsNotSupported(APIError):
@@ -104,6 +110,7 @@ class SnapshotFile(SnapshotDir):
         return TarFile.open(self.path, 'r')
 
     def fetch(self, path):
+        fp = None
         try:
             fp = self.file.extractfile('%s.json' % path)
             ret = loads(fp.read().decode('utf-8'))

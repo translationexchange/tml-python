@@ -18,8 +18,8 @@ class TranslationTest(unittest.TestCase):
     """ Test translations """
     def setUp(self):
         self.client = Client()
-        self.client.read('applications/current', {'definition': 1})
-        self.client.read('languages/ru', {'definition': 1})
+        self.client.read('projects/current/definition')
+        self.client.read('languages/ru')
         self.app = Application.load_default(self.client)
         self.lang = Language.load_by_locale(self.app, 'ru')
 

@@ -15,8 +15,8 @@ class SnapshotTest(unittest.TestCase):
     """ Test for snapshot API client """
     def test_rewrite(self):
         c = SnapshotFile('%s/snapshot.tar.gz' % FIXTURES_PATH)
-        self.assertEquals('application', c.rewrite_path('applications/current'), 'Rewrite application path')
-        self.assertEquals('de/language', c.rewrite_path('languages/de'), 'Rewrite language path')
+        self.assertEquals('application', c.rewrite_path('projects/current/definition'), 'Rewrite application path')
+        self.assertEquals('de/language', c.rewrite_path('languages/de/definition'), 'Rewrite language path')
         self.assertEquals('ru/sources/test', c.rewrite_path('ru/sources/test'), 'Do not rewrite sources path')
 
     def test_load_from_tar(self):

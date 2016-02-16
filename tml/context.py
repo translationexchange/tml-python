@@ -131,26 +131,26 @@ class AbstractContext(RenderEngine):
 
 class LanguageContext(AbstractContext):
     """ Context with selected language """
-    def __init__(self, client, locale = None, application_id = None, **kwargs):
+    def __init__(self, client, locale=None, source=None, application_id=None, **kwargs):
         """ .ctor
             Args:
                 client (Client): custom API client
                 locale (string): selected locale
+                source (string): which source to load in a single fetch (e.g. /home/index)
                 application_id (int): API application id (use default if None)
+
         """
         if application_id:
-            application = Application.load_by_id(client, application_id)
+            application = Application.load_by_id(client, application_id, locale=locale, source=source)
         else:
-            application = Application.load_default(client)
+            application = Application.load_default(client, locale=locale)
+        language = application.language(locale)
+        super(LanguageContext, self).__init__(
+            dictionary=self.build_dict(language),
+            language=language)
 
-        language =  Language.load_by_locale(application, 
-                                            locale if locale else application.default_locale)
-
-        super(LanguageContext, self).__init__(dictionary = self.build_dict(language),
-                                              language = language)
-
-    def build_dict(self, language):
-        """ Dictionary factory """
+    def build_dict(self, language, **kwargs):
+        """ Dictionary factory (uses API directly for each fetch request) """
         return Dictionary()
 
     _fallback_dict = None
@@ -208,11 +208,13 @@ class SourceContext(LanguageContext):
                 source (string): source name
         """
         self.source = source
-        super(SourceContext, self).__init__(**kwargs)
-
+        super(SourceContext, self).__init__(source=source, **kwargs)
+        
+        
     def build_dict(self, language):
-        """ Build source dictionary for language """
-        return SourceDictionary(self.source, language)
+        """ Fetches or builds source dictionary for language """
+        return language.application.source(
+            self.source, language.locale)
 
     def deactivate(self):
         self.dict.flush()
@@ -226,13 +228,14 @@ class SnapshotContext(LanguageContext):
                 source (string): source name
         """
         self.source = source
-        super(SnapshotContext, self).__init__(**kwargs)
+        super(SnapshotContext, self).__init__(source=source, **kwargs)
+        
 
-    def build_dict(self, language):
+    def build_dict(self, language, **kwargs):
         """ Build snapshot dictionary """
         if not self.source:
             # Snapshot does not works out of source:
             return NoneDict()
-        return SnapshotDictionary(self.source, language)
+        return SnapshotDictionary(self.source, language, **kwargs)
 
 

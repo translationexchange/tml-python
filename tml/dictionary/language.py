@@ -28,13 +28,27 @@ from tml.api.pagination import allpages
 
 class LanguageDictionary(Hashtable):
     """ Load tranlations for language """
-    def __init__(self, lang, fallback = None):
+    def __init__(self, lang, fallback=None, translations=None):
         """ .ctor
             Args:
                 lang (Language): language
                 missed_keys (list): list for missed keys
         """
-        url = 'applications/%d/translations' % lang.application.id
-        translations = allpages(lang.client, url, {'locale': lang.locale})
-        super(LanguageDictionary, self).__init__(translations, fallback)
+        self.language = lang
+        translations = translations or self.fetch_translations()
+        super(LanguageDictionary, self).__init__(translations=translations, fallback=fallback)
 
+    def load_translations(self):
+        self.translations = self.fetch_translations()
+
+    def fetch_translations(self):
+        return allpages(self.language.client, *self.api_query)
+
+    @property
+    def api_query(self):
+        """ Params to API call 
+            Returns:
+                tuple: url, params
+        """
+        return ('projects/%d/translations' % self.language.application.id,
+                {'locale': self.language.locale})

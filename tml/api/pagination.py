@@ -34,6 +34,7 @@ def allpages(client, url, params):
     total_pages = 1
     params['page'] = 0
     ret = None
+    
     while params['page'] < total_pages:
         params['page'] = params['page'] + 1
         resp = client.get(url, params)

@@ -27,6 +27,7 @@ __author__ = 'a@toukmanov.ru'
 from . import Hashtable
 from hashlib import md5
 from ..translation.missed import MissedKeys
+from ..api import APIError
 from tml.dictionary import TranslationIsNotExists
 
 
@@ -50,7 +51,7 @@ class SourceMissed(MissedKeys):
 
 class SourceDictionary(Hashtable):
     """ Dictionary of keys grouped by source """
-    def __init__(self, source, language, fallback = None):
+    def __init__(self, source, language, fallback=None, translations=None):
         """ .ctor 
             Args:
                 source (string): source name
@@ -60,8 +61,35 @@ class SourceDictionary(Hashtable):
         self.source = source
         self.language = language
         self.missed_keys = SourceMissed(self.language.client, source)
-        data = self.language.client.get(*self.api_query)
-        super(SourceDictionary, self).__init__(data['results'], fallback)
+        translations = translations or self.fetch_translations()
+        super(SourceDictionary, self).__init__(translations=translations, fallback=fallback)
+
+    @property
+    def key(self):
+        return self.compute_key()
+
+    def compute_key(self):
+        return md5(self.source.encode('utf-8')).hexdigest()
+
+    def load_translations(self, translations=None):
+        """Load translations.
+        Logic:
+            1. if `translations` passed, then reset old with new one
+            2. if self.translations is set, then no op
+            3. in all other cases, fetch translations from api"""
+        if translations:
+            self.translations = translations
+        elif self.translations:
+            pass
+        else:
+            self.translations = self.fetch_translations()
+        return self
+
+    def fetch_translations(self):
+        try:
+            return self.language.client.get(*self.api_query)['results']
+        except APIError:
+            return {}
 
     @property
     def api_query(self):
@@ -69,9 +97,8 @@ class SourceDictionary(Hashtable):
             Returns:
                 tuple: url, params
         """
-        uri = md5(self.source.encode('utf-8')).hexdigest()
-        return ('sources/%s/translations' % uri,
-                {'locale': self.language.locale})
+        return ('sources/%s/translations' % self.key,
+                {'locale': self.language.locale, 'all': True, 'ignored': True})
 
     def fetch(self, key):
         try:

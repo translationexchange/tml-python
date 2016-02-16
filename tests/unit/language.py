@@ -8,14 +8,17 @@ import json
 from tml.rules.contexts import Contexts
 from tests.mock import Client
 
-LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
+LANGUAGES = [
+    {'id': 233, 'locale':'ru', 'native_name': 'Русский', 'right_to_left': False},
+    {'id': 2, 'locale':'en', 'native_name': 'English', 'right_to_left': False}]
+
 
 class LanguageTest(unittest.TestCase):
     """ Language tests"""
     def setUp(self):
         self.client = Client()
-        self.client.read('languages/ru', {'definition':1})
-        self.app = Application(self.client, 100, [{'locale':'ru'}], 'en')
+        self.client.read('languages/ru/definition', None)
+        self.app = Application(self.client, 100, [{'id': 233, 'locale':'ru', 'native_name': 'Русский', 'right_to_left': False}], 'en')
 
     def test_load(self):
         """ Load language """

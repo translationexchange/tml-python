@@ -6,11 +6,13 @@ from tml.api.mock import File
 
 FIXTURES_PATH = '%s/fixtures' % dirname(dirname(__file__))
 
-URLS = [('applications/current', {'definition': 1}),
-        ('applications/2', {'definition': 1}),
-        ('languages/ru', {'definition': 1}),
-        ('languages/en', {'definition': 1}),
-        ('applications/1/translations', {'locale':'ru','page':1}),
+URLS = [('projects/current/definition', None),
+        ('projects/current/definition', {'locale': 'en'}),
+        ('projects/2/definition', None),
+        ('languages/ru/definition', ),
+        ('languages/en/definition', ),
+        ('projects/1/translations', {'locale':'ru','page':1}),
+        ('projects/1768/definition', {'locale':'ru,en', 'source': '/home/index'}),
         ('sources/register_keys', None),
         ('translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations', {'locale':'ru','page':1}),
         ('translation_keys/bdc08159a02e7ff01ca188c03fa1323e/translations', {'locale':'ru','page':1}),

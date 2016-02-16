@@ -20,7 +20,7 @@ class TranslationsTest(unittest.TestCase):
         self.lang = Language.load_by_locale(self.app, 'ru')
         self.client.read('translation_keys/%s/translations' % self.apples_key().key, {'page':1, 'locale':'ru'}, 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations_1.json')
         self.client.read('translation_keys/%s/translations' % self.apples_key().key, {'page':2, 'locale':'ru'}, 'translation_keys/8ad5a7fe0a12729764e31a1e3ca80059/translations_2.json')
-        self.client.read('applications/current', {'definition': 1})
+        self.client.read('projects/current', {'definition': 1})
 
     def apples_key(self):
         return Key(label = '{actor} give you {count} apples', description = 'apple', language = self.lang)

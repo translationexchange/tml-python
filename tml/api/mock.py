@@ -34,6 +34,25 @@ from . import AbstractClient, APIError
 import re
 
 
+def clean_url(url):
+    _url = '/'.join([
+        part.rstrip('/') for part in url.split('definition')])
+    if _url.endswith('/'):
+        return _url[:-1]
+    return _url
+
+def debug(data, contains=''):
+    return list(k for k, v in data.iteritems() if contains in k)
+
+
+REWRITE_RULES = (
+    ('projects/current/definition?locale=ru', 'projects/current'),
+    ('projects/current/definition', 'projects/current'),
+    (r'^languages\/(\w+)\/definition$', 'languages/%(0)s'),
+)
+
+
+
 class Hashtable(AbstractClient):
     """ Client mock: all data stored in hashtable """
     last_url = None
@@ -66,11 +85,13 @@ class Hashtable(AbstractClient):
         self.__class__.last_url = url
         self.url = url
         self.method = method
-        self.params = params
+        self.params = params = {} if params is None else self._compact_params(params)
+        print self.build_url(url, params), self.rewrite_path(self.build_url(url, params)), debug(self.data, 'source')
+        # print self.data[self.rewrite_path(self.build_url(url, params))]
         try:
             try:
                 self.status = 200
-                return self.data[self.build_url(url, params)]
+                return self.data[self.rewrite_path(self.build_url(url, params))]
             except self.handle_nostrict:
                 return self.data[url]
         except KeyError as key_not_exists:
@@ -86,14 +107,35 @@ class Hashtable(AbstractClient):
             Returns:
                 string: url with joined get params
         """
+
         if params is None:
             return url
-        return url + '?' + urlencode(params)
+        return url + ('' if not params else '?' + urlencode(params))
 
     reloaded = []
 
     def reload(self, url, params):
         self.reloaded.append(Hashtable.build_url(url, params))
+
+    @classmethod
+    def rewrite_path(cls, url):
+        """ Build path from URL 
+            Args:
+                url (string): API url
+            Returns:
+                string: path in snapshot matches API URL 
+        """
+        for pattern, replacer in REWRITE_RULES:
+            if pattern == url:  # if equal
+                return replacer
+            else: # if match by regex
+                match_obj = re.compile(pattern).match(url)
+                if not match_obj:
+                    continue
+                ctx = dict([(str(idx), v) for idx, v
+                            in enumerate(match_obj.groups())])
+                return replacer % ctx
+        return url
 
 
 class File(Hashtable):
@@ -115,6 +157,7 @@ class File(Hashtable):
             Returns:
                 Client
         """
+        url = clean_url(url)
         path = path if path else '%s.json' % url
         if path[0] != '/':
             # relative path:
@@ -131,6 +174,7 @@ class File(Hashtable):
     def readdir(self, path):
         """ Read all files from directory """
         abspath = '%s/%s' % (self.basedir, path)
+
         for dir_or_fname in listdir(abspath):
             is_json = self.JSON_FILE.match(dir_or_fname)
             if is_json:

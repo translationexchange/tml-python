@@ -60,6 +60,9 @@ class AbstractClient(object):
         """ Drop cache stub """
         pass
 
+    def _compact_params(self, params):
+        return dict((k, v) for k, v in params.iteritems() if v)
+
 
 class ClientError(Error):
     """ Abstract API error """

@@ -12,8 +12,8 @@ from tml.language import Language
 class MissedTest(unittest.TestCase):
     def setUp(self):
         self.c = Client()
-        self.c.read('applications/current', {'definition':1})
-        self.c.read('languages/ru', {'definition':1})
+        self.c.read('projects/current', None)
+        self.c.read('languages/ru', None)
         self.c.read('sources/register_keys', None)
         self.app = Application.load_default(self.c)
         self.lang = Language.load_by_locale(self.app, 'ru')

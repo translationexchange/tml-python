@@ -48,7 +48,9 @@ def debug(data, contains=''):
 REWRITE_RULES = (
     ('projects/current/definition?locale=ru', 'projects/current'),
     ('projects/current/definition', 'projects/current'),
+    (r'^projects\/(\w+)\/definition\?locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
     (r'^languages\/(\w+)\/definition$', 'languages/%(0)s'),
+    (r'^sources\/(\w+)\/translations\?locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s')
 )
 
 
@@ -86,13 +88,15 @@ class Hashtable(AbstractClient):
         self.url = url
         self.method = method
         self.params = params = {} if params is None else self._compact_params(params)
-        print self.build_url(url, params), self.rewrite_path(self.build_url(url, params)), debug(self.data, 'source')
-        # print self.data[self.rewrite_path(self.build_url(url, params))]
         try:
             try:
                 self.status = 200
-                return self.data[self.rewrite_path(self.build_url(url, params))]
+                # print self.rewrite_path(self.build_url(url, params)), debug(self.data, 'projects/2')
+                url, url_with_params, has_params = self.rewrite_path(self.build_url(url, params))
+                self.url = url
+                return self.data[url_with_params]
             except self.handle_nostrict:
+                # print self.rewrite_path(self.build_url(url, params)), debug(self.data, 'projects/2'), url
                 return self.data[url]
         except KeyError as key_not_exists:
             self.status = 404
@@ -127,15 +131,15 @@ class Hashtable(AbstractClient):
         """
         for pattern, replacer in REWRITE_RULES:
             if pattern == url:  # if equal
-                return replacer
+                url = replacer
             else: # if match by regex
                 match_obj = re.compile(pattern).match(url)
                 if not match_obj:
                     continue
                 ctx = dict([(str(idx), v) for idx, v
                             in enumerate(match_obj.groups())])
-                return replacer % ctx
-        return url
+                url = replacer % ctx
+        return url.split('?')[0], url, len(url.split('?')) == 2
 
 
 class File(Hashtable):

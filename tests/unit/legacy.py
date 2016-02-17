@@ -52,7 +52,6 @@ class LegacyTest(unittest.TestCase):
         c = Client.read_all()
         context = build_context(client = c)
         context.dict = LanguageDictionary(context.language, [])
-        # print context.dict.language.application.id
         t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
 
         self.assertEquals(to_string('Хелло Bill'), t)

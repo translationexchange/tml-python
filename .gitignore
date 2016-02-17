@@ -10,3 +10,4 @@ django/dist
 *.egg-info/
 *.swp
 .coverage
+tml.log

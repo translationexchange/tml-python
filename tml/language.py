@@ -60,7 +60,6 @@ class Language(object):
             cases, case_errors = Case.from_data(data['cases'], safe = True)
             if len(case_errors) and not safe:
                 raise Exception('Language contains invalid cases', case_errors)
-        # print data, 'hi', application.id
         return cls(application,
                    data['id'],
                    data['locale'],

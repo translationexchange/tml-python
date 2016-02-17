@@ -41,7 +41,6 @@ class LanguageTest(unittest.TestCase):
         label = 'No translation'
         key = Key(label = label, language = self.lang)
         t = dict.get_translation(key)
-        print dict._fallback
         self.assertEquals(1, len(f.missed_keys), 'Key marked as missed')
         self.assertEquals(key, f.missed_keys[0], 'Key added to missed')
         self.assertEquals(label, t.execute({}, {}), 'Use default translation (fallback)')

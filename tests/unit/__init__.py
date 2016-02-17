@@ -52,12 +52,11 @@ class api_test(unittest.TestCase):
             tr('Hello')
 
     def test_configure(self):
-        c = build_context(client = self.client)
+        c = build_context(client=self.client)
 
         self.assertEquals('en', c.language.locale, 'Load app defaults')
         self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
-
-        c = build_context(locale = 'ru', application_id = 2, client = self.client)
+        c = build_context(locale='ru', application_id=2, client = self.client)
         self.assertEquals('ru', c.language.locale, 'Custom locale')
         self.assertEquals(2, c.language.application.id, 'Custom application id')
 
@@ -90,11 +89,12 @@ class api_test(unittest.TestCase):
         label = 'Only in English'
         # emulate empty source for ru
         source_hash = md5(source.encode('utf-8')).hexdigest()
+        # print source_hash
         self.client.read('sources/%s/translations' % source_hash, {'locale':'ru'}, 'sources/sources_empty.json', True)
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
         c = build_context(client = self.client, locale = 'ru', source = source)
-        self.assertEquals('Only in English', c.tr(label),'Use fallback source for en')
+        self.assertEquals('Has english translation', c.tr(label),'Use fallback source for en')
         c.deactivate()
         self.assertEquals(self.client.url, 'sources/register_keys', 'Submit missed keys url')
         expected_keys = [{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]

@@ -1020,3 +1020,18 @@ Exception: My error
 [2016-02-17 00:41:13] - trex.TML - GET: https://api.translationexchange.com/v1/test/access_token=qwerty&param=value takes 0 seconds.
 [2016-02-17 00:41:14] - trex.TML - This is debug message
 [2016-02-17 00:41:14] - trex.TML - This is debug message
+[2016-02-17 13:14:57] - trex.TML - GET: https://api.translationexchange.com/v1/test/access_token=qwerty&param=value takes 0 seconds.
+[2016-02-17 13:14:57] - trex.TML - My error
+Traceback (most recent call last):
+  File "/Users/rustem/projects/translation-exchange/tml-python/tml/api/client.py", line 102, in trace_call
+    yield
+  File "/Users/rustem/projects/translation-exchange/tml-python/tml/api/client.py", line 87, in call
+    resp = requests.request(method, url, params=params)
+  File "/Users/rustem/projects/translation-exchange/tml-python/tests/unit/api/client.py", line 61, in request
+    raise self.exception
+Exception: My error
+[2016-02-17 13:14:57] - trex.TML - GET: https://api.translationexchange.com/v1/test/access_token=qwerty&param=value takes 0 seconds.
+[2016-02-17 13:14:57] - trex.TML - GET: https://api.translationexchange.com/v1/test/access_token=qwerty takes 0 seconds.
+[2016-02-17 13:14:57] - trex.TML - GET: https://api.translationexchange.com/v1/test/access_token=qwerty&param=value takes 0 seconds.
+[2016-02-17 13:14:58] - trex.TML - This is debug message
+[2016-02-17 13:14:58] - trex.TML - This is debug message

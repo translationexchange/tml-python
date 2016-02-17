@@ -53,7 +53,6 @@ class LegacyTest(unittest.TestCase):
         context = build_context(client = c)
         context.dict = LanguageDictionary(context.language, [])
         t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
-
         self.assertEquals(to_string('Хелло Bill'), t)
         # Check old response syntax:
         context.dict.translations['8a7c891aa103e45e904a173f218cab9a'][0]['label'] = 'Привет %(name)s'

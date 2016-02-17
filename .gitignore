@@ -11,3 +11,4 @@ django/dist
 *.swp
 .coverage
 tml.log
+logs

@@ -119,3 +119,5 @@ class SourceDictionary(Hashtable):
         if self.missed_keys.submit_all():
             self.language.client.reload(*self.api_query)
 
+    flush.i = 0
+

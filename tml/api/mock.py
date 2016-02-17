@@ -48,6 +48,7 @@ def debug(data, contains=''):
 REWRITE_RULES = (
     ('projects/current/definition?locale=ru', 'projects/current'),
     ('projects/current/definition', 'projects/current'),
+    (r'^projects\/(\w+)\/definition', 'projects/%(0)s'),
     (r'^projects\/(\w+)\/definition\?locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
     (r'^languages\/(\w+)\/definition$', 'languages/%(0)s'),
     (r'^sources\/(\w+)\/translations\?locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s')
@@ -57,7 +58,8 @@ REWRITE_RULES = (
 
 class Hashtable(AbstractClient):
     """ Client mock: all data stored in hashtable """
-    last_url = None
+    last_url = ''
+    last_params = {}
     def __init__(self, data = {}, strict = False):
         """ .ctor
             Args:
@@ -85,13 +87,13 @@ class Hashtable(AbstractClient):
                 dict
         """
         self.__class__.last_url = url
+        self.__class__.last_params = params
         self.url = url
         self.method = method
         self.params = params = {} if params is None else self._compact_params(params)
         try:
             try:
                 self.status = 200
-                # print self.rewrite_path(self.build_url(url, params)), debug(self.data, 'projects/2')
                 url, url_with_params, has_params = self.rewrite_path(self.build_url(url, params))
                 self.url = url
                 return self.data[url_with_params]

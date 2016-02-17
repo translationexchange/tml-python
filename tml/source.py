@@ -3,15 +3,12 @@ from dictionary.source import SourceDictionary
 class SourceTranslations(object):
     """Locale => Translation dictionary per single source."""
     
-    cache = {}
-    ignored_keys = []
-    sources = []
-    source = None
-    application = None
-
     def __init__(self, source, application):
         self.source = source
         self.application = application
+        self.cache = {}
+        self.ignored_keys = []
+        self.sources = []
 
     def is_ignored(self, key):
         try:

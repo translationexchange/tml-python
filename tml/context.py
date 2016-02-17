@@ -195,6 +195,13 @@ class LanguageContext(AbstractContext):
         """
         try:
             key = Key(label = label, description = description, language = self.default_language)
+            if 'Only in English'.lower() in label.lower():
+                print self.fallback_dict.source
+            # 16132a471f9958f96a2ed16af25e8d8e
+            
+                
+                # print key.key 
+                # print key.key, key.label, 'hi', self.fallback_dict.translations
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)
@@ -213,8 +220,9 @@ class SourceContext(LanguageContext):
         
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """
-        return language.application.source(
+        source = language.application.source(
             self.source, language.locale)
+        return source
 
     def deactivate(self):
         self.dict.flush()

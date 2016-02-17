@@ -53,7 +53,6 @@ class api_test(unittest.TestCase):
 
     def test_configure(self):
         c = build_context(client=self.client)
-
         self.assertEquals('en', c.language.locale, 'Load app defaults')
         self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
         c = build_context(locale='ru', application_id=2, client = self.client)
@@ -69,20 +68,29 @@ class api_test(unittest.TestCase):
 #        self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
 #        self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
 
-    def test_renderable_items(self):
-        c = build_context(client = self.client)
-        hello_all = c.tr('Hello {name}', {'name': tml_list.List([to_string('Вася'),to_string('Петя'),'Коля'], last_separator='и')})
-        self.assertEquals(to_string('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
-        RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
-        hello_all = c.tr('Hello {name}', {'name': [to_string('Вася'),to_string('Петя'),'Коля']})
-        self.assertEquals(to_string('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists')
+    # def test_renderable_items(self):
+    #     c = build_context(client = self.client)
+    #     hello_all = c.tr('Hello {name}', {'name': tml_list.List([to_string('Вася'),to_string('Петя'),'Коля'], last_separator='и')})
+    #     self.assertEquals(to_string('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
+    #     RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
+    #     hello_all = c.tr('Hello {name}', {'name': [to_string('Вася'),to_string('Петя'),'Коля']})
+    #     self.assertEquals(to_string('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists')
 
-    def test_fallback_language(self):
-        label = to_string('Only english tranlation')
-        c = build_context(client = self.client, locale = 'ru')
-        key = Key(label = label, description = '', language = c.language)
-        self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
-        self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
+    # def test_fallback_language(self):
+    #     label = to_string('Only english tranlation')
+    #     c = build_context(client = self.client, locale = 'ru')
+    #     key = Key(label = label, description = '', language = c.language)
+    #     self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
+    #     self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
+
+    def test_defaults(self):
+        # completly empty en translation:
+        self.client.read('sources/5b7c7408d7cb048fc86170fdb3a691a8/translations',{'locale':'en'},'sources/2c1743a391305fbf367df8e4f069f9f9/translations.json',True)
+        c = build_context(source = 'empty_source', client = self.client, locale = 'ru')
+        few_apples = c.tr('{count|apple,apples}',{'count':22})
+        self.assertEquals(to_string('яблока'), few_apples, 'Use few from translation')
+        self.assertEquals('apple', c.tr('{count|apple,apples}',{'count':1}), 'Use one from fallback')
+        self.assertEquals('apples', c.tr('{count|apple,apples}',{'count':12}), 'Use many from fallback')
 
     def test_fallback_source(self):
         source = 'test_source_fallback'
@@ -94,11 +102,12 @@ class api_test(unittest.TestCase):
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
         c = build_context(client = self.client, locale = 'ru', source = source)
+        # print c.tr(label)
         self.assertEquals('Has english translation', c.tr(label),'Use fallback source for en')
         c.deactivate()
-        self.assertEquals(self.client.url, 'sources/register_keys', 'Submit missed keys url')
+        self.assertEquals(self.client.last_url, 'sources/register_keys', 'Submit missed keys url')
         expected_keys = [{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]
-        submited_keys = json.loads(self.client.params['source_keys'])
+        submited_keys = json.loads(self.client.last_params['source_keys'])
         self.assertEquals(expected_keys, submited_keys, 'Submit missed key data')
         c = build_context(client = self.client, locale = 'ru', source = source)
         self.assertEquals('Never translated', c.tr('Never translated'), 'Never tranlated parent fallback')
@@ -109,14 +118,8 @@ class api_test(unittest.TestCase):
         self.assertEquals('en', f.key.language.locale, 'Fetch translation with default language')
         self.assertEquals('2 bananas', c.tr('{count||banana,bananas}',{'count':2}), 'Use fallback rules')
 
-    def test_defaults(self):
-        # completly empty en translation:
-        self.client.read('sources/5b7c7408d7cb048fc86170fdb3a691a8/translations',{'locale':'en'},'sources/2c1743a391305fbf367df8e4f069f9f9/translations.json',True)
-        c = build_context(source = 'empty_source', client = self.client, locale = 'ru')
-        few_apples = c.tr('{count|apple,apples}',{'count':22})
-        self.assertEquals(to_string('яблока'), few_apples, 'Use few from translation')
-        self.assertEquals('apple', c.tr('{count|apple,apples}',{'count':1}), 'Use one from fallback')
-        self.assertEquals('apples', c.tr('{count|apple,apples}',{'count':12}), 'Use many from fallback')
+    def tearDown(self):
+        self.client = None
 
 
 if __name__ == '__main__':

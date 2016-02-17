@@ -33,16 +33,15 @@ class Application(object):
     client = None # API client
     id = None # application id
     languages = None # supported languages
-    languages_by_locale = {}  #
-    sources = {}   # contained under 'extensions' key
+    sources = None   # contained under 'extensions' key
     default_locale = None
-
-    features = {} # key - feature code, value - boolean supported)
+    languages_by_locale = None
+    features = None # key - feature code, value - boolean supported)
     key = None # client key
     name = None # human readable name
-    shortcuts = {}
-    tools = {} # tools URLS
-    extensions = {}
+    shortcuts = None
+    tools = None # tools URLS
+    extensions = None
 
     def __init__(self, client, id, languages, default_locale, **kwargs):
         """ .ctor
@@ -53,6 +52,10 @@ class Application(object):
         """
         self.client = client
         self.id = id
+        self.languages_by_locale = {}
+        self.sources = {}
+        
+
         self.languages = [Language.from_dict(self, lang_meta) for lang_meta in languages]
         self.default_locale = default_locale
         self.load_extensions(kwargs.get('extensions', {}))
@@ -153,7 +156,8 @@ class Application(object):
                 dictionary.SourceDictionary or None"""
         source_translations = self.sources.get(source, None)
         if not source_translations:
-            source_translations = self.sources[source] = SourceTranslations(source, self) #.add_locale(locale)
+            source_translations = self.sources[source] = SourceTranslations(source, self)
+        print source, source_translations.source, 'hi', source_translations.add_locale(locale).hashtable_by_locale(locale).source
         return source_translations.add_locale(locale).hashtable_by_locale(locale)
 
     def get_language_url(self, locale):

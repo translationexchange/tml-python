@@ -50,6 +50,7 @@ class ApplicationTest(unittest.TestCase):
         self.assertEqual(prefix + '/a/b/c', app.asset_url('/a/b/c'))
 
     def test_load(self):
+        app = Application.load_by_id(self.client, 2).id
         self.assertEquals(2, Application.load_by_id(self.client, 2).id, 'Load by id')
         self.assertEquals(1, Application.load_default(self.client).id, 'Load default')
 

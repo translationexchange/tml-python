@@ -25,7 +25,7 @@ from __future__ import absolute_import
 
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
-from tml import configure, tr, build_context, Gender, ContextNotConfigured, RenderEngine
+from tml import initialize, tr, build_context, Gender, ContextNotConfigured, RenderEngine
 import tml
 from tests.mock import Client as ClientMock
 import unittest
@@ -60,28 +60,28 @@ class api_test(unittest.TestCase):
         self.assertEquals(2, c.language.application.id, 'Custom application id')
 
 
-#    def test_configure_globals(self):
-#        configure(locale = 'ru', application_id = None, client = self.client)
-#        self.assertEquals('ru', tml.DEFAULT_CONTEXT.locale)
-#        self.assertEquals(1, tml.DEFAULT_CONTEXT.application.id, 'Load default application')
-#        self.assertEquals(type(tml.DEFAULT_CONTEXT.dict), Dictionary, 'No preload data')
-#        self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
-#        self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apple', {'link':{'href':'http://site.com'}}))
+    def test_initialize_globals(self):
+        initialize(locale = 'ru', application_id = None, client = self.client)
+        self.assertEquals('ru', tml.DEFAULT_CONTEXT.locale)
+        self.assertEquals(1, tml.DEFAULT_CONTEXT.application.id, 'Load default application')
+        self.assertEquals(type(tml.DEFAULT_CONTEXT.dict), Dictionary, 'No preload data')
+        self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
+        self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2, 'link':{'href':'http://site.com'}}, 'apple', {'link':{'href':'http://site.com'}}))
 
-    # def test_renderable_items(self):
-    #     c = build_context(client = self.client)
-    #     hello_all = c.tr('Hello {name}', {'name': tml_list.List([to_string('Вася'),to_string('Петя'),'Коля'], last_separator='и')})
-    #     self.assertEquals(to_string('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
-    #     RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
-    #     hello_all = c.tr('Hello {name}', {'name': [to_string('Вася'),to_string('Петя'),'Коля']})
-    #     self.assertEquals(to_string('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists')
+    def test_renderable_items(self):
+        c = build_context(client = self.client)
+        hello_all = c.tr('Hello {name}', {'name': tml_list.List([to_string('Вася'),to_string('Петя'),'Коля'], last_separator='и')})
+        self.assertEquals(to_string('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
+        RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
+        hello_all = c.tr('Hello {name}', {'name': [to_string('Вася'),to_string('Петя'),'Коля']})
+        self.assertEquals(to_string('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists')
 
-    # def test_fallback_language(self):
-    #     label = to_string('Only english tranlation')
-    #     c = build_context(client = self.client, locale = 'ru')
-    #     key = Key(label = label, description = '', language = c.language)
-    #     self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
-    #     self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
+    def test_fallback_language(self):
+        label = to_string('Only english tranlation')
+        c = build_context(client = self.client, locale = 'ru')
+        key = Key(label = label, description = '', language = c.language)
+        self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
+        self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
 
     def test_defaults(self):
         # completly empty en translation:

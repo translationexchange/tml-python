@@ -86,17 +86,24 @@ def build_context(token=None,
 
 DEFAULT_CONTEXT = None
 
-def configure(**kwargs):
+
+def initialize(**kwargs):
     """ Build context and set as default """
     global DEFAULT_CONTEXT
     DEFAULT_CONTEXT = build_context(**kwargs)
     enable_warnings()
+    
+
+def configure(**kwargs):
+    config.configure(**kwargs)
+
 
 def get_context():
     """ Get current context """
     if not DEFAULT_CONTEXT:
         raise ContextNotConfigured()
     return DEFAULT_CONTEXT
+
 
 def tr(label, data = {}, description = '', options = {}):
     """ Tranlate data
@@ -110,7 +117,7 @@ def tr(label, data = {}, description = '', options = {}):
     context = get_context()
     return context.tr(
         label,
-        context.prepare_data(data),
+        data,
         description,
         options)
 

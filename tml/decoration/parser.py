@@ -51,7 +51,7 @@ def parse(text, tags_factory = None):
                 trace('begin token')
                 tag_name = ''
             elif let == CLOSE_TOKEN:
-                if tag_name is None:
+                if tag_name is None:  # just a symbol
                     element.append(let)
                 elif isinstance(element, ShortTag):
                     raise UnexpectedToken(text, pos, '[/')
@@ -89,10 +89,10 @@ def parse(text, tags_factory = None):
                 element = ShortTag(tags_factory.build(tag_name))
                 trace('build short', tag_name)
                 tag_name = None
-            elif not tag_name is None:
+            elif not tag_name is None:  # name of tag continue
                 tag_name = tag_name + let
                 trace('tag_name',tag_name)
-            else:
+            else:   # new symbol inside tag
                 element.append(let)
         except UnsupportedTag as e:
             raise ParseError(text, pos, e)

@@ -3,6 +3,7 @@ import os
 from .utils import rel, APP_DIR
 from .base import Singleton
 from .exceptions import Error
+from .config import CONFIG
 
 
 class TMLLogRecord(logging.LogRecord):
@@ -63,5 +64,5 @@ class LoggerNotConfigured(Error):
 
 
 def get_logger(**kwargs):
-    return Logger.instance(**kwargs)
+    return Logger.instance(**CONFIG.logger)
 

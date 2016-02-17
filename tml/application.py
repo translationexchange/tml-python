@@ -26,14 +26,13 @@ __author__ = 'a@toukmanov.ru'
 from .exceptions import Error
 from .language import Language
 from .source import SourceTranslations
-
+from .config import CONFIG
 
 class Application(object):
     """ TML application """
     client = None # API client
     id = None # application id
     languages = None # supported languages
-    sources = None   # contained under 'extensions' key
     default_locale = None
     languages_by_locale = None
     features = None # key - feature code, value - boolean supported)
@@ -52,10 +51,8 @@ class Application(object):
         """
         self.client = client
         self.id = id
-        self.languages_by_locale = {}
         self.sources = {}
-        
-
+        self.languages_by_locale = {}
         self.languages = [Language.from_dict(self, lang_meta) for lang_meta in languages]
         self.default_locale = default_locale
         self.load_extensions(kwargs.get('extensions', {}))
@@ -125,7 +122,7 @@ class Application(object):
 
     def language(self, locale=None):
         if locale is None:
-            locale = self.default_locale
+            locale = self.default_locale or CONFIG.default_locale
         locale = locale.strip()
         return self.languages_by_locale.setdefault(locale, Language.load_by_locale(self, locale))
 

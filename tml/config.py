@@ -37,6 +37,7 @@ class BaseConfig(dict, Singleton):
             if is_builtin(k) or is_callable(k):
                 continue
             self.__setattr__(k, v)
+            
 
     def override_config(self, **kwargs):
         for k, v in kwargs.iteritems():
@@ -54,6 +55,24 @@ class Config(BaseConfig):
         'level': logging.DEBUG
     }
     api_client_class = 'tml.api.client.Client'
+    locale = {
+        'default': 'en',
+        'method': 'current_locale',
+        'subdomain': False,
+        'extension': False
+    }
+    
+    @property
+    def default_locale(self):
+        return self.locale['default']
 
+
+CONFIG = Config.instance()
+
+def configure(**kwargs):
+    global CONFIG
+    if kwargs:
+        CONFIG.override_config(**kwargs)
+    return CONFIG
 
     

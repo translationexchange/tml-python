@@ -34,3 +34,11 @@ class RequiredArgumentIsNotPassed(Error):
         self.data = data
         super(RequiredArgumentIsNotPassed, self).__init__()
 
+
+class MethodDoesNotExist(Error):
+    def __init__(self, var_name, meth_name):
+        self.var_name = var_name
+        self.method_name = meth_name
+
+    def __str__(self):
+        return "Variable `%s` has no method called `%s`" % (self.var_name, self.method_name)

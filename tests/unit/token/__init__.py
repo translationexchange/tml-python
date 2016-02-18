@@ -23,8 +23,10 @@
 
 from __future__ import absolute_import
 import unittest
+from tml.strings import to_string
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
-    TokenMatcher, InvalidTokenSyntax, CaseToken
+    TokenMatcher, InvalidTokenSyntax, CaseToken, MethodToken
+from tml.exceptions import MethodDoesNotExist
 from tml.rules.contexts.gender import Gender
 import six
 
@@ -41,6 +43,12 @@ class FakeLanguage(object):
 class CaseMock(object):
     def execute(self, data):
         return data.upper()
+
+
+class DummyUser(object):
+    def __init__(self, name, gender=None):
+        self.name = name
+        self.gender = gender or 'male'
 
 
 class TokenTest(unittest.TestCase):
@@ -85,6 +93,23 @@ class TokenTest(unittest.TestCase):
         self.assertEquals(None, VariableToken.validate('{a|b}', self.language), 'Ignore rules syntax')
         self.assertEquals(None, VariableToken.validate('{a||b}', self.language), 'Ignore piped syntax')
         self.assertEquals(None, VariableToken.validate('{a::b}', self.language), 'Ignore dotted')
+
+    def test_execute_method(self):
+        user = DummyUser('Michael')
+        token = MethodToken('user', 'name')
+        self.assertEquals('Michael', token.execute({'user': user}, {}), 'execute method token')
+
+    def test_parse_method(self):
+        user = DummyUser('Рустем')
+        v = MethodToken.validate('{user.name}', self.language)
+        self.assertEquals(v.name, 'user', 'var name')
+        self.assertEquals(v.method_name, 'name', 'meth name')
+        self.assertIsNotNone(v, 'evaluated correctly')
+        self.assertIsInstance(v, MethodToken)
+        self.assertEquals(to_string('Рустем'), v.execute({'user': user}, {}), 'method execute')
+        token = MethodToken.validate('{user.aaa}', self.language)
+        with self.assertRaises(MethodDoesNotExist):
+            token.execute({'user': user}, {})
 
     def test_execute_rules(self):
         """ Execute rules """

@@ -28,7 +28,7 @@ __author__ = 'a@toukmanov.ru'
 
 
 import re
-from ..exceptions import Error, RequiredArgumentIsNotPassed
+from ..exceptions import Error, RequiredArgumentIsNotPassed, MethodDoesNotExist
 from ..rules.contexts import Value, ContextNotFound
 from tml.strings import to_string, suggest_string
 
@@ -133,6 +133,7 @@ class TextToken(AbstractToken):
 class AbstractVariableToken(AbstractToken):
 
     IS_VARIABLE = '([\$\d\w]+)'
+    IS_METHOD = '([\$\d\w])'
     REGEXP_TOKEN = '^\{%s\}$'
 
     def __init__(self, name):
@@ -184,6 +185,75 @@ class VariableToken(AbstractVariableToken):
         return 'VariableToken[%s]' % self.name
 
 
+####################################################################### 
+# 
+# Method Token Forms
+#
+# {user.name}  
+# {user.name:gender}
+# 
+####################################################################### 
+
+
+# class 
+
+# class Tml::Tokens::Method < Tml::Tokens::Data
+#   def self.expression
+#     /(%?\{{1,2}\s*[\w]*\.\w*\s*(:\s*\w+)*\s*(::\s*\w+)*\s*\}{1,2})/
+#   end
+
+#   def object_name
+#     @object_name ||= short_name.split(".").first
+#   end
+
+#   def object_method_name
+#     @object_method_name ||= short_name.split(".").last
+#   end
+
+#   def substitute(label, context, language, options = {})
+#     object = Tml::Utils.hash_value(context, object_name)
+#     return label unless object
+#     object_value = sanitize(object.send(object_method_name), object, language, options.merge(:safe => false))
+#     label.gsub(full_name, decorate(object_value, options))
+#   end
+# end
+
+
+class MethodToken(VariableToken):
+    HAS_METHOD = '\.(\w*\s*)'
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + HAS_METHOD))
+
+    def __init__(self, name, method_name):
+        VariableToken.__init__(self, name)
+        self.method_name = method_name
+
+    def execute(self, data, options):
+        """ Fetch and escape variable from data
+            Args:
+                data (dict): input data
+                options (dict): translation options
+            Returns:
+                string
+        """
+        obj = self.fetch(data)
+        try:
+            prop = getattr(obj, self.method_name)
+            rv = callable(prop) and prop() or prop
+            return escape_if_needed(rv, options)
+        except AttributeError:
+            raise MethodDoesNotExist(self.name, self.method_name)
+
+    def fetch(self, data):
+        """ Fetch variable"""
+        return super(VariableToken, self).fetch(data)
+
+    @classmethod
+    def validate(cls, text, language):
+        m = cls.IS_TOKEN.match(text)
+        if m:
+            return MethodToken(m.group(1), m.group(2))
+
+
 class RulesToken(AbstractVariableToken):
     """ 
         Token which execute some rules on variable 
@@ -226,6 +296,15 @@ class RulesToken(AbstractVariableToken):
         return "RulesToken[%s, choices=%s]" % (self.name, self.rules)
 
 
+class RulesMethodToken(RulesToken):
+
+    @classmethod
+    def validate(cls, text, language):
+        m = cls.IS_TOKEN.match(text)
+        if m:
+            return cls(m.group(1), m.group(2), m.group(3), language)
+
+
 class CaseToken(RulesToken):
     """ Language keys {name::nom} """
     IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + '\:\:(.*)',))
@@ -234,7 +313,6 @@ class CaseToken(RulesToken):
         super(RulesToken, self).__init__(name)
         self.case = language.cases[str(case)]
 
-
     def execute(self, data, options):
         """ Execute with rules options """
         return escape_if_needed(
@@ -242,6 +320,24 @@ class CaseToken(RulesToken):
 
     def __str__(self):
         return "CaseToken[%s, case=%s]" % (self.name, self.case)
+
+
+class CaseMethodToken(RulesMethodToken):
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (
+        AbstractVariableToken.IS_VARIABLE + RulesToken.TOKEN_TYPE_REGEX + '\:\:(.*)'))
+
+    def __init__(self, name, method_name, case, language):
+        self.token = MethodToken(name, method_name)
+        self.case = language.cases[str(case)]
+
+    def execute(self, data, options):
+        """ Execute with rules options """
+        return escape_if_needed(
+            self.case.execute(token.execute(data, options)), options)
+
+    def __str__(self):
+        return "CaseMethodToken[%s, case=%s]" % (self.name, self.case)
+
 
 
 class UnsupportedCase(Error):
@@ -280,6 +376,19 @@ class PipeToken(RulesToken):
         return "PipeToken: token=%s, rules=%s" % (self.token, self.rules)
 
 
+class PipeMethodToken(RulesMethodToken, PipeToken):
+
+    IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (
+        AbstractVariableToken.IS_VARIABLE + RulesToken.TOKEN_TYPE_REGEX + '\|\|(.*)'))
+
+    def __init__(self, name, method_name, rules, language):
+        self.token = MethodToken(name, method_name)
+        self.rules = RulesToken(name, rules, language)
+
+    def __str__(self):
+        return "PipeMethodToken: token=%s, rules=%s" % (self.token, self.rules)
+
+
 class TokenMatcher(object):
     """ Class which select first supported token for text """
     def __init__(self, classes):
@@ -303,7 +412,7 @@ class TokenMatcher(object):
         # No token find:
         raise InvalidTokenSyntax(text)
 
-data_matcher = TokenMatcher([TextToken, VariableToken, RulesToken, PipeToken, CaseToken])
+data_matcher = TokenMatcher([TextToken, VariableToken, MethodToken, RulesToken, PipeToken, PipeMethodToken, CaseToken, CaseMethodToken])
 
 def execute_all(tokens, data, options):
     """ Execute all tokens

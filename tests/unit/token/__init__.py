@@ -26,6 +26,7 @@ import unittest
 from tml.strings import to_string
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
     TokenMatcher, InvalidTokenSyntax, CaseToken, MethodToken, PipeMethodToken, CaseMethodToken
+from tests.mock import DummyUser
 from tml.exceptions import MethodDoesNotExist
 from tml.rules.contexts.gender import Gender
 import six
@@ -43,12 +44,6 @@ class FakeLanguage(object):
 class CaseMock(object):
     def execute(self, data):
         return data.upper()
-
-
-class DummyUser(object):
-    def __init__(self, name, gender=None):
-        self.name = name
-        self.gender = gender or 'male'
 
 
 class TokenTest(unittest.TestCase):

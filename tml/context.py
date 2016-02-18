@@ -100,6 +100,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
+        # print label, Key(label = label, description = description, language = self.default_language).key
         return self.dict.fallback(Key(label = label, description = description, language = self.default_language))
 
     def tr(self, label, data = {}, description = '', options = {}):

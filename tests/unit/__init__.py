@@ -29,6 +29,7 @@ from tml import initialize, tr, build_context, Gender, ContextNotConfigured, Ren
 import tml
 from tests.mock import Client as ClientMock
 import unittest
+from tests.mock import DummyUser
 from tml.dictionary.source import SourceDictionary
 from tml.tools import list as tml_list
 from tml.translation import Key
@@ -59,7 +60,6 @@ class api_test(unittest.TestCase):
         self.assertEquals('ru', c.language.locale, 'Custom locale')
         self.assertEquals(2, c.language.application.id, 'Custom application id')
 
-
     def test_initialize_globals(self):
         initialize(locale = 'ru', application_id = None, client = self.client)
         self.assertEquals('ru', tml.DEFAULT_CONTEXT.locale)
@@ -67,6 +67,9 @@ class api_test(unittest.TestCase):
         self.assertEquals(type(tml.DEFAULT_CONTEXT.dict), Dictionary, 'No preload data')
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2, 'link':{'href':'http://site.com'}}, 'apple', {'link':{'href':'http://site.com'}}))
+        self.assertEquals(u'Маша give you 2 apples', tr('{user.name} give you {count} apples', {'user': DummyUser('Маша', gender='female'), 'count': 2}, 'check method'))
+        self.assertEquals(u'<a href="http://site.com">Маша</a> дала <strong>тебе</strong> 1 яблоко', tr('[link]{user.name}[/link] {user|дал,дала} [b]тебе[/b] {count||яблоко,яблока}', {'user': DummyUser('Маша', gender='female'), 'count': 1, 'link': {'href': 'http://site.com'}}, 'check method token decorated'))
+
 
     def test_renderable_items(self):
         c = build_context(client = self.client)

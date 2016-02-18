@@ -185,41 +185,12 @@ class VariableToken(AbstractVariableToken):
         return 'VariableToken[%s]' % self.name
 
 
-####################################################################### 
-# 
-# Method Token Forms
-#
-# {user.name}  
-# {user.name:gender}
-# 
-####################################################################### 
-
-
-# class 
-
-# class Tml::Tokens::Method < Tml::Tokens::Data
-#   def self.expression
-#     /(%?\{{1,2}\s*[\w]*\.\w*\s*(:\s*\w+)*\s*(::\s*\w+)*\s*\}{1,2})/
-#   end
-
-#   def object_name
-#     @object_name ||= short_name.split(".").first
-#   end
-
-#   def object_method_name
-#     @object_method_name ||= short_name.split(".").last
-#   end
-
-#   def substitute(label, context, language, options = {})
-#     object = Tml::Utils.hash_value(context, object_name)
-#     return label unless object
-#     object_value = sanitize(object.send(object_method_name), object, language, options.merge(:safe => false))
-#     label.gsub(full_name, decorate(object_value, options))
-#   end
-# end
-
-
 class MethodToken(VariableToken):
+    # Method Token Forms
+    #
+    # {user.name}  
+    # {user.name:gender}
+    
     HAS_METHOD = '\.(\w*\s*)'
     IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + HAS_METHOD))
 
@@ -412,7 +383,18 @@ class TokenMatcher(object):
         # No token find:
         raise InvalidTokenSyntax(text)
 
-data_matcher = TokenMatcher([TextToken, VariableToken, MethodToken, RulesToken, PipeToken, PipeMethodToken, CaseToken, CaseMethodToken])
+
+data_matcher = TokenMatcher([
+    TextToken,
+    VariableToken,
+    MethodToken,
+    RulesToken,
+    PipeToken,
+    PipeMethodToken,
+    CaseToken,
+    CaseMethodToken
+])
+
 
 def execute_all(tokens, data, options):
     """ Execute all tokens

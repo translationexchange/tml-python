@@ -17,6 +17,7 @@ class SourceTest(unittest.TestCase):
     """ Test loading tranlations over API """
     def setUp(self):
         self.client = Client.read_all()
+        self.client.reloaded = []
         self.app = Application.load_default(self.client)
         self.lang = Language.load_by_locale(self.app, 'ru')
 

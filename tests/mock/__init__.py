@@ -26,3 +26,8 @@ class Client(File):
     def read_all(cls):
         return cls().readdir('')
 
+
+class DummyUser(object):
+    def __init__(self, name, gender=None):
+        self.name = name
+        self.gender = gender or 'male'

@@ -91,6 +91,7 @@ class TokenTest(unittest.TestCase):
         token = RulesToken('name', 'somerule', self.language)
         self.assertEquals('somerule', token.execute({'name':'Jonh'}, {}), 'Execute token')
 
+
     def test_parse_rules(self):
         """ Test rules token parsing """
         rules = 'some text with any signs, including :.. and | to'

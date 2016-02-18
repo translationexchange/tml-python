@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-__author__ = 'a@toukmanov.ru'
+__author__ = 'a@toukmanov.ru, xepa4ep'
 
 from .exceptions import Error
 from .language import Language
@@ -154,7 +154,6 @@ class Application(object):
         source_translations = self.sources.get(source, None)
         if not source_translations:
             source_translations = self.sources[source] = SourceTranslations(source, self)
-        print source, source_translations.source, 'hi', source_translations.add_locale(locale).hashtable_by_locale(locale).source
         return source_translations.add_locale(locale).hashtable_by_locale(locale)
 
     def get_language_url(self, locale):

@@ -26,7 +26,7 @@ from .rules.contexts import Contexts
 from .rules.case import Case, LazyCases
 from .utils import pj
 
-__author__ = 'a@toukmanov.ru'
+__author__ = 'a@toukmanov.ru, xepa4ep'
 
 class Language(object):
     """ Language object """

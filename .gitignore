@@ -12,3 +12,4 @@ django/dist
 .coverage
 tml.log
 logs
+tests/fixtures/logs/tml.log

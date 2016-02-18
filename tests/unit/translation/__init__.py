@@ -88,6 +88,7 @@ class TranslationTest(unittest.TestCase):
                   t.fetch_option({}, {}).label,
                   'fetch default')
         self.assertEquals(to_string('Вася дал тебе 5 яблок'), t.execute({'actor':{'gender':'male','name':'Вася'},'count':5}, {}), 'Male many')
+        t = Translation.from_data(key, [{'label': "{xxx||рум,румки,румок}"}])
         t = Translation.from_data(key, [{"label":"{to::dat}"}])
         sdata = '{"to":{"gender":"male","name":"Вася"}}'
         self.assertEquals(to_string("Васе"), t.execute(loads(sdata), {}), 'Васе')

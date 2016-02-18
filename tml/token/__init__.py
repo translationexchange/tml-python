@@ -29,7 +29,7 @@ __author__ = 'a@toukmanov.ru'
 
 import re
 from ..exceptions import Error, RequiredArgumentIsNotPassed
-from ..rules.contexts import Value
+from ..rules.contexts import Value, ContextNotFound
 from tml.strings import to_string, suggest_string
 
 def need_to_escape(options):
@@ -214,6 +214,13 @@ class RulesToken(AbstractVariableToken):
     def execute(self, data, options):
         """ Execute token with var """
         return self.language.contexts.execute(self.rules, self.fetch(data)).strip()
+
+    def find_context(self, token=None):
+        token = token or self.name
+        try:
+            return self.language.contexts.find_by_code(token)
+        except ContextNotFound:
+            return self.language.contexts.find_by_token_name(token)
 
     def __str__(self):
         return "RulesToken[%s, choices=%s]" % (self.name, self.rules)

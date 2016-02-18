@@ -23,8 +23,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = 'a@toukmanov.ru, xepa4ep'
 
+import re
 from tml.exceptions import Error as BaseError
 from _ctypes import ArgumentError
 from .count import Count
@@ -86,7 +87,7 @@ SUPPORTED_CONTEXTS = [('date', Date),
 
 class Context(object):
     """ Variable context """
-    def __init__(self, pattern, options_parser, rules, variable_name):
+    def __init__(self, pattern, options_parser, rules, variable_name, token_expression=None):
         """ .ctor
             pattern (Value): pattern for variable token
             options_parser (OptionsParser): parser for token options
@@ -97,6 +98,14 @@ class Context(object):
         self.options_parser = options_parser
         self.rules = rules
         self.variable_name = variable_name
+        if token_expression:
+            self.token_expression = re.compile(token_expression[1:-2])
+
+    def applies_to_token(self, token):
+        """Check whether this token applies to context"""
+        if not self.token_expression:
+            return False
+        return self.token_expression.match(token) is not None
 
     def match(self, value):
         """ Check is value match context 
@@ -161,7 +170,9 @@ class Context(object):
                                      TokenMapping.build(data['token_mapping'])),
                        ContextRules.from_rules(data['rules'],
                                                data['default_key']),
-                       data['variables'][0][1:])
+                       data['variables'][0][1:],
+                       data.get('token_expression', None))
+
 
 class Contexts(object):
     """ List of contexts """
@@ -218,6 +229,15 @@ class Contexts(object):
             return self.contexts[self.index[code]]
         except KeyError:
             raise ContextNotFound(code, self)
+
+    def find_by_token_name(self, token):
+        """Find context by token using regex matching rules"""
+        search_iter = (context for context in
+                       self.contexts if context.applies_to_token(token))
+        try:
+            return next(search_iter)
+        except StopIteration:
+            raise ContextNotFound(token, self)
 
     @classmethod
     def from_dict(cls, config):

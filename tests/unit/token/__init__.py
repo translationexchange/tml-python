@@ -25,7 +25,7 @@ from __future__ import absolute_import
 import unittest
 from tml.strings import to_string
 from tml.token import VariableToken, TextToken, RulesToken, PipeToken,\
-    TokenMatcher, InvalidTokenSyntax, CaseToken, MethodToken
+    TokenMatcher, InvalidTokenSyntax, CaseToken, MethodToken, PipeMethodToken, CaseMethodToken
 from tml.exceptions import MethodDoesNotExist
 from tml.rules.contexts.gender import Gender
 import six
@@ -116,7 +116,6 @@ class TokenTest(unittest.TestCase):
         token = RulesToken('name', 'somerule', self.language)
         self.assertEquals('somerule', token.execute({'name':'Jonh'}, {}), 'Execute token')
 
-
     def test_parse_rules(self):
         """ Test rules token parsing """
         rules = 'some text with any signs, including :.. and | to'
@@ -134,6 +133,9 @@ class TokenTest(unittest.TestCase):
     def test_parse_piped(self):
         v = PipeToken.validate('{name||rule}', self.language)
         self.assertEquals(v.__class__, PipeToken, 'Check is pipe token')
+        user = DummyUser('Rustem')
+        p = PipeMethodToken.validate('{user.name||rule}', self.language)
+        self.assertEquals('Rustem rule', p.execute({'user': user}, {}))
 
     def test_token_matcher(self):
         """ Token matcher """
@@ -173,6 +175,15 @@ class TokenTest(unittest.TestCase):
         self.assertEquals(
             six.u('&lt;JOHN &amp; &quot;QOUTED&#39;&gt;'),
             token.execute({'obj': escape_obj}, {'escape': True}),
+            'escape data')
+
+        user = DummyUser('michael')
+        token = CaseMethodToken(name='user', method_name='name', case='upper', language=self.language)
+        self.assertEquals('MICHAEL', token.execute({'user': user}, {}), 'execute method case')
+        user.name = '<John & "qouted\'>'
+        self.assertEquals(
+            six.u('&lt;JOHN &amp; &quot;QOUTED&#39;&gt;'),
+            token.execute({'user': user}, {'escape': True}),
             'escape data')
 
 if __name__=='__main__':

@@ -317,14 +317,14 @@ class CaseToken(RulesToken):
         """ Execute with rules options """
         return escape_if_needed(
             self.case.execute(self.fetch(data)), options)
-
+        
     def __str__(self):
         return "CaseToken[%s, case=%s]" % (self.name, self.case)
 
 
 class CaseMethodToken(RulesMethodToken):
     IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (
-        AbstractVariableToken.IS_VARIABLE + RulesToken.TOKEN_TYPE_REGEX + '\:\:(.*)'))
+        AbstractVariableToken.IS_VARIABLE + MethodToken.HAS_METHOD + '\:\:(.*)'))
 
     def __init__(self, name, method_name, case, language):
         self.token = MethodToken(name, method_name)
@@ -333,7 +333,7 @@ class CaseMethodToken(RulesMethodToken):
     def execute(self, data, options):
         """ Execute with rules options """
         return escape_if_needed(
-            self.case.execute(token.execute(data, options)), options)
+            self.case.execute(self.token.execute(data, {'escape': False})), options)
 
     def __str__(self):
         return "CaseMethodToken[%s, case=%s]" % (self.name, self.case)
@@ -379,7 +379,7 @@ class PipeToken(RulesToken):
 class PipeMethodToken(RulesMethodToken, PipeToken):
 
     IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (
-        AbstractVariableToken.IS_VARIABLE + RulesToken.TOKEN_TYPE_REGEX + '\|\|(.*)'))
+        AbstractVariableToken.IS_VARIABLE + MethodToken.HAS_METHOD + '\|\|(.*)'))
 
     def __init__(self, name, method_name, rules, language):
         self.token = MethodToken(name, method_name)

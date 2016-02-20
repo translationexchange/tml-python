@@ -38,7 +38,7 @@ class RenderEngine(object):
     env_generators = []
 
     def render(self, translation, data, options, fallback = False):
-        """ Render translation 
+        """ Render translation
             Args:
                 translation (Transaltion): translation to render
                 data (dict): user data
@@ -100,5 +100,5 @@ class Data(object):
                     return ret
             except ArgumentError:
                 pass
-        raise KeyError('%s key is not found in translation data' % key) 
+        raise KeyError('%s key is not found in translation data' % key)
 

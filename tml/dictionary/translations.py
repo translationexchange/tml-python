@@ -1,6 +1,6 @@
 # encoding: UTF-8
 """
-# Basic translation dict - call API for each translation 
+# Basic translation dict - call API for each translation
 #
 # Copyright (c) 2015, Translation Exchange, Inc.
 # Permission is hereby granted, free of charge, to any person obtaining

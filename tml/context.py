@@ -60,7 +60,7 @@ class AbstractContext(RenderEngine):
                    language = self.language)
 
     def fetch(self, label, description):
-        """ Fetch Translation 
+        """ Fetch Translation
             Args:
                 label (string): label
                 description (string): description
@@ -109,7 +109,7 @@ class AbstractContext(RenderEngine):
                 label (string): tranlation label
                 data (dict): user data
                 description (string): tranlation description
-                options (dict): options 
+                options (dict): options
                 language (Language):
             Returns:
                 unicode
@@ -158,7 +158,7 @@ class LanguageContext(AbstractContext):
 
     @property
     def fallback_dict(self):
-        """ Dictionary used if tranlation is not found in primary dictionary 
+        """ Dictionary used if tranlation is not found in primary dictionary
             Returns:
                 dictionary.AbstractDictionary
         """
@@ -187,7 +187,7 @@ class LanguageContext(AbstractContext):
         return self.language.application
 
     def fallback(self, label, description):
-        """ Fallback translation: try to use default language 
+        """ Fallback translation: try to use default language
             Args:
                 label (string): tranlated label
                 description (string): desctioption
@@ -199,9 +199,9 @@ class LanguageContext(AbstractContext):
             if 'Only in English'.lower() in label.lower():
                 print self.fallback_dict.source
             # 16132a471f9958f96a2ed16af25e8d8e
-            
-                
-                # print key.key 
+
+
+                # print key.key
                 # print key.key, key.label, 'hi', self.fallback_dict.translations
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
@@ -217,8 +217,8 @@ class SourceContext(LanguageContext):
         """
         self.source = source
         super(SourceContext, self).__init__(source=source, **kwargs)
-        
-        
+
+
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """
         source = language.application.source(
@@ -238,7 +238,7 @@ class SnapshotContext(LanguageContext):
         """
         self.source = source
         super(SnapshotContext, self).__init__(source=source, **kwargs)
-        
+
 
     def build_dict(self, language, **kwargs):
         """ Build snapshot dictionary """

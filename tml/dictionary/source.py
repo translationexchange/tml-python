@@ -52,7 +52,7 @@ class SourceMissed(MissedKeys):
 class SourceDictionary(Hashtable):
     """ Dictionary of keys grouped by source """
     def __init__(self, source, language, fallback=None, translations=None):
-        """ .ctor 
+        """ .ctor
             Args:
                 source (string): source name
                 lang (Language): language
@@ -93,7 +93,7 @@ class SourceDictionary(Hashtable):
 
     @property
     def api_query(self):
-        """ Params to API call 
+        """ Params to API call
             Returns:
                 tuple: url, params
         """

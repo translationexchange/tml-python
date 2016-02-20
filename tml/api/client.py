@@ -45,7 +45,7 @@ class Client(AbstractClient):
         self.token = token
 
     def get(self, url, params = {}):
-        """ GET request to API 
+        """ GET request to API
             Args:
                 url (string): URL
                 params (dict): params
@@ -57,7 +57,7 @@ class Client(AbstractClient):
         return self.call(url, 'get', params)
 
     def post(self, url, params):
-        """ POST request to API 
+        """ POST request to API
             Args:
                 url (string): URL
                 params (dict): params
@@ -69,7 +69,7 @@ class Client(AbstractClient):
         return self.call(url, 'post', params)
 
     def call(self, url, method, params=None):
-        """ Make request to API 
+        """ Make request to API
             Args:
                 url (string): URL
                 method (string): HTTP method (get|post|put|delete)

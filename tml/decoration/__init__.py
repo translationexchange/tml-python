@@ -81,6 +81,8 @@ class Tag(Set):
             first = False
         if self.self_closed:
             return '<%s/>%s' % (self.tag, super(Tag, self).render(data))
+        # print self.tag, attributes, data
+        print attributes
         return '<%s%s>%s</%s>' % (self.tag, render_attributes(attributes), super(Tag, self).render(data), self.tag)
 
     def fetch_attribute(self, key, attributes):
@@ -101,7 +103,7 @@ class Tag(Set):
             return attributes[self.name][key]
         except Exception:
             pass
-        if type(attributes[self.name]) is str and len(self.attributes) == 1:
+        if isinstance(attributes[self.name], six.string_types) and len(self.attributes) == 1:
             # just link
             return attributes[self.name]
 

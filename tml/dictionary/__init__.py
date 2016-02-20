@@ -55,7 +55,7 @@ class AbstractDictionary(object):
                 Translation
         """
         return self.get_translation(key)
-    
+
     def get_translation(self, key):
         """Get key translation
             Args:
@@ -83,7 +83,7 @@ class AbstractDictionary(object):
 
     @property
     def fallback_function(self):
-        """ Fallback getter 
+        """ Fallback getter
             Returns:
                 FunctionType
         """
@@ -97,11 +97,11 @@ class Hashtable(AbstractDictionary):
             Args:
                 tranlations (dict): key- tranlation code, value - tranlation options
         """
-        self.translations = translations
+        self.translations = translations or {}
         super(Hashtable, self).__init__(fallback)
 
     def fetch(self, key):
-        """ Tranlate key 
+        """ Tranlate key
             Args:
                 key (Key): translated key
             Returns:

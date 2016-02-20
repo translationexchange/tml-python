@@ -23,10 +23,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = 'a@toukmanov.ru, xepa4ep'
 
-
-
+import six
 from _ctypes import ArgumentError
 from tml.strings import to_string
 
@@ -34,7 +33,7 @@ from tml.strings import to_string
 class Gender(object):
     """ Gender data """
     GENDERS = MALE, FEMALE, OTHER = ('male', 'female', 'other')
-    
+
     def __init__(self, gender, value):
         self.value = value
         self.gender = Gender.supported_gender(gender)
@@ -83,7 +82,7 @@ class Gender(object):
     def match(cls, data):
         """ Check is object string is valid gender """
         try:
-            if (type(data) is str):
+            if isinstance(data, six.string_types):
                 # String:
                 return Gender.supported_gender(data)
             if (isinstance(data, Gender)):

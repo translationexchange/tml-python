@@ -49,7 +49,7 @@ class SnapshotDir(AbstractClient):
         self.path = path
 
     def call(self, url, method, params = {}):
-        """ Make request to API 
+        """ Make request to API
             Args:
                 url (string): URL
                 method (string): HTTP method (get|post|put|delete)
@@ -76,11 +76,11 @@ class SnapshotDir(AbstractClient):
 
     @classmethod
     def rewrite_path(cls, url):
-        """ Build path from URL 
+        """ Build path from URL
             Args:
                 url (string): API url
             Returns:
-                string: path in snapshot matches API URL 
+                string: path in snapshot matches API URL
         """
         for pattern, replacer in REWRITE_RULES:
             if pattern == url:  # if equal

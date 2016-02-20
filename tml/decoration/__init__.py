@@ -35,7 +35,7 @@ class Set(object):
         self.text = Text()
 
     def append(self, el):
-        if type(el) is str or type(el) is six.text_type:
+        if isinstance(el, six.string_types) or type(el) is six.text_type:
             self.text.append(el)
         else:
             self.flush_text()
@@ -101,7 +101,7 @@ class Tag(Set):
             return attributes[self.name][key]
         except Exception:
             pass
-        if type(attributes[self.name]) is str and len(self.attributes) == 1:
+        if isinstance(attributes[self.name], six.string_types) and len(self.attributes) == 1:
             # just link
             return attributes[self.name]
 

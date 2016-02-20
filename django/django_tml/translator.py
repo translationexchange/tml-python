@@ -87,7 +87,7 @@ class Translator(object):
             Returns:
                 Context
         """
-        return build_context(locale = self.locale, 
+        return build_context(locale = self.locale,
                              source = self.source,
                              client = self.build_client(),
                              use_snapshot = self.use_snapshot)
@@ -108,14 +108,14 @@ class Translator(object):
     def build_client(self):
         if self.use_snapshot:
             # Use snapshot:
-            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot'])) 
+            return CachedClient.wrap(open_snapshot(self.settings.TML['snapshot']))
         if 'api_client' in self.settings.TML:
             # Custom client:
             custom_client = self.settings.TML['api_client']
             if type(custom_client) is FunctionType:
                 # factory function:
                 return custom_client()
-            elif custom_client is str:
+            elif isinstance(custom_client, six.string_types):
                 # full factory function or class name: path.to.module.function_name
                 custom_client_import = '.'.split(custom_client)
                 module = __import__('.'.join(custom_client[0, -1]))
@@ -153,7 +153,7 @@ class Translator(object):
         return self.context.language.locale
 
     def activate(self, locale):
-        """ Activate selected language 
+        """ Activate selected language
             Args:
                 locale (string): selected locale
         """
@@ -196,7 +196,7 @@ class Translator(object):
 
     def exit_source(self):
         """ Use last source
-            
+
         """
         try:
             self._use_source(self._sources.pop())
@@ -293,7 +293,7 @@ class Translator(object):
         show. Only languages listed in settings.LANGUAGES are taken into account.
         If the user requests a sublanguage where we have a main language, we send
         out the main language.
-    
+
         If check_path is True, the URL path prefix will be checked for a language
         code, otherwise this is skipped for backwards compatibility.
         """
@@ -301,17 +301,17 @@ class Translator(object):
             lang_code = self.get_language_from_path(request.path_info)
             if lang_code is not None:
                 return lang_code
-    
+
         if hasattr(request, 'session'):
             # for backwards compatibility django_language is also checked (remove in 1.8)
             lang_code = request.session.get(LANGUAGE_SESSION_KEY, request.session.get('django_language'))
             if self.check_for_language(lang_code):
                 return lang_code
-    
+
         lang_code = request.COOKIES.get(self.settings.LANGUAGE_COOKIE_NAME)
         if self.check_for_language(lang_code):
             return lang_code
-    
+
         accept = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
         for accept_lang, unused in parse_accept_lang_header(accept):
             if accept_lang == '*':
@@ -327,7 +327,7 @@ class Translator(object):
         """
         Returns the language-code if there is a valid language-code
         found in the `path`.
-    
+
         If `strict` is False (the default), the function will look for an alternative
         country-specific variant when the currently checked is not found.
         """
@@ -345,10 +345,10 @@ class Translator(object):
         """
         Returns the language-code that's listed in supported languages, possibly
         selecting a more generic variant. Raises LookupError if nothing found.
-    
+
         If `strict` is False (the default), the function will look for an alternative
         country-specific variant when the currently checked is not found.
-    
+
         lru_cache should have a maxsize to prevent from memory exhaustion attacks,
         as the provided language codes are taken from the HTTP request. See also
         <https://www.djangoproject.com/weblog/2007/oct/26/security-fix/>.

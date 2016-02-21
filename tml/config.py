@@ -36,8 +36,7 @@ class BaseConfig(dict, Singleton):
         for k, v in Config.__dict__.iteritems():
             if is_builtin(k) or is_callable(k):
                 continue
-            self.__setattr__(k, v)
-            
+            self[k] = v
 
     def override_config(self, **kwargs):
         for k, v in kwargs.iteritems():
@@ -45,7 +44,7 @@ class BaseConfig(dict, Singleton):
             if orig_v:
                 if isinstance(orig_v, dict):
                     v = merge(copy(orig_v), v)
-                self.__setattr__(k, v)
+                self[k] = v
 
 
 class Config(BaseConfig):
@@ -54,14 +53,31 @@ class Config(BaseConfig):
         'path': rel(APP_DIR, 'tml.log'),
         'level': logging.DEBUG
     }
-    api_client_class = 'tml.api.client.Client'
+
+    api_client = 'tml.api.client.Client'
+
     locale = {
         'default': 'en',
         'method': 'current_locale',
         'subdomain': False,
         'extension': False
     }
-    
+
+    agent = {
+        'enabled': True,
+        'type': 'agent',
+        'cache':   86400  # timeout every 24 hours
+    }
+
+    data_preprocessors = ('tml.tools.list.preprocess_lists',)
+    env_generators = ('tml.tools.viewing_user.get_viewing_user',)
+
+    cache = {
+        'enabled': False,
+        #'adapter': 'file',
+        #'path': 'a/b/c/snapshot.tar.gz'
+    }
+
     @property
     def default_locale(self):
         return self.locale['default']
@@ -75,4 +91,4 @@ def configure(**kwargs):
         CONFIG.override_config(**kwargs)
     return CONFIG
 
-    
+

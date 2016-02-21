@@ -43,7 +43,7 @@ __author__ = 'a@toukmanov.ru'
 
 
 def build_client(client, snapshot_path, token):
-    """ Client builder 
+    """ Client builder
         Args:
             client (api.client.Client): custom client
             snapshot_path (string): path to snapshot (returns SnapshotClient)
@@ -92,10 +92,10 @@ def initialize(**kwargs):
     global DEFAULT_CONTEXT
     DEFAULT_CONTEXT = build_context(**kwargs)
     enable_warnings()
-    
+
 
 def configure(**kwargs):
-    config.configure(**kwargs)
+    return config.configure(**kwargs)
 
 
 def get_context():
@@ -112,7 +112,7 @@ def tr(label, data = {}, description = '', options = {}):
             data (dict): user data
             description (string): tranlation description
             language (Language):
-            options (dict): options 
+            options (dict): options
     """
     context = get_context()
     return context.tr(

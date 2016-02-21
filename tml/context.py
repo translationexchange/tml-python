@@ -186,6 +186,10 @@ class LanguageContext(AbstractContext):
         """
         return self.language.application
 
+    @property
+    def client(self):
+        return self.application.client
+
     def fallback(self, label, description):
         """ Fallback translation: try to use default language
             Args:

@@ -34,7 +34,7 @@ class Logger(Singleton):
     backup_count = 30
     mode = 'a'
     namespace = 'trex.TML'
-        
+
     def init(self, path=None, log_level=None, **kwargs):
         self.path = Logger.default_path if path is None else path
         dirname = os.path.dirname(self.path)

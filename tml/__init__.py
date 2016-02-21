@@ -41,6 +41,12 @@ from .utils import enable_warnings
 
 __author__ = 'a@toukmanov.ru'
 
+__VERSION__ = '0.1.0'
+
+
+def full_version():
+    return "tml-python v#%s" % (__VERSION__)
+
 
 def build_client(client, snapshot_path, token):
     """ Client builder

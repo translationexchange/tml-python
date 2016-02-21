@@ -41,6 +41,7 @@ class Application(object):
     shortcuts = None
     tools = None # tools URLS
     extensions = None
+    css = None
 
     def __init__(self, client, id, languages, default_locale, **kwargs):
         """ .ctor
@@ -58,7 +59,6 @@ class Application(object):
         self.load_extensions(kwargs.get('extensions', {}))
         for key in kwargs:
             setattr(self, key, kwargs[key])
-
 
     @classmethod
     def from_dict(cls, client, data):
@@ -120,6 +120,10 @@ class Application(object):
                 source,
                 SourceTranslations(source, self).add_locale(source_locale, **data))
 
+    @property
+    def token(self):
+        return self.client.token
+
     def language(self, locale=None):
         if locale is None:
             locale = self.default_locale or CONFIG.default_locale
@@ -177,7 +181,7 @@ class Application(object):
         if not language:
             raise LanguageNotSupported(locale, self)
         return 'languages/%s' % locale
-    
+
     def feature_enabled(self, key):
         return self.features.get(key, False)
 

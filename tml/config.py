@@ -4,14 +4,10 @@ from .base import Singleton
 from .utils import APP_DIR, rel, merge
 
 
-class BaseConfig(dict, Singleton):
-
-    def init(self, **kwargs):
-        self.init_config()
-        self.override_config(**kwargs)
+class BaseConfigMixin(dict):
 
     def __setitem__(self, name, value):
-        super(BaseConfig, self).__setitem__(name.lower(), value)
+        super(BaseConfigMixin, self).__setitem__(name.lower(), value)
 
     def __setattr__(self, name, value):
         self[name.lower()] = value
@@ -27,12 +23,10 @@ class BaseConfig(dict, Singleton):
         del self[name]
 
     def init_config(self):
-
         def is_builtin(k):
             return k.startswith('__') or k.endswith('__')
         def is_callable(k):
             return callable(getattr(self, k))
-
         for k, v in Config.__dict__.iteritems():
             if is_builtin(k) or is_callable(k):
                 continue
@@ -47,7 +41,15 @@ class BaseConfig(dict, Singleton):
                 self[k] = v
 
 
-class Config(BaseConfig):
+class Config(BaseConfigMixin, Singleton):
+
+    def __init__(self, *a, **kw):
+        Singleton.__init__(self, *a, **kw)
+
+    def init(self, **kwargs):
+        self.init_config()
+        self.override_config(**kwargs)
+
     logger = {
         'enabled': True,
         'path': rel(APP_DIR, 'tml.log'),
@@ -78,12 +80,14 @@ class Config(BaseConfig):
         #'path': 'a/b/c/snapshot.tar.gz'
     }
 
+    version_check_interval = 3600
+
     @property
     def default_locale(self):
         return self.locale['default']
 
     def cache_enabled(self):
-        return self.['cache'].get('enabled', False)
+        return self['cache'].get('enabled', False)
 
 
 CONFIG = Config.instance()

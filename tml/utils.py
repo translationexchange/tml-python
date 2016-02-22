@@ -73,4 +73,4 @@ def decode_cookie(base64_payload, secret=None):
 
 def interval_timestamp(interval):
     t = ts()
-    return t - (ts % interval)
+    return t - (t % interval)

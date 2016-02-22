@@ -26,8 +26,12 @@ class CacheVersion(object):
     def set(self, new_version):
         self.version = new_version
 
+    def reset(self):
+        self.version = None
+
     def upgrade(self):
         self.cache.store(self.CACHE_VERSION_KEY, {'version': 'undefined', 't': self.cache_timestamp})
+        self.reset()
 
     invalidate = upgrade
 
@@ -37,11 +41,11 @@ class CacheVersion(object):
 
     def validate_version(self, version):
         if not version or not type(version.get('t', None)) is int:
-            return False
+            return 'undefined'
         expires_at = version['t'] + CONFIG['version_check_interval']
         if expires_at < ts():
             print 'Cache version is outdated'
-            return False
+            return 'undefined'
         else:
             delta = expires_at - ts()
             print 'Cache version is up to date, expires in %s' % delta
@@ -53,21 +57,26 @@ class CacheVersion(object):
             return {'version': CONFIG.cache.get('version', 'undefined'),
                     't': self.cache_timestamp}
 
-        version = self.version = self.cache.fetch(self.CACHE_VERSION_KEY, miss_callback=on_miss)
-        return self.validate_version(version)
+        version_obj = self.cache.fetch(self.CACHE_VERSION_KEY, miss_callback=on_miss)
+        version_obj['version'] = self.version = self.validate_version(version_obj)
+        return version_obj
 
     def store(self, new_version):
         self.version = new_version
         self.cache.store(self.CACHE_VERSION_KEY, {'version': new_version, 't': self.cache_timestamp})
 
     def is_undefined(self):
-        return not self.version or self.version['version'] == 'undefined'
+        return self.version is None or self.version == 'undefined'
 
     def is_defined(self):
         return not self.is_undefined()
 
     def is_invalid(self):
-        return ('undefined', 0).index(self.version) > -1
+        try:
+            ('undefined', 0).index(self.version)
+            return True
+        except:
+            return False
 
     def is_valid(self):
         return not self.is_invalid()
@@ -77,7 +86,7 @@ class CacheVersion(object):
         return "tml_%s%s_%s" % (namespace, version, key)
 
 
-class CachedClient(Singleton):
+class CachedClient(object):
 
     default_adapter_module = 'tml.cache_adapters'
     version_attr = '__cache_version__'
@@ -86,9 +95,12 @@ class CachedClient(Singleton):
     @classmethod
     def instance(cls, **kwargs):
         if not hasattr(cls, CachedClient.instance_attr):
-            klass_path = CONFIG.cache['adapter']
-            adapter = cls.load_adapter(klass_path, **kwargs)
-            setattr(self, CachedClient.instance_attr, adapter)
+            if CONFIG.cache_enabled():
+                klass_path = CONFIG.cache['adapter']
+                adapter = cls.load_adapter(klass_path, **kwargs)
+                setattr(self, CachedClient.instance_attr, adapter)
+            else:
+                setattr(self, CachedClient.instance_attr, CachedClient())
         return getattr(self, CachedClient.instance_attr)
 
     @classmethod

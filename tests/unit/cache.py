@@ -1,5 +1,6 @@
 import unittest
 from tml.cache import CacheVersion, CachedClient
+from tml.cache_adapters import FileAdapter
 from tml import configure
 from .common import override_config
 
@@ -72,6 +73,12 @@ class CacheTest(unittest.TestCase):
             cache.store('foo', 'bar')
             self.assertEquals(cache.fetch('foo'), 'bar', 'work as adapter')
             self.assertTrue(hasattr(cache, 'versioned_key'), 'has inhereted methods')
+
+    def test_file_adapter(self):
+        with override_config(cache={'enabled': True}):
+            cache = CachedClient.instance(adapter=FileAdapter)
+            self.assertIsInstance(cache, CachedClient)
+            self.assertEquals(cache.cache_name, 'file')
 
 if __name__ == '__main__':
     unittest.main()

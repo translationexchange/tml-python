@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from six import string_types
 from importlib import import_module
 from types import FunctionType
+from .base import SingletonMixin
 from .api.client import Client
 from .config import CONFIG
 from .utils import interval_timestamp, ts
@@ -88,38 +89,41 @@ class CacheVersion(object):
         return "tml_%s%s_%s" % (namespace, version, key)
 
 
-class CachedClient(object):
+class CachedClient(SingletonMixin):
 
     default_adapter_module = 'tml.cache_adapters'
     version_attr = '__cache_version__'
-    instance_attr = '__instance__'
 
     @classmethod
     def instance(cls, **kwargs):
-        if not hasattr(cls, CachedClient.instance_attr):
-            if CONFIG.cache_enabled():
-                klass_path = kwargs.get('adapter', CONFIG.cache.get('adapter', None))
-                adapter = cls.load_adapter(klass_path, **kwargs)
-                setattr(cls, CachedClient.instance_attr, adapter)
-            else:
-                setattr(cls, CachedClient.instance_attr, CachedClient())
-        return getattr(cls, CachedClient.instance_attr)
+        if CONFIG.cache_enabled():
+            klass_path = kwargs.get('adapter', CONFIG.cache.get('adapter', None))
+            return cls.load_adapter(klass_path, **kwargs)
+        else:
+            return CachedClient()
+
 
     @classmethod
     def load_adapter(cls, klass, **kwargs):
+        def build_client(klass):
+            return type(
+                klass.__name__,
+                (CachedClient,),
+                dict(klass.__dict__))
+
         if type(klass) is FunctionType:
             return klass()
         elif isinstance(klass, string_types):
             path_parts = klass.split('.')
             if len(path_parts) == 1:  # for shorter configuration
                 path_parts = CachedClient.default_adapter_module.split('.') +  path_parts
-            package_path, class_name = '.'.join(path_parts[:-1]), path_parts[-1]
+            package_path, adapter_name = '.'.join(path_parts[:-1]), path_parts[-1]
             module = import_module(package_path)
-            adapter_class = getattr(module, class_name)
-            return type(class_name, (CachedClient,), dict(adapter_class.__dict__))()
+            adapter_class = getattr(module, adapter_name)
+            return build_client(adapter_class)()
         else:  # custom object
             if isinstance(klass, type):
-                return klass(**kwargs)
+                return build_client(klass)()
             else:  # object
                 return klass
 

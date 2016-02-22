@@ -17,6 +17,14 @@ class MockCachedClient(CachedClient):
             val = self.cache[key] = miss_callback(key)
         return val
 
+class DumbCachedClient(object):
+    cache = {}
+    def store(self, key, data, **opts):
+        self.cache[key] = data
+
+    def fetch(self, key):
+        return self.cache[key]
+
 
 class CacheVersionTest(unittest.TestCase):
 
@@ -55,8 +63,15 @@ class CacheVersionTest(unittest.TestCase):
 
 
 class CacheTest(unittest.TestCase):
-    pass
 
+    def test_init_adapter(self):
+        path = 'tests.unit.cache.DumbCachedClient'
+        with override_config(cache={'enabled': True}):
+            cache = CachedClient.instance(adapter=path)
+            self.assertTrue(isinstance(cache, CachedClient))
+            cache.store('foo', 'bar')
+            self.assertEquals(cache.fetch('foo'), 'bar', 'work as adapter')
+            self.assertTrue(hasattr(cache, 'versioned_key'), 'has inhereted methods')
 
 if __name__ == '__main__':
     unittest.main()

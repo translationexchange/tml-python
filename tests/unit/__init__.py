@@ -22,7 +22,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
 from tml import initialize, tr, build_context, Gender, ContextNotConfigured, RenderEngine

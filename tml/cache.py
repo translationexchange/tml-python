@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 # encoding: UTF-8
-import six
+from six import string_types
+from importlib import import_module
+from types import FunctionType
 from .api.client import Client
 from .config import CONFIG
 from .utils import interval_timestamp, ts
@@ -96,25 +98,25 @@ class CachedClient(object):
     def instance(cls, **kwargs):
         if not hasattr(cls, CachedClient.instance_attr):
             if CONFIG.cache_enabled():
-                klass_path = CONFIG.cache['adapter']
+                klass_path = kwargs.get('adapter', CONFIG.cache.get('adapter', None))
                 adapter = cls.load_adapter(klass_path, **kwargs)
-                setattr(self, CachedClient.instance_attr, adapter)
+                setattr(cls, CachedClient.instance_attr, adapter)
             else:
-                setattr(self, CachedClient.instance_attr, CachedClient())
-        return getattr(self, CachedClient.instance_attr)
+                setattr(cls, CachedClient.instance_attr, CachedClient())
+        return getattr(cls, CachedClient.instance_attr)
 
     @classmethod
     def load_adapter(cls, klass, **kwargs):
         if type(klass) is FunctionType:
             return klass()
         elif isinstance(klass, string_types):
-            path_parts = klass_path.split('.')
+            path_parts = klass.split('.')
             if len(path_parts) == 1:  # for shorter configuration
                 path_parts = CachedClient.default_adapter_module.split('.') +  path_parts
-            module_name, class_name = '.'.join(path_parts[:-1]), path_parts[-1]
-            module = __import__(module_name, **kwargs)
+            package_path, class_name = '.'.join(path_parts[:-1]), path_parts[-1]
+            module = import_module(package_path)
             adapter_class = getattr(module, class_name)
-            return type(class_name, (CachedClient,), dict(adapter_class.__dict__))
+            return type(class_name, (CachedClient,), dict(adapter_class.__dict__))()
         else:  # custom object
             if isinstance(klass, type):
                 return klass(**kwargs)

@@ -82,6 +82,9 @@ class Config(BaseConfig):
     def default_locale(self):
         return self.locale['default']
 
+    def cache_enabled(self):
+        return self.['cache'].get('enabled', False)
+
 
 CONFIG = Config.instance()
 

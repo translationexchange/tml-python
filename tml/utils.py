@@ -2,7 +2,10 @@ import os
 import logging
 import logging.handlers
 import functools
+import json
 import warnings
+from datetime import datetime, timedelta
+from time import mktime
 
 pj = os.path.join
 
@@ -49,3 +52,25 @@ def merge(a, b):
     return a
 
 multi_merge = functools.partial(reduce, merge)
+
+
+def ts():
+    return int(mktime(datetime.utcnow().timetuple()))
+
+
+def cookie_name(app_key):
+    return 'trex_%s' % app_key
+
+
+def decode_cookie(base64_payload, secret=None):
+    try:
+        data = json.loads(base64.b64decode(base64_payload))
+        # TODO: Verify signature
+        return data
+    except Exception as e:
+        raise CookieNotParsed(e)
+
+
+def interval_timestamp(interval):
+    t = ts()
+    return t - (ts % interval)

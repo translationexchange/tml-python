@@ -1,0 +1,37 @@
+# encoding: UTF-8
+from ..config import CONFIG
+import os
+
+class FileAdapter(object):
+
+    cache = {}
+
+    def get_cache_path(self):
+        return os.path.join(CONFIG['cache']['path'], CONFIG['cache']['version'])
+
+    def file_path(self, key):
+        return os.path.join(self.get_cache_path(), '%s.json' % key)
+
+    @property
+    def cache_name(self):
+        return 'file'
+
+    def fetch(self, key, opts=None):
+        if key in self.cache:
+            print 'memory hit: %s' % key
+            return self.cache[key]
+        path = self.file_path(key)
+        if os.path.exists(path):
+            print 'cache hit: %s' % key
+            with open(path) as fp:
+                self.cache[key] = json.loads(to_string(fp.read()))
+            return self.cache[key]
+        print 'cache miss: %s' % key
+        return
+
+    def read_only(self):
+        return True
+
+    @classmethod
+    def generate(cls, *args, **kwargs):
+        pass

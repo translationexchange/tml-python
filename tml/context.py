@@ -141,10 +141,13 @@ class LanguageContext(AbstractContext):
                 application_id (int): API application id (use default if None)
 
         """
+        key = kwargs.get('key', CONFIG['application']['key'])
         if application_id:
-            application = Application.load_by_id(client, application_id, locale=locale, source=source)
+            application = Application.load_by_id(
+                client, application_id, locale=locale, source=source, key=key)
         else:
-            application = Application.load_default(client, locale=locale)
+            application = Application.load_default(
+                client, locale=locale, source=source, key=key)
         language = application.language(locale)
         super(LanguageContext, self).__init__(
             dictionary=self.build_dict(language),

@@ -28,7 +28,9 @@ import time
 import requests
 import contextlib
 from . import AbstractClient, APIError, ClientError
+from ..config import CONFIG
 from ..logger import get_logger
+
 
 
 class Client(AbstractClient):
@@ -37,12 +39,13 @@ class Client(AbstractClient):
     CDN_HOST = 'https://cdn.translationexchange.com'
     API_PATH = 'v1'
 
-    def __init__(self, token):
+    def __init__(self, key=None, auth_token=None):
         """ Client .ctor
             Args:
                 token (string): API access token
         """
-        self.token = token
+        self.key = key or CONFIG['application']['key']
+        self.token = auth_token
 
     def get(self, url, params = {}):
         """ GET request to API
@@ -68,6 +71,52 @@ class Client(AbstractClient):
         """
         return self.call(url, 'post', params)
 
+    def call_cdn(self, uri, params=None):
+        pass
+        # if Tml.cache.version.invalid? and key != 'version'
+        #   return nil
+        # end
+
+        # response = nil
+        # cdn_path = "/#{application.key}"
+
+        # if key == 'version'
+        #   cdn_path += "/#{key}.json"
+        # else
+        #   cdn_path += "/#{Tml.cache.version.to_s}/#{key}.json.gz"
+        # end
+
+        # trace_api_call(cdn_path, params, opts.merge(:host => application.cdn_host)) do
+        #   begin
+        #     response = cdn_connection.get do |request|
+        #       prepare_request(request, cdn_path, params)
+        #     end
+        #   rescue Exception => ex
+        #     Tml.logger.error("Failed to execute request: #{ex.message[0..255]}")
+        #     return nil
+        #   end
+        # end
+        # return if response.status >= 500 and response.status < 600
+        # return if response.body.nil? or response.body == '' or response.body.match(/xml/)
+
+        # compressed_data = response.body
+        # return if compressed_data.nil? or compressed_data == ''
+
+        # data = compressed_data
+
+        # unless opts[:uncompressed]
+        #   data = Zlib::GzipReader.new(StringIO.new(compressed_data.to_s)).read
+        #   Tml.logger.debug("Compressed: #{compressed_data.length} Uncompressed: #{data.length}")
+        # end
+
+        # begin
+        #   data = JSON.parse(data)
+        # rescue Exception => ex
+        #   return nil
+        # end
+
+        # data
+
     def call(self, url, method, params=None):
         """ Make request to API
             Args:
@@ -82,7 +131,11 @@ class Client(AbstractClient):
         params = {} if params is None else self._compact_params(params)
         resp = None
         url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
-        params.update({'access_token': self.token})
+        params['app_id'] = self.key
+        if method == 'post':
+            params['access_token'] = self.token
+            params.update({'access_token': self.token})
+
         with self.trace_call(url, method, params):
             resp = requests.request(method, url, params=params)
         ret = resp.json()

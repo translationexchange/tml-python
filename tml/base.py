@@ -42,5 +42,5 @@ class Singleton(object):
 
     @classmethod
     def instance(cls, *a, **kw):
-        kw['is_configured'] = hsh(cls) in getattr(cls, '_instance_dict', {}) 
+        kw['is_configured'] = hsh(cls) in getattr(cls, '_instance_dict', {})
         return cls(*a, **kw)

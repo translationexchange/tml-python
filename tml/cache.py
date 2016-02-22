@@ -120,7 +120,10 @@ class CachedClient(SingletonMixin):
             package_path, adapter_name = '.'.join(path_parts[:-1]), path_parts[-1]
             module = import_module(package_path)
             adapter_class = getattr(module, adapter_name)
-            return build_client(adapter_class)()
+            if type(adapter_class) is FunctionType:  # e.g. factory callable
+                return adapter_class()
+            else:
+                return build_client(adapter_class)()
         else:  # custom object
             if isinstance(klass, type):
                 return build_client(klass)()

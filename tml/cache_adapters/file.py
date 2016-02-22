@@ -4,6 +4,8 @@ from ..strings import to_string
 import json
 import os
 
+__author__ = 'a@toukmanov.ru, xepa4ep'
+
 class FileAdapter(object):
 
     cache = {}

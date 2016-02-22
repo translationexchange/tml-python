@@ -6,29 +6,28 @@ from .utils import APP_DIR, rel, merge
 
 class BaseConfigMixin(dict):
 
-    def __setitem__(self, name, value):
-        super(BaseConfigMixin, self).__setitem__(name.lower(), value)
+    def __setitem__(self, key, value):
+        self.__dict__[key.lower()] = value
 
-    def __setattr__(self, name, value):
-        self[name.lower()] = value
+    def __getitem__(self, key):
+        return self.__dict__[key.lower()]
 
-    def __getattr__(self, name):
-        name = name.lower()
-        if name in self:
-            return self[name]
-        raise AttributeError
+    def __delitem__(self, key):
+        del self.__dict__[key]
 
-    def __delattr__(self, name):
-        name = name.lower()
-        del self[name]
+    def __contains__(self, key):
+        return key in self.__dict__
 
     def init_config(self):
-        def is_builtin(k):
+
+        def is_builtin(k, v):
             return k.startswith('__') or k.endswith('__')
-        def is_callable(k):
-            return callable(getattr(self, k))
+
+        def is_callable(k, v):
+            return callable(v)
+
         for k, v in Config.__dict__.iteritems():
-            if is_builtin(k) or is_callable(k):
+            if is_builtin(k, v) or is_callable(k, v):
                 continue
             self[k] = v
 
@@ -38,8 +37,8 @@ class BaseConfigMixin(dict):
             if orig_v:
                 if isinstance(orig_v, dict):
                     v = merge(copy(orig_v), v)
+                    # print merge(copy(orig_v), v)
                 self[k] = v
-
 
 class Config(BaseConfigMixin, Singleton):
 

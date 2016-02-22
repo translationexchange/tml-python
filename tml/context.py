@@ -22,6 +22,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from .application import Application
+from .config import CONFIG
 from .translation import Key
 from .render import RenderEngine
 from .exceptions import Error

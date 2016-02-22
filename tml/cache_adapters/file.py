@@ -1,5 +1,7 @@
 # encoding: UTF-8
 from ..config import CONFIG
+from ..strings import to_string
+import json
 import os
 
 class FileAdapter(object):

@@ -1,8 +1,9 @@
 import unittest
+import os
 from tml.cache import CacheVersion, CachedClient
 from tml.cache_adapters import FileAdapter
 from tml import configure
-from .common import override_config
+from .common import override_config, FIXTURES_PATH
 
 
 class MockCachedClient(CachedClient):
@@ -65,6 +66,10 @@ class CacheVersionTest(unittest.TestCase):
 
 class CacheTest(unittest.TestCase):
 
+    def setUp(self):
+        self.snapshot_path = FIXTURES_PATH
+        self.version = '20160218065921'
+
     def test_init_adapter(self):
         path = 'tests.unit.cache.DumbCachedClient'
         with override_config(cache={'enabled': True}):
@@ -79,6 +84,14 @@ class CacheTest(unittest.TestCase):
             cache = CachedClient.instance(adapter=FileAdapter)
             self.assertIsInstance(cache, CachedClient)
             self.assertEquals(cache.cache_name, 'file')
+
+        with override_config(cache={'enabled': True, 'path': self.snapshot_path, 'version': self.version}):
+            cache = CachedClient.instance(adapter=FileAdapter)
+            self.assertEquals(cache.get_cache_path(), os.path.join(self.snapshot_path, self.version))
+            self.assertEquals(cache.file_path('application'), os.path.join(self.snapshot_path, self.version, 'application.json'))
+            app_data = cache.fetch('application')
+            self.assertEquals(app_data['key'], 'ca77401b70d5efb91db42f15091a21a68e032ee20e93cd3539ce72b7b810fa1a')
+            app_data = cache.fetch('application')
 
 if __name__ == '__main__':
     unittest.main()

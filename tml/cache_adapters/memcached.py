@@ -67,7 +67,7 @@ class BaseMemcachedAdapter(object):
         return False
 
     def store(self, key, data, opts=None):
-        print 'Cache store: #%s' % key
+        self.debug('Cache store: %s', key)
         opts = {} if opts is None else opts
         timeout = self.get_backend_timeout(opts.get('timeout', None))
         self._cache.set(self.versioned_key(key, opts), self._pickle(data), timeout)
@@ -77,17 +77,17 @@ class BaseMemcachedAdapter(object):
         data = self._cache.get(self.versioned_key(key, opts))
         if data:
             data = self._unpickle(data)
-            print 'Cache hit: %s' % key
+            self.debug('Cache hit: %s', key)
         else:
             if opts and opts.get('miss_callback', None):
                 if callable(opts['miss_callback']):
                     data = opts['miss_callback'](key)
             self.store(key, data)
-            print 'Cache miss: %s' % key
+            self.debug('Cache miss: %s', key)
         return data
 
     def delete(self, key, opts=None):
-        print 'Cache delete: %s' % key
+        self.debug('Cache delete: %s', key)
         self._cache.delete(self.versioned_key(key, opts))
         return key
 
@@ -100,7 +100,8 @@ class DefaultMemcachedAdapter(BaseMemcachedAdapter):
 
     def __init__(self, server, params):
         import memcache
-        super(DefaultMemcachedAdapter, self).__init__(server, params, library=memcache)
+        for base_class in self.__class__.__bases__:
+            base_class.__init__(self, server, params, library=memcache)
 
     @property
     def _cache(self):
@@ -112,7 +113,8 @@ class DefaultMemcachedAdapter(BaseMemcachedAdapter):
 class PyLibMCCacheAdapter(BaseMemcachedAdapter):
     def __init__(self, server, params):
         import pylibmc
-        super(PyLibMCCacheAdapter, self).__init__(server, params, library=pylibmc)
+        for base_class in self.__class__.__bases__:
+            base_class.__init__(self, server, params, library=pylibmc)
 
     @property
     def _cache(self):
@@ -139,8 +141,8 @@ def MemcachedAdapterFactory(cache_builder):
     adapter_name = CONFIG.cache.get('backend', 'memcache_memcached')
     adapter = None
     if adapter_name.endswith('pylibmc'):
-        adapter = cache_builder(PyLibMCCacheAdapter, PyLibMCCacheAdapter)
+        adapter = cache_builder(PyLibMCCacheAdapter, BaseMemcachedAdapter)
     else:
-        adapter = cache_builder(DefaultMemcachedAdapter, DefaultMemcachedAdapter)
+        adapter = cache_builder(DefaultMemcachedAdapter, BaseMemcachedAdapter)
     return adapter(server, params)
 

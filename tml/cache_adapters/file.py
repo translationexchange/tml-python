@@ -22,15 +22,15 @@ class FileAdapter(object):
 
     def fetch(self, key, opts=None):
         if key in self.cache:
-            print 'memory hit: %s' % key
+            self.debug("memory hit: %s", key)
             return self.cache[key]
         path = self.file_path(key)
         if os.path.exists(path):
-            print 'cache hit: %s' % key
+            self.debug('cache hit: %s', key)
             with open(path) as fp:
                 self.cache[key] = json.loads(to_string(fp.read()))
             return self.cache[key]
-        print 'cache miss: %s' % key
+        self.debug('cache miss: %s', key)
         return
 
     def read_only(self):

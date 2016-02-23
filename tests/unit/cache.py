@@ -4,7 +4,7 @@ import time
 from tml.cache import CacheVersion, CachedClient
 from tml.cache_adapters import FileAdapter
 from tml.cache_adapters.test_utils import check_alive
-from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter
+from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter, BaseMemcachedAdapter
 from tml import configure
 from .common import override_config, FIXTURES_PATH
 
@@ -99,13 +99,13 @@ class CacheTest(unittest.TestCase):
     def test_memcache_init(self):
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'namespace': 'tml-2', 'ttl': 3600}):
             cache = CachedClient.instance()
-            self.assertIsInstance(cache, DefaultMemcachedAdapter, 'proper factory build')
+            self.assertIsInstance(cache, BaseMemcachedAdapter, 'proper factory build')
             self.assertEquals(cache.default_namespace, 'tml-2')
             self.assertEquals(cache.default_timeout, 3600)
 
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'backend': 'pylibmc', 'host': '127.0.0.1', 'namespace': 'tml-3', 'ttl': 1200}):
             cache = CachedClient.instance()
-            self.assertIsInstance(cache, PyLibMCCacheAdapter, 'proper factory build')
+            self.assertIsInstance(cache, BaseMemcachedAdapter, 'proper factory build')
             self.assertEquals(cache.default_namespace, 'tml-3')
             self.assertEquals(cache.default_timeout, 1200)
 

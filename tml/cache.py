@@ -16,7 +16,7 @@ except ImportError:
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
 
-class CacheVersion(object):
+class CacheVersion(LoggerMixin):
 
     version = None
     cache = None
@@ -27,6 +27,7 @@ class CacheVersion(object):
         self.cache = cache
         self.version = version
         self._key = self.CACHE_VERSION_KEY if key is None else key
+        super(CacheVersion, self).__init__()
 
     def set(self, new_version):
         self.version = new_version
@@ -49,11 +50,11 @@ class CacheVersion(object):
             return 'undefined'
         expires_at = version['t'] + CONFIG['version_check_interval']
         if expires_at < ts():
-            print 'Cache version is outdated'
+            self.debug('Cache version is outdated')
             return 'undefined'
         else:
             delta = expires_at - ts()
-            print 'Cache version is up to date, expires in %s' % delta
+            self.debug('Cache version is up to date, expires in %s', delta)
             return version['version']
 
     def fetch(self):

@@ -67,6 +67,8 @@ def get_logger(**kwargs):
     return Logger.instance(**CONFIG.logger)
 
 
+getattr_ = object.__getattribute__
+
 class LoggerMixin(object):
 
     def __init__(self):
@@ -74,6 +76,7 @@ class LoggerMixin(object):
 
     def __getattr__(self, name):
         if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
+            self._logger
             return getattr(self._logger, name)
-        raise AttributeError('No such attribute %s' % name)
+        return getattr_(self, name)
 

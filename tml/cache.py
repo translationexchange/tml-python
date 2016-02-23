@@ -7,6 +7,7 @@ from .base import SingletonMixin
 from .api.client import Client
 from .config import CONFIG
 from .utils import interval_timestamp, ts
+from .logger import LoggerMixin
 try:
     from urllib import urlencode
 except ImportError:
@@ -22,9 +23,10 @@ class CacheVersion(object):
 
     CACHE_VERSION_KEY = 'current_version'
 
-    def __init__(self, cache, version=None):
+    def __init__(self, cache, version=None, key=None):
         self.cache = cache
         self.version = version
+        self._key = self.CACHE_VERSION_KEY if key is None else key
 
     def set(self, new_version):
         self.version = new_version
@@ -33,7 +35,7 @@ class CacheVersion(object):
         self.version = None
 
     def upgrade(self):
-        self.cache.store(self.CACHE_VERSION_KEY, {'version': 'undefined', 't': self.cache_timestamp})
+        self.cache.store(self._key, {'version': 'undefined', 't': self.cache_timestamp})
         self.reset()
 
     invalidate = upgrade
@@ -60,14 +62,14 @@ class CacheVersion(object):
             return {'version': CONFIG.cache.get('version', 'undefined'),
                     't': self.cache_timestamp}
 
-        version_obj = self.cache.fetch(self.CACHE_VERSION_KEY,
+        version_obj = self.cache.fetch(self._key,
                                        opts={'miss_callback': on_miss})
         version_obj['version'] = self.version = self.validate_version(version_obj)
         return version_obj
 
     def store(self, new_version):
         self.version = new_version
-        self.cache.store(self.CACHE_VERSION_KEY, {'version': new_version, 't': self.cache_timestamp})
+        self.cache.store(self._key, {'version': new_version, 't': self.cache_timestamp})
 
     def is_undefined(self):
         return self.version is None or self.version == 'undefined'
@@ -86,14 +88,17 @@ class CacheVersion(object):
         return not self.is_invalid()
 
     def versioned_key(self, key, namespace=''):
-        version = '' if key == self.CACHE_VERSION_KEY else '_v%s' % self.version
-        return "tml_%s%s_%s" % (namespace, version, key)
+        version = '' if key == self._key else '_v#%s' % self.version
+        return "tml_%s:%s_%s" % (namespace, version, key)
 
 
-class CachedClient(SingletonMixin):
+class CachedClient(SingletonMixin, LoggerMixin):
 
     default_adapter_module = 'tml.cache_adapters'
     version_attr = '__cache_version__'
+
+    def __init__(self, *args, **kwargs):
+        LoggerMixin.__init__(self)
 
     @classmethod
     def instance(cls, **kwargs):
@@ -106,10 +111,10 @@ class CachedClient(SingletonMixin):
 
     @classmethod
     def load_adapter(cls, klass, **kwargs):
-        def build_client(klass):
+        def build_client(klass, *bases):
             return type(
                 klass.__name__,
-                (CachedClient,),
+                bases + (CachedClient,),
                 dict(klass.__dict__))
 
         if type(klass) is FunctionType:
@@ -122,7 +127,7 @@ class CachedClient(SingletonMixin):
             module = import_module(package_path)
             adapter_class = getattr(module, adapter_name)
             if type(adapter_class) is FunctionType:  # e.g. factory callable
-                return adapter_class()
+                return adapter_class(build_client)
             else:
                 return build_client(adapter_class)()
         else:  # custom object
@@ -135,7 +140,7 @@ class CachedClient(SingletonMixin):
     def version(self):
         if hasattr(self, CachedClient.version_attr):
             return self._get_version()
-        setattr(self, CachedClient.version_attr, CachedVersion(self))
+        setattr(self, CachedClient.version_attr, CacheVersion(self))
         return self._get_version()
 
     @property
@@ -143,7 +148,7 @@ class CachedClient(SingletonMixin):
         return CONFIG.cache.get('namespace', '#')
 
     def versioned_key(self, key, opts=None):
-        self.version.versioned_key(key, self.namespace)
+        return self.version.versioned_key(key, self.namespace)
 
     def fetch(self, key, opts=None):
         pass
@@ -162,6 +167,15 @@ class CachedClient(SingletonMixin):
 
     def read_only(self):
         return False
+
+    def reset_version(self):
+        self.version.reset()
+
+    def upgrade_version(self):
+        self.version.upgrade()
+
+    def store_version(self, new_version):
+        self.version.store(new_version)
 
     def _get_version(self):
         return getattr(self, CachedClient.version_attr, None)

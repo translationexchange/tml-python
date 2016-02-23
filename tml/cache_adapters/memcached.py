@@ -57,7 +57,7 @@ class BaseMemcachedAdapter(object):
         return data
 
     def _unpickle(self, payload):
-        return _payload
+        return payload
 
     @property
     def cache_name(self):
@@ -79,7 +79,7 @@ class BaseMemcachedAdapter(object):
             data = self._unpickle(data)
             print 'Cache hit: %s' % key
         else:
-            if opts.get('miss_callback', None):
+            if opts and opts.get('miss_callback', None):
                 if callable(opts['miss_callback']):
                     data = opts['miss_callback'](key)
             self.store(key, data)
@@ -129,7 +129,7 @@ class PyLibMCCacheAdapter(BaseMemcachedAdapter):
         return json.loads(payload)
 
 
-def MemcachedAdapterFactory():
+def MemcachedAdapterFactory(cache_builder):
     server = CONFIG.cache['host']
     params = {
         'OPTIONS': CONFIG.cache.get('options', {}),
@@ -137,9 +137,10 @@ def MemcachedAdapterFactory():
         'timeout': CONFIG.cache.get('ttl', None),
         'compress': None}
     adapter_name = CONFIG.cache.get('backend', 'memcache_memcached')
+    adapter = None
     if adapter_name.endswith('pylibmc'):
-        return PyLibMCCacheAdapter(server, params)
+        adapter = cache_builder(PyLibMCCacheAdapter, PyLibMCCacheAdapter)
     else:
-        return DefaultMemcachedAdapter(server, params)
-
+        adapter = cache_builder(DefaultMemcachedAdapter, DefaultMemcachedAdapter)
+    return adapter(server, params)
 

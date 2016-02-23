@@ -66,3 +66,14 @@ class LoggerNotConfigured(Error):
 def get_logger(**kwargs):
     return Logger.instance(**CONFIG.logger)
 
+
+class LoggerMixin(object):
+
+    def __init__(self):
+        self._logger = get_logger()
+
+    def __getattr__(self, name):
+        if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
+            return getattr(self._logger, name)
+        raise AttributeError('No such attribute %s' % name)
+

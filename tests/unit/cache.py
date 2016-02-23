@@ -1,7 +1,9 @@
 import unittest
 import os
+import time
 from tml.cache import CacheVersion, CachedClient
 from tml.cache_adapters import FileAdapter
+from tml.cache_adapters.test_utils import check_alive
 from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter
 from tml import configure
 from .common import override_config, FIXTURES_PATH
@@ -94,7 +96,7 @@ class CacheTest(unittest.TestCase):
             self.assertEquals(app_data['key'], 'ca77401b70d5efb91db42f15091a21a68e032ee20e93cd3539ce72b7b810fa1a')
             app_data = cache.fetch('application')
 
-    def test_memcached_init(self):
+    def test_memcache_init(self):
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'namespace': 'tml-2', 'ttl': 3600}):
             cache = CachedClient.instance()
             self.assertIsInstance(cache, DefaultMemcachedAdapter, 'proper factory build')
@@ -106,6 +108,42 @@ class CacheTest(unittest.TestCase):
             self.assertIsInstance(cache, PyLibMCCacheAdapter, 'proper factory build')
             self.assertEquals(cache.default_namespace, 'tml-3')
             self.assertEquals(cache.default_timeout, 1200)
+
+
+    def test_memcache_funct(self):
+        with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'namespace': 'tml-test'}):
+            cache = CachedClient.instance()
+            check_alive(cache)
+            self._test_memcache_func(cache)
+            self._test_versioning(cache)
+
+    def test_pylibmc_funct(self):
+        with override_config(cache={'enabled': True, 'adapter': 'memcached', 'backend': 'pylibmc', 'host': '127.0.0.1', 'namespace': 'tml-test'}):
+            cache = CachedClient.instance()
+            check_alive(cache)
+            self._test_memcache_func(cache)
+            self._test_versioning(cache)
+
+    def _test_memcache_func(self, cache):
+        self.assertEquals(cache.store('foo', 'bar'), 'bar', 'dummy store')
+        self.assertEquals(cache.fetch('foo'), 'bar', 'dummy fetch')
+        self.assertEquals(cache.delete('foo'), 'foo', 'dummy delete')
+        self.assertEquals(cache.fetch('foo'), None, 'dummy check delete')
+        self.assertEquals(cache.store('foo', {'a': 'b'}), {'a': 'b'}, 'json store')
+        self.assertEquals(cache.fetch('foo'), {'a': 'b'}, 'json fetch')
+        cache.delete('foo')
+        cache.store('foo', 'new_bar', opts=dict(timeout=1))
+        self.assertEquals(cache.fetch('foo'), 'new_bar', 'timeout')
+        time.sleep(1)
+        self.assertEquals(cache.fetch('foo'), None, 'timeout works')
+
+    def _test_versioning(self, cache):
+        cache.delete('a')
+        cache.store_version('1312321')
+        cache.store('a', 'b')
+        self.assertEquals(cache.fetch('a'), 'b', 'upgrade version')
+        cache.upgrade_version()
+        self.assertEquals(cache.fetch('a'), None, 'upgrade version works')
 
 if __name__ == '__main__':
     unittest.main()

@@ -3,6 +3,8 @@ import logging
 import logging.handlers
 import functools
 import json
+import gzip
+from StringIO import StringIO
 import warnings
 from datetime import datetime, timedelta
 from time import mktime
@@ -74,3 +76,10 @@ def decode_cookie(base64_payload, secret=None):
 def interval_timestamp(interval):
     t = ts()
     return t - (t % interval)
+
+
+def read_gzip(payload):
+    buf = StringIO(payload)
+    buf.seek(0)
+    gzip_f = gzip.GzipFile(fileobj=buf, mode='rb')
+    return gzip_f.read()

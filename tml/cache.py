@@ -4,7 +4,6 @@ from six import string_types
 from importlib import import_module
 from types import FunctionType
 from .base import SingletonMixin
-from .api.client import Client
 from .config import CONFIG
 from .utils import interval_timestamp, ts
 from .logger import LoggerMixin
@@ -91,6 +90,9 @@ class CacheVersion(LoggerMixin):
     def versioned_key(self, key, namespace=''):
         version = '' if key == self._key else '_v#%s' % self.version
         return "tml_%s:%s_%s" % (namespace, version, key)
+
+    def __str__(self):
+        return self.version
 
 
 class CachedClient(SingletonMixin, LoggerMixin):

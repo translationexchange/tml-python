@@ -27,13 +27,54 @@ import sys
 import time
 import requests
 import contextlib
-from . import AbstractClient, APIError, ClientError
+from ..utils import read_gzip, pj
 from ..config import CONFIG
 from ..logger import get_logger
+from ..cache import CachedClient
+from . import AbstractClient, APIError, ClientError
 
 
+class CacheFallbackMixin(object):
 
-class Client(AbstractClient):
+    @property
+    def cache(self):
+        return CachedClient.instance()
+
+    def is_live_api_request(self):
+        return True if self.token else False
+
+    def on_miss(self, key):
+        return None if self.cache.read_only() else self.cdn_call(key)
+
+    # get cache version from CDN
+    def get_cache_version(self):
+        t = interval_timestamp(CONFIG['version_check_interval'])
+        print "Fetching cache version from CDN with timestamp: %s" % t
+        data = self.cdn_call('version', params={'t': t}, opts={'public': True, 'uncompressed': True})
+        if not data:
+            print 'No releases have been published yet'
+            return '0'
+        return data['version']
+
+    def verify_cache_version(self):
+        """If version is not available in cache, then ask cdn."""
+        if not CONFIG.cache_enabled():
+            return False
+        cur_version = self.cache.version.fetch()
+        if cur_version == 'undefined':
+            self.cache.store_version(self.get_cache_version())
+        else:
+            self.cache.version.set(cur_version)
+        print 'Version: %s' % self.cache.version
+        return
+
+    # cache is enabled if: get and cache enabled and cache_key
+    def should_enable_cache(method, opts=None):
+        opts = {} if opts is None else opts
+        return method != 'get' and CONFIG.cache_enabled() and opts['cache_key'] is not None
+
+
+class Client(CacheFallbackMixin, AbstractClient):
     """ API Client """
     API_HOST = 'https://api.translationexchange.com'
     CDN_HOST = 'https://cdn.translationexchange.com'
@@ -71,53 +112,20 @@ class Client(AbstractClient):
         """
         return self.call(url, 'post', params)
 
-    def call_cdn(self, uri, params=None):
-        pass
-        # if Tml.cache.version.invalid? and key != 'version'
-        #   return nil
-        # end
+    def cdn_call(self, key, method, params=None, opts=None):
+        opts = {} if opts is None else self._compact_params(opts)
+        if self.cache.version.is_invalid() and key != 'version':
+            return None
+        uri = self.key
+        response = None
+        if key == 'version':
+            uri += '%s.json' % key
+        else:
+            uri += '%s/%s.json.gz' % (self.cache.version, key)
+        with self.trace_call(pj(self.CDN_HOST, uri), method, params):
+            return self.process_response(requests.request(method, url, params=params), opts)
 
-        # response = nil
-        # cdn_path = "/#{application.key}"
-
-        # if key == 'version'
-        #   cdn_path += "/#{key}.json"
-        # else
-        #   cdn_path += "/#{Tml.cache.version.to_s}/#{key}.json.gz"
-        # end
-
-        # trace_api_call(cdn_path, params, opts.merge(:host => application.cdn_host)) do
-        #   begin
-        #     response = cdn_connection.get do |request|
-        #       prepare_request(request, cdn_path, params)
-        #     end
-        #   rescue Exception => ex
-        #     Tml.logger.error("Failed to execute request: #{ex.message[0..255]}")
-        #     return nil
-        #   end
-        # end
-        # return if response.status >= 500 and response.status < 600
-        # return if response.body.nil? or response.body == '' or response.body.match(/xml/)
-
-        # compressed_data = response.body
-        # return if compressed_data.nil? or compressed_data == ''
-
-        # data = compressed_data
-
-        # unless opts[:uncompressed]
-        #   data = Zlib::GzipReader.new(StringIO.new(compressed_data.to_s)).read
-        #   Tml.logger.debug("Compressed: #{compressed_data.length} Uncompressed: #{data.length}")
-        # end
-
-        # begin
-        #   data = JSON.parse(data)
-        # rescue Exception => ex
-        #   return nil
-        # end
-
-        # data
-
-    def call(self, url, method, params=None):
+    def call(self, url, method, params=None, opts=None):
         """ Make request to API
             Args:
                 url (string): URL
@@ -128,21 +136,58 @@ class Client(AbstractClient):
             Returns:
                 dict: response
         """
+        if self.is_live_api_request():
+            return self.process_response(self._api_call(url, method, params=params, opts=opts))
+        else:
+            data = None
+            if self.should_enable_cache(method, opts):
+                self.verify_cache_version()
+                if self.cache.is_valid():
+                    data = self.cache.fetch(
+                        opts['cache_key'], opts={'miss_callback': self.on_miss})
+            return data
+
+    def _api_call(self, uri, method, params=None, opts=None):
+        response = None
         params = {} if params is None else self._compact_params(params)
-        resp = None
-        url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, url)
-        params['app_id'] = self.key
-        if method == 'post':
+        opts = {} if opts is None else self._compact_params(opts)
+        url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, uri)
+        if not opts.get('public', None):
             params['access_token'] = self.token
-            params.update({'access_token': self.token})
+        if method == 'post':
+            params['app_id'] = self.key
 
         with self.trace_call(url, method, params):
-            resp = requests.request(method, url, params=params)
-        ret = resp.json()
-        if 'error' in ret:
-            raise APIError(ret['error'], url=resp.url, client=self)
-        return ret
+            return requests.request(method, url, params=params)
 
+    def process_response(self, response, opts):
+        if response is None:  # response is empty
+            return
+        data = None
+        if not isinstance(response, HTTPResponse):
+            return response
+        if 500 <= response.status_code < 600:   # server error occured
+            raise APIError(response.text, url=response.url, client=self)
+        compressed = ret.request.method.lower() == 'get'   # if get then compressed result
+        if compressed and not opts.get('uncompressed', False):   # need uncompress
+            compressed_data = response.content
+            if not compressed_data:  # empty response
+                return None
+            data = read_gzip(compressed_data)
+            print "Compressed: %s, uncompressed: %s" % (len(compressed_data), len(data))
+        else:
+            data = response.text
+        if opts.get('raw', False):   # no need to deserialize
+            return data
+        try:
+            data = json.loads(data)
+        except:
+            data = None
+        if opts.get('wrapper', None):   # either class or fn wrappers/modifiers
+            data = opts['wrapper'](data)
+        if 'error' in data:   # if service error
+            raise APIError(data['error'], url=response.url, client=self)
+        return data
 
     @contextlib.contextmanager
     def trace_call(self, url, method, params):

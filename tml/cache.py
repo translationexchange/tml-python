@@ -60,7 +60,8 @@ class CacheVersion(object):
             return {'version': CONFIG.cache.get('version', 'undefined'),
                     't': self.cache_timestamp}
 
-        version_obj = self.cache.fetch(self.CACHE_VERSION_KEY, miss_callback=on_miss)
+        version_obj = self.cache.fetch(self.CACHE_VERSION_KEY,
+                                       opts={'miss_callback': on_miss})
         version_obj['version'] = self.version = self.validate_version(version_obj)
         return version_obj
 
@@ -141,19 +142,19 @@ class CachedClient(SingletonMixin):
     def namespace(self):
         return CONFIG.cache.get('namespace', '#')
 
-    def versioned_key(self, key, **opts):
+    def versioned_key(self, key, opts=None):
         self.version.versioned_key(key, self.namespace)
 
-    def fetch(self, key, miss_callback=None, **opts):
+    def fetch(self, key, opts=None):
         pass
 
-    def store(self, key, data, **opts):
+    def store(self, key, data, opts=None):
         pass
 
-    def delete(self, key, **opts):
+    def delete(self, key, opts=None):
         pass
 
-    def exists(self, key, **opts):
+    def exists(self, key, opts=None):
         pass
 
     def clear(self):

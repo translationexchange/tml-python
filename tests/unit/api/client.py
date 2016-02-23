@@ -1,20 +1,42 @@
 from __future__ import absolute_import
 # encoding: UTF-8
+import six
+import weakref
 import unittest
 import requests
+import json
 from tml.api import client
 from pydoc import cli
 
 
 class RequestMockResponse(object):
     """ Response for Mock """
-    def __init__(self, data):
+    def __init__(self, data, *args, **kwargs):
         self.data = data
+        for k, v in kwargs.iteritems():
+            setattr(self, k, v)
+
+    def set_request(self, request):
+        self.request = weakref.ref(request)()
+
+    @property
+    def content(self):
+        return json.dumps(self.data)
+
+    @property
+    def text(self):
+        return self.content
+
+    @property
+    def status_code(self):
+        return 200
 
     def raise_for_status(self):
         pass
 
     def json(self):
+        if isinstance(self.data, six.string_types):
+            self.data = json.loads(self.data)
         return self.data
 
 class InvalidStatusResponse(object):
@@ -35,7 +57,8 @@ class RequestMock(object):
                 error (Exception): network error
                 raise_for_status (Excpetion): status error
         """
-        self.response = response
+        self.response = weakref.ref(response)()
+        self.response.set_request(self)
 
     def request(self, method, url, params, **kwargs):
         """ Stub for get request
@@ -57,7 +80,7 @@ class RequestFault(object):
     def __init__(self, exception):
         self.exception = exception
 
-    def request(self, method, url, params):
+    def request(self, method, url, params, **kwargs):
         raise self.exception
 
 class ClientTest(unittest.TestCase):
@@ -67,20 +90,20 @@ class ClientTest(unittest.TestCase):
         # mock http response:
         expected = {'result':'OK'}
         client.requests = RequestMock(RequestMockResponse(expected))
-        c = client.Client('qwerty')
+        c = client.Client('qwerty', '123124512412')
         # execute request:
-        resp = c.get('test', {'param':'value'})
+        resp = c.get('test', params={'param':'value'}, opts={'response_class': RequestMockResponse, 'uncompressed': True})
         self.assertEquals(expected, resp, 'Return response')
         # check url and query building:
         self.assertEquals('https://api.translationexchange.com/v1/test', client.requests.url, 'Call URL')
-        self.assertEquals({'access_token':'qwerty', 'param': 'value'}, client.requests.params, 'Token sent as GET parameter')
+        self.assertEquals({'access_token':'123124512412', 'param': 'value'}, client.requests.params, 'Token sent as GET parameter')
         # check call with no params:
         resp = c.get('test')
-        self.assertEquals({'access_token':'qwerty'}, client.requests.params, 'Call with no params')
+        self.assertEquals({'access_token':'123124512412'}, client.requests.params, 'Call with no params')
         # check string response:
         expected = 'Hello world'
         client.requests = RequestMock(RequestMockResponse(expected))
-        resp = c.get('test', {'param':'value'})
+        resp = c.get('test', params={'param':'value'}, opts={'response_class': RequestMockResponse, 'uncompressed': True})
         self.assertEquals(expected, resp, 'Return response')
 
 
@@ -88,18 +111,18 @@ class ClientTest(unittest.TestCase):
         """ Check network error case """
         error = Exception('My error')
         client.requests = RequestFault(error)
-        c = client.Client('qwerty')
+        c = client.Client('qwerty', '123')
         with self.assertRaises(Exception) as context:
-            c.get('test', {'param':'value'})
-        self.assertEquals(error, context.exception, 'Check error')
+            c.get('test', params={'param':'value'})
+        self.assertEquals(error, context.exception)
 
     def test_api_error(self):
         """ Test error from API """
         expected = {'error':'Error message'}
         client.requests = RequestMock(RequestMockResponse(expected))
-        c = client.Client('qwerty')
+        c = client.Client('qwerty', '123')
         with self.assertRaises(client.APIError) as context:
-            c.get('test', {'param':'value'})
+            c.get('test', params={'param':'value'}, opts={'response_class': RequestMockResponse, 'uncompressed': True})
         self.assertEquals('Error message', context.exception.error, 'Check API error')
 
 

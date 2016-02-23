@@ -27,6 +27,8 @@ import sys
 import time
 import requests
 import contextlib
+import json
+from requests import Response
 from ..utils import read_gzip, pj
 from ..config import CONFIG
 from ..logger import get_logger
@@ -69,8 +71,7 @@ class CacheFallbackMixin(object):
         return
 
     # cache is enabled if: get and cache enabled and cache_key
-    def should_enable_cache(method, opts=None):
-        opts = {} if opts is None else opts
+    def should_enable_cache(self, method, opts=None):
         return method != 'get' and CONFIG.cache_enabled() and opts['cache_key'] is not None
 
 
@@ -88,7 +89,7 @@ class Client(CacheFallbackMixin, AbstractClient):
         self.key = key or CONFIG['application']['key']
         self.token = auth_token
 
-    def get(self, url, params = {}):
+    def get(self, url, **kwargs):
         """ GET request to API
             Args:
                 url (string): URL
@@ -98,9 +99,9 @@ class Client(CacheFallbackMixin, AbstractClient):
             Returns:
                 dict: response
         """
-        return self.call(url, 'get', params)
+        return self.call(url, 'get', **kwargs)
 
-    def post(self, url, params):
+    def post(self, url, **kwargs):
         """ POST request to API
             Args:
                 url (string): URL
@@ -110,9 +111,10 @@ class Client(CacheFallbackMixin, AbstractClient):
             Returns:
                 dict: response
         """
-        return self.call(url, 'post', params)
+        return self.call(url, 'post', **kwargs)
 
     def cdn_call(self, key, method, params=None, opts=None):
+        params = {} if params is None else self._compact_params(params)
         opts = {} if opts is None else self._compact_params(opts)
         if self.cache.version.is_invalid() and key != 'version':
             return None
@@ -123,7 +125,9 @@ class Client(CacheFallbackMixin, AbstractClient):
         else:
             uri += '%s/%s.json.gz' % (self.cache.version, key)
         with self.trace_call(pj(self.CDN_HOST, uri), method, params):
-            return self.process_response(requests.request(method, url, params=params), opts)
+            options, headers = self.request_config()
+            response = requests.request(method, url, params=params, headers=headers, **options)
+            return self.process_response(response, opts)
 
     def call(self, url, method, params=None, opts=None):
         """ Make request to API
@@ -136,8 +140,12 @@ class Client(CacheFallbackMixin, AbstractClient):
             Returns:
                 dict: response
         """
+        params = {} if params is None else self._compact_params(params)
+        opts = {} if opts is None else self._compact_params(opts)
         if self.is_live_api_request():
-            return self.process_response(self._api_call(url, method, params=params, opts=opts))
+            return self.process_response(
+                self._api_call(url, method, params=params, opts=opts),
+                opts=opts)
         else:
             data = None
             if self.should_enable_cache(method, opts):
@@ -149,26 +157,32 @@ class Client(CacheFallbackMixin, AbstractClient):
 
     def _api_call(self, uri, method, params=None, opts=None):
         response = None
-        params = {} if params is None else self._compact_params(params)
-        opts = {} if opts is None else self._compact_params(opts)
         url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, uri)
-        if not opts.get('public', None):
+        if not opts.get('public', None) and not 'access_token' in params:
             params['access_token'] = self.token
         if method == 'post':
             params['app_id'] = self.key
 
         with self.trace_call(url, method, params):
-            return requests.request(method, url, params=params)
+            options, headers = self.request_config()
+            return requests.request(method, url, params=params, headers=headers, **options)
+
+    def request_config(self):
+        options = {'timeout': 5}
+        headers = {'User-Agent': 'tml-python v0.0.1',
+                   'Accept': 'application/json',
+                   'Accept-Encoding': 'gzip, deflate'}
+        return (options, headers)
 
     def process_response(self, response, opts):
         if response is None:  # response is empty
             return
         data = None
-        if not isinstance(response, HTTPResponse):
+        if not isinstance(response, Response) and not (opts.get('response_class', None) and isinstance(response, opts['response_class'])):
             return response
         if 500 <= response.status_code < 600:   # server error occured
             raise APIError(response.text, url=response.url, client=self)
-        compressed = ret.request.method.lower() == 'get'   # if get then compressed result
+        compressed = response.request.method.lower() == 'get'   # if get then compressed result
         if compressed and not opts.get('uncompressed', False):   # need uncompress
             compressed_data = response.content
             if not compressed_data:  # empty response
@@ -181,7 +195,7 @@ class Client(CacheFallbackMixin, AbstractClient):
             return data
         try:
             data = json.loads(data)
-        except:
+        except Exception as e:
             data = None
         if opts.get('wrapper', None):   # either class or fn wrappers/modifiers
             data = opts['wrapper'](data)

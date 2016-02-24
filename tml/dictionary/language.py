@@ -52,7 +52,8 @@ class LanguageDictionary(Hashtable):
             self.translations = self.fetch_translations()
 
     def fetch_translations(self):
-        return allpages(self.language.client, *self.api_query)
+        uri, params, opts = self.api_query
+        return allpages(self.language.client, uri, params=params, opts=opts)
 
     @property
     def api_query(self):

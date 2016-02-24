@@ -51,7 +51,7 @@ def render_token(token):
 
 
 def sprintf_token(token):
-    """ Convert token to sprintf syncts %(variable)s 
+    """ Convert token to sprintf syncts %(variable)s
         Args:
             token (VariableToken): token
         Returns:
@@ -60,11 +60,11 @@ def sprintf_token(token):
     return '%%(%s)s' % token.name
 
 def to_sprintf(tokens):
-    """ Parse tokens and convert as printf template 
+    """ Parse tokens and convert as printf template
         Args:
             tokens (list): list of AbstractToken
         Returns:
-            string: string 
+            string: string
     """
     return six.u('').join((render_token(token) for token in tokens))
 
@@ -106,7 +106,7 @@ def translate(context, label, data, description, options):
     return option.apply(data, options)
 
 def execute(translation, data, options):
-    """ Execute translation in legacy mode 
+    """ Execute translation in legacy mode
         Args:
             translation (tranlation.Translation)
             data (dict): template data
@@ -122,7 +122,7 @@ def execute(translation, data, options):
 
 
 def fetch(context, label, description):
-    """ Fetch translation for django i18n label 
+    """ Fetch translation for django i18n label
         Args:
             context (context.AbstractContext): translation context
             label (string): translated label
@@ -133,7 +133,7 @@ def fetch(context, label, description):
     try:
         # Try to suggest translation replace %(name)s -> {name}
         return context.fetch(suggest_label(label), description)
-    except TranslationIsNotExists:
+    except TranslationIsNotExists as e:
         # Try to tranlate as is
         try:
             return context.fetch(label, description)

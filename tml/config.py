@@ -18,6 +18,9 @@ class BaseConfigMixin(dict):
     def __contains__(self, key):
         return key in self.__dict__
 
+    def get(self, key, default=None):
+        return self.__dict__.get(key.lower(), default)
+
     def init_config(self):
 
         def is_builtin(k, v):
@@ -96,7 +99,7 @@ class Config(BaseConfigMixin, Singleton):
         return self['cache'].get('enabled', False)
 
     def application_key(self):
-        return self['application']['key']
+        return self['application'].get('key', 'current')
 
 
 CONFIG = Config.instance()

@@ -92,7 +92,8 @@ class SourceDictionary(Hashtable):
 
     def fetch_translations(self):
         try:
-            return self.language.client.get(*self.api_query),
+            uri, params, opts = self.api_query
+            return self.language.client.get(uri, params=params, opts=opts)['results']
         except APIError:
             return {}
 
@@ -123,7 +124,8 @@ class SourceDictionary(Hashtable):
     def flush(self):
         """ Submit all missed keys on delete """
         if self.missed_keys.submit_all():
-            self.language.client.reload(*self.api_query)
+            uri, params, _ = self.api_query
+            self.language.client.reload(uri, params=params)
 
     flush.i = 0
 

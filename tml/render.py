@@ -77,7 +77,6 @@ class Data(object):
         self.context = context
 
     def __getitem__(self, key, *args, **kwargs):
-        # raise
         try:
             # get item for data:
             ret = self.data[key]

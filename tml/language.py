@@ -57,8 +57,8 @@ class Language(object):
         for k in kwargs:
             setattr(self, k, kwargs[k])
 
-    @property
-    def cache_key(self):
+    @classmethod
+    def cache_key(cls, locale):
         return pj(locale, 'language')
 
     @classmethod
@@ -97,7 +97,7 @@ class Language(object):
         # check is language supported by APP:
         url = application.get_language_url(locale)
         # load data by API:
-        data = application.client.get(pj(url, 'definition'), params={}, opts={'cache_key': self.cache_key})
+        data = application.client.get(pj(url, 'definition'), params={}, opts={'cache_key': cls.cache_key(locale)})
         # create instance:
         return cls.from_dict(application, data)
 

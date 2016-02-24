@@ -14,7 +14,7 @@ class MissedKeys(object):
             Args:
                 missed keys
         """
-        return self.client.post('sources/register_keys',{'source_keys': dumps(missed_keys)})
+        return self.client.post('sources/register_keys', params={'source_keys': dumps(missed_keys)})
 
     def append(self, key):
         """ Add key to missed

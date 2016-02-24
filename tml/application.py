@@ -81,7 +81,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return cls.load_by_key(client, key=CONFIG.application['key'], source=source, locale=locale)
+        return cls.load_by_key(client, key=CONFIG.application_key(), source=source, locale=locale)
 
     @property
     def supported_locales(self):

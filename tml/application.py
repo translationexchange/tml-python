@@ -45,7 +45,7 @@ class Application(object):
 
     cache_key = 'application'
 
-    def __init__(self, client, id, languages, default_locale, **kwargs):
+    def __init__(self, client=None, key=None, languages=None, default_locale=None, **kwargs):
         """ .ctor
             Args:
                 client (api.client.Client): API client
@@ -53,10 +53,10 @@ class Application(object):
                 languages (list): list of languages
         """
         self.client = client
-        self.id = id
+        self.key = key
         self.sources = {}
         self.languages_by_locale = {}
-        self.languages = [Language.from_dict(self, lang_meta) for lang_meta in languages]
+        self.languages = [Language.from_dict(self, lang_meta) for lang_meta in languages or []]
         self.default_locale = default_locale
         self.load_extensions(kwargs.get('extensions', {}))
         for key in kwargs:
@@ -71,7 +71,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return Application(client, **data)
+        return Application(client=client, **data)
 
     @classmethod
     def load_default(cls, client, source=None, locale=None):
@@ -103,8 +103,12 @@ class Application(object):
             Returns:
                 Application
         """
-        return cls.from_dict(client, client.get('projects/%s/definition' % key,
-                                        params={'locale': locale, 'source': source, 'ignored': True}, opts={'cache_key': cls.cache_key}))
+        default_dict = {'key': key}
+        app_dict = client.get(
+            'projects/%s/definition' % key,
+            params={'locale': locale, 'source': source, 'ignored': True},
+            opts={'cache_key': cls.cache_key})
+        return cls.from_dict(client, app_dict or default_dict)
 
     def load_extensions(self, extensions):
         """Load application extensions if any"""
@@ -198,8 +202,8 @@ class LanguageNotSupported(Error):
         self.locale = locale
         self.application = application
 
-    MESSAGE = 'Locale %s is not suppored by application %d'
+    MESSAGE = 'Locale %s is not suppored by application %s'
 
     def __str__(self):
-        return self.MESSAGE % (self.locale, self.application.id)
+        return self.MESSAGE % (self.locale, self.application.key)
 

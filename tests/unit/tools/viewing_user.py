@@ -6,10 +6,9 @@ from tml.tools.template import Template
 from tests.mock import Client
 from tml import build_context, tr, initialize, RenderEngine
 from _ctypes import ArgumentError
-from ..common import TmlTestCase
 
 
-class ViewingUserTest(TmlTestCase, unittest.TestCase):
+class ViewingUserTest(unittest.TestCase):
 
     def setUp(self):
         reset_viewing_user()

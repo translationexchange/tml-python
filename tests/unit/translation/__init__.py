@@ -74,7 +74,7 @@ class TranslationTest(unittest.TestCase):
         key = Key(label = '{actor} give you {count} apples',
                   language = self.lang)
         t = Translation.from_data(key,
-                                  self.client.get(url, {'locale':'ru'})['results'])
+                                  self.client.get(url, params={'locale':'ru'})['results'])
 
         self.assertEquals(to_string('Маша любезно дала тебе 2 яблока'), t.execute({'actor':Gender.female('Маша'),'count':2}, {}), 'Female few')
         male_one = {'actor':{'gender':'male','name':'Вася'},'count':1}

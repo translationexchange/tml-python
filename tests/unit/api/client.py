@@ -3,9 +3,10 @@ from __future__ import absolute_import
 import six
 import weakref
 import unittest
+from mock import patch
 import requests
 import json
-from tml.api import client
+import tml.api.client as client
 from pydoc import cli
 
 
@@ -83,8 +84,19 @@ class RequestFault(object):
     def request(self, method, url, params, **kwargs):
         raise self.exception
 
+
+class TranslatorMock(object):
+    def __call__(self):
+        return self
+
+    def is_inline(self):
+        return True
+
+
 class ClientTest(unittest.TestCase):
     """ Test client """
+
+    @patch('tml.api.client.get_current_translator', TranslatorMock)
     def test_success(self):
         """ Test success response """
         # mock http response:
@@ -106,7 +118,7 @@ class ClientTest(unittest.TestCase):
         resp = c.get('test', params={'param':'value'}, opts={'response_class': RequestMockResponse, 'uncompressed': True})
         self.assertEquals(expected, resp, 'Return response')
 
-
+    @patch('tml.api.client.get_current_translator', TranslatorMock)
     def test_network_error(self):
         """ Check network error case """
         error = Exception('My error')
@@ -116,6 +128,7 @@ class ClientTest(unittest.TestCase):
             c.get('test', params={'param':'value'})
         self.assertEquals(error, context.exception)
 
+    @patch('tml.api.client.get_current_translator', TranslatorMock)
     def test_api_error(self):
         """ Test error from API """
         expected = {'error':'Error message'}

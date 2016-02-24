@@ -32,7 +32,7 @@ class SingletonMixin(object):
             cls._instance_dict = {}
         if key not in cls._instance_dict:
             with cls.__singleton_lock:
-                if not cls._instance_dict:
+                if key not in cls._instance_dict:
                     cls._instance_dict[key] = \
                         super(SingletonMixin, cls).__new__(cls, *args, **kwargs)
         return cls._instance_dict[key]

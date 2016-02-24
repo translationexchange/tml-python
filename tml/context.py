@@ -147,7 +147,7 @@ class LanguageContext(AbstractContext):
         CachedClient.instance().upgrade_version()   # reset cache
         if key:
             application = Application.load_by_key(
-                client, application_id, locale=locale, source=source, key=key)
+                client, key, locale=locale, source=source)
         else:
             application = Application.load_default(
                 client, locale=locale, source=source)

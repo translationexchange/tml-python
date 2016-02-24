@@ -48,7 +48,7 @@ class SnapshotDir(AbstractClient):
         super(SnapshotDir, self).__init__()
         self.path = path
 
-    def call(self, url, method, params = {}):
+    def call(self, url, method, params = None, opts=None):
         """ Make request to API
             Args:
                 url (string): URL

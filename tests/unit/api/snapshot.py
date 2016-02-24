@@ -38,11 +38,11 @@ class SnapshotTest(unittest.TestCase):
         self.assertEquals(767, app.id, 'Load application')
         self.assertEquals('ru', Language.load_by_locale(app, 'ru').locale, 'Load language')
         self.assertEquals({"results":{"90e0ac08b178550f6513762fa892a0ca":[{"label":to_string("Привет {name}")}]}},
-                          client.get('ru/sources/yyyy', {}),
+                          client.get('ru/sources/yyyy', params={}),
                           'Load source')
         with self.assertRaises(APIError) as c:
             client.get('de/sources/notexists')
 
         with self.assertRaises(MethodIsNotSupported) as c:
-            client.post('some/url', {})
+            client.post('some/url', params={})
 

@@ -49,10 +49,10 @@ REWRITE_RULES = (
     ('projects/current/definition?locale=ru', 'projects/current'),
     ('projects/current/definition', 'projects/current'),
     (r'^projects\/(\w+)\/definition', 'projects/%(0)s'),
-    (r'^projects\/(\w+)\/definition\?locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
+    (r'^projects\/(\w+)\/definition.*[\?\&]locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
     (r'^languages\/(\w+)\/definition$', 'languages/%(0)s'),
-    (r'^sources\/(\w+)\/translations\?locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s'),
-    (r'^translation_keys\/(\w+)\/translations\?locale=(\w+).*$', 'translation_keys/%(0)s/translations?locale=%(1)s')
+    (r'^sources\/(\w+)\/translations.*[\?\&]locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s'),
+    (r'^translation_keys\/(\w+)\/translations\?locale=(\w+)&page=(\d+).*$', 'translation_keys/%(0)s/translations?locale=%(1)s&page=%(2)s')
 )
 
 def rewrite_path(url):
@@ -114,7 +114,6 @@ class Hashtable(AbstractClient):
                 return self.data[url_with_params]
             except self.handle_nostrict:
                 # print self.rewrite_path(self.build_url(url, params)), debug(self.data, 'projects/2'), url
-                print url
                 return self.data[url]
         except KeyError as key_not_exists:
             self.status = 404
@@ -132,7 +131,8 @@ class Hashtable(AbstractClient):
 
         if params is None:
             return url
-        return url + ('' if not params else '?' + urlencode(params))
+        sorted_params = sorted(params.items(), key=lambda cur: cur[0])
+        return url + ('' if not params else '?' + urlencode(sorted_params))
 
     reloaded = []
 

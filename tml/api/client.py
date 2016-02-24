@@ -50,7 +50,7 @@ class CacheFallbackMixin(object):
     def is_live_api_request(self):
         if not self.access_token: # if no access token, never use live mode
             return False
-        return self.translator.is_inline()
+        return self.translator and self.translator.is_inline()
 
     def on_miss(self, key):
         return None if self.cache.read_only() else self.cdn_call(key)
@@ -166,7 +166,7 @@ class Client(CacheFallbackMixin, AbstractClient):
         response = None
         url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, uri)
         if not opts.get('public', None) and not 'access_token' in params:
-            params['access_token'] = self.token
+            params['access_token'] = self.access_token
         if method == 'post':
             params['app_id'] = self.key
 

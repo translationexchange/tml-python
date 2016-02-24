@@ -6,16 +6,17 @@ from tml.tools.template import Template
 from tests.mock import Client
 from tml import build_context, tr, initialize, RenderEngine
 from _ctypes import ArgumentError
+from ..common import TmlTestCase
 
 
-class ViewingUserTest(unittest.TestCase):
+class ViewingUserTest(TmlTestCase, unittest.TestCase):
 
     def setUp(self):
         reset_viewing_user()
         RenderEngine.env_generators.append(get_viewing_user)
 
     def test_viewing_user(self):
-        initialize(client = Client.read_all())
+        initialize(client=Client.read_all())
         set_viewing_user({'gender':'male','name':'Bond'})
         self.assertEquals('Mr', tr('honorific'))
         set_viewing_user('female')

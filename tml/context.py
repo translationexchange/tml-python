@@ -32,6 +32,8 @@ from .language import Language
 from .dictionary import NoneDict
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
+from .cache import CachedClient
+from .session_vars import set_current_translator, set_current_context
 
 
 class ContextNotConfigured(Error):
@@ -133,7 +135,7 @@ class AbstractContext(RenderEngine):
 
 class LanguageContext(AbstractContext):
     """ Context with selected language """
-    def __init__(self, client, locale=None, source=None, application_id=None, **kwargs):
+    def __init__(self, client, key=None, translator=None, locale=None, source=None, application_id=None, **kwargs):
         """ .ctor
             Args:
                 client (Client): custom API client
@@ -142,17 +144,19 @@ class LanguageContext(AbstractContext):
                 application_id (int): API application id (use default if None)
 
         """
-        key = kwargs.get('key', CONFIG['application']['key'])
-        if application_id:
-            application = Application.load_by_id(
+        CachedClient.instance().upgrade_version()   # reset cache
+        if key:
+            application = Application.load_by_key(
                 client, application_id, locale=locale, source=source, key=key)
         else:
             application = Application.load_default(
-                client, locale=locale, source=source, key=key)
+                client, locale=locale, source=source)
         language = application.language(locale)
+        self.set_translator(translator)
         super(LanguageContext, self).__init__(
             dictionary=self.build_dict(language),
             language=language)
+        set_current_context(self)
 
     def build_dict(self, language, **kwargs):
         """ Dictionary factory (uses API directly for each fetch request) """
@@ -194,6 +198,13 @@ class LanguageContext(AbstractContext):
     def client(self):
         return self.application.client
 
+    def set_translator(self, translator):
+        if not translator:
+            return
+        translator.set_application(self.application)
+        self.translator = translator
+        set_current_translator(translator)
+
     def fallback(self, label, description):
         """ Fallback translation: try to use default language
             Args:
@@ -214,6 +225,10 @@ class LanguageContext(AbstractContext):
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)
+
+
+    def is_inline_mode(self):
+        return self.translator and self.translator.is_inline()
 
 
 class SourceContext(LanguageContext):

@@ -34,7 +34,7 @@ class BaseConfigMixin(dict):
     def override_config(self, **kwargs):
         for k, v in kwargs.iteritems():
             orig_v = getattr(self, k, getattr(Config, k))
-            if orig_v:
+            if orig_v is not None:
                 if isinstance(orig_v, dict):
                     v = merge(copy(orig_v), v)
                     # print merge(copy(orig_v), v)
@@ -48,6 +48,13 @@ class Config(BaseConfigMixin, Singleton):
     def init(self, **kwargs):
         self.init_config()
         self.override_config(**kwargs)
+
+    environment = 'dev'
+
+    application = {
+        #'key':
+        #'token'
+    }
 
     logger = {
         'enabled': True,
@@ -87,6 +94,9 @@ class Config(BaseConfigMixin, Singleton):
 
     def cache_enabled(self):
         return self['cache'].get('enabled', False)
+
+    def application_key(self):
+        return self['application']['key']
 
 
 CONFIG = Config.instance()

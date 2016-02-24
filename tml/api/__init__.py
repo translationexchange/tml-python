@@ -23,13 +23,13 @@
 __author__ = 'a@toukmanov.ru'
 
 from ..exceptions import Error
-
+from ..logger import LoggerMixin
 
 class AbstractClient(object):
     """ Basic API client """
 
     def get(self, url, params = {}):
-        """ GET request to API 
+        """ GET request to API
             Args:
                 url (string): URL
                 params (dict): params
@@ -41,7 +41,7 @@ class AbstractClient(object):
         return self.call(url, 'get', params)
 
     def post(self, url, params):
-        """ POST request to API 
+        """ POST request to API
             Args:
                 url (string): URL
                 params (dict): params

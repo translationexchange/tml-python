@@ -26,6 +26,7 @@ from __future__ import absolute_import
 __author__ = 'a@toukmanov.ru'
 
 from . import AbstractDictionary
+from ..utils import pj
 from ..api.pagination import allpages
 from ..translation import Translation
 from ..api.client import ClientError
@@ -34,6 +35,14 @@ from . import TranslationIsNotExists
 
 class Dictionary(AbstractDictionary):
     """ Dictionary fetch translation for each key via API """
+
+    def __init__(self, *a, **kw):
+        super(Dictionary, self).__init__(*a, **kw)
+        self.translations = {}
+
+    def cache_key(self, locale, key):
+        return pj(locale, 'keys', key)
+
     def fetch(self, key):
         """ Translate key
             Args:
@@ -41,10 +50,13 @@ class Dictionary(AbstractDictionary):
             Returns:
                 Translation
         """
+        if self.translations.get(key.key, None):
+            return Translation.from_data(key, self.translations[key.key])
         try:
-            data = allpages(key.client,
+            self.translations[key.key] = data = allpages(key.client,
                             'translation_keys/%s/translations' % key.key,
-                            {'locale': key.language.locale})
+                            params={'locale': key.language.locale, 'per_page': 10000},
+                            opts={'cache_key': self.cache_key(key.language.locale, key.key)})
             return Translation.from_data(key, data)
         except ClientError:
             raise TranslationIsNotExists(key, self)

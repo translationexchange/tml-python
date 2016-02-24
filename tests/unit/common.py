@@ -11,3 +11,12 @@ def override_config(**overrides):
     CONFIG.override_config(**overrides)
     yield
     CONFIG.override_config(**before_dict)
+
+
+class TmlTestCase(object):
+
+    @classmethod
+    def setUpClass(cls):
+        from tml.config import CONFIG
+        CONFIG.override_config(environment='test', application={'key': 'dummy-key'})
+

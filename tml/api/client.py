@@ -33,6 +33,7 @@ from ..utils import read_gzip, pj
 from ..config import CONFIG
 from ..logger import get_logger
 from ..cache import CachedClient
+from ..session_vars import get_current_translator
 from . import AbstractClient, APIError, ClientError
 
 
@@ -42,8 +43,14 @@ class CacheFallbackMixin(object):
     def cache(self):
         return CachedClient.instance()
 
+    @property
+    def translator(self):
+        return get_current_translator()
+
     def is_live_api_request(self):
-        return True if self.token else False
+        if not self.access_token: # if no access token, never use live mode
+            return False
+        return self.translator.is_inline()
 
     def on_miss(self, key):
         return None if self.cache.read_only() else self.cdn_call(key)
@@ -51,10 +58,10 @@ class CacheFallbackMixin(object):
     # get cache version from CDN
     def get_cache_version(self):
         t = interval_timestamp(CONFIG['version_check_interval'])
-        print "Fetching cache version from CDN with timestamp: %s" % t
+        self.debug("Fetching cache version from CDN with timestamp: %s", t)
         data = self.cdn_call('version', params={'t': t}, opts={'public': True, 'uncompressed': True})
         if not data:
-            print 'No releases have been published yet'
+            self.debug('No releases have been published yet')
             return '0'
         return data['version']
 
@@ -67,7 +74,7 @@ class CacheFallbackMixin(object):
             self.cache.store_version(self.get_cache_version())
         else:
             self.cache.version.set(cur_version)
-        print 'Version: %s' % self.cache.version
+        self.debug('Version: %s', self.cache.version)
         return
 
     # cache is enabled if: get and cache enabled and cache_key
@@ -81,13 +88,13 @@ class Client(CacheFallbackMixin, AbstractClient):
     CDN_HOST = 'https://cdn.translationexchange.com'
     API_PATH = 'v1'
 
-    def __init__(self, key=None, auth_token=None):
+    def __init__(self, key, access_token=None):
         """ Client .ctor
             Args:
                 token (string): API access token
         """
-        self.key = key or CONFIG['application']['key']
-        self.token = auth_token
+        self.key = key
+        self.access_token = access_token
 
     def get(self, url, **kwargs):
         """ GET request to API
@@ -167,6 +174,15 @@ class Client(CacheFallbackMixin, AbstractClient):
             options, headers = self.request_config()
             return requests.request(method, url, params=params, headers=headers, **options)
 
+  #   def prepare_request(request, path, params)
+  #   request.options.timeout = 5
+  #   request.options.open_timeout = 2
+  #   request.headers['User-Agent']       = "tml-ruby v#{Tml::VERSION} (Faraday v#{Faraday::VERSION})"
+  #   request.headers['Accept']           = 'application/json'
+  #   request.headers['Accept-Encoding']  = 'gzip, deflate'
+  #   request.url(path, params)
+  # end
+
     def request_config(self):
         options = {'timeout': 5}
         headers = {'User-Agent': 'tml-python v0.0.1',
@@ -188,7 +204,7 @@ class Client(CacheFallbackMixin, AbstractClient):
             if not compressed_data:  # empty response
                 return None
             data = read_gzip(compressed_data)
-            print "Compressed: %s, uncompressed: %s" % (len(compressed_data), len(data))
+            self.debug("Compressed: %s, uncompressed: %s", len(compressed_data), len(data))
         else:
             data = response.text
         if opts.get('raw', False):   # no need to deserialize

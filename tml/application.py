@@ -43,6 +43,8 @@ class Application(object):
     extensions = None
     css = None
 
+    cache_key = 'application'
+
     def __init__(self, client, id, languages, default_locale, **kwargs):
         """ .ctor
             Args:
@@ -71,7 +73,6 @@ class Application(object):
         """
         return Application(client, **data)
 
-
     @classmethod
     def load_default(cls, client, source=None, locale=None):
         """ Load default application
@@ -80,8 +81,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return cls.from_dict(client, client.get('projects/current/definition', {'source': source, 'locale': locale}))
-
+        return cls.load_by_key(client, key=CONFIG.application['key'], source=source, locale=locale)
 
     @property
     def supported_locales(self):
@@ -92,7 +92,7 @@ class Application(object):
         return [lang.locale for lang in self.languages]
 
     @classmethod
-    def load_by_id(cls, client, id, locale=None, source=None):
+    def load_by_key(cls, client, key, locale=None, source=None):
         """ Load application by id
             Args:
                 client (api.client.Client): API client
@@ -103,8 +103,8 @@ class Application(object):
             Returns:
                 Application
         """
-        return cls.from_dict(client, client.get('projects/%s/definition' % id,
-                                        {'locale': locale, 'source': source, 'ignored': True}))
+        return cls.from_dict(client, client.get('projects/%s/definition' % key,
+                                        params={'locale': locale, 'source': source, 'ignored': True}, opts={'cache_key': cls.cache_key}))
 
     def load_extensions(self, extensions):
         """Load application extensions if any"""

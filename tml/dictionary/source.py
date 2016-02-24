@@ -26,8 +26,10 @@ __author__ = 'a@toukmanov.ru'
 
 from . import Hashtable
 from hashlib import md5
+from ..utils import pj
 from ..translation.missed import MissedKeys
 from ..api import APIError
+from ..cache import CachedClient
 from tml.dictionary import TranslationIsNotExists
 
 
@@ -68,6 +70,9 @@ class SourceDictionary(Hashtable):
     def key(self):
         return self.compute_key()
 
+    def cache_key(self):
+        return pj(self.language.locale, 'sources', *self.source.split('/'))
+
     def compute_key(self):
         return md5(self.source.encode('utf-8')).hexdigest()
 
@@ -87,7 +92,7 @@ class SourceDictionary(Hashtable):
 
     def fetch_translations(self):
         try:
-            return self.language.client.get(*self.api_query)['results']
+            return self.language.client.get(*self.api_query),
         except APIError:
             return {}
 
@@ -98,7 +103,8 @@ class SourceDictionary(Hashtable):
                 tuple: url, params
         """
         return ('sources/%s/translations' % self.key,
-                {'locale': self.language.locale, 'all': True, 'ignored': True})
+                {'locale': self.language.locale, 'all': True, 'ignored': True},
+                {'cache_key': self.cache_key})
 
     def fetch(self, key):
         try:

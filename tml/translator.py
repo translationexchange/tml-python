@@ -14,10 +14,12 @@ class Translator(object):
     features = None
     image_url = None
 
-    def __init__(self, application, **kwargs):
-        self.application = application
+    def __init__(self, **kwargs):
         for k in kwargs:
             setattr(self, k, kwargs[k])
+
+    def set_application(self, application):
+        self.application = application
 
     def feature_enabled(self, key):
         if not self.features:

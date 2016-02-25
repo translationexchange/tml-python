@@ -83,7 +83,7 @@ class AbstractContext(RenderEngine):
                 language.Language
         """
         if not self._default_language:
-            self._default_language = Language.load_by_locale(self.application, self.default_locale)
+            self._default_language = self.application.language(self.default_locale)
         return self._default_language
 
 
@@ -135,13 +135,20 @@ class AbstractContext(RenderEngine):
 
 class LanguageContext(AbstractContext):
     """ Context with selected language """
-    def __init__(self, client, key=None, translator=None, locale=None, source=None, application_id=None, **kwargs):
+
+    client = None
+    key = None
+    translator = None
+    locale = None
+    source = None
+
+    def __init__(self, client, key=None, translator=None, locale=None, source=None, **kwargs):
         """ .ctor
             Args:
                 client (Client): custom API client
                 locale (string): selected locale
                 source (string): which source to load in a single fetch (e.g. /home/index)
-                application_id (int): API application id (use default if None)
+                key (int): API application key (use default if None)
 
         """
         CachedClient.instance().upgrade_version()   # reset cache
@@ -152,10 +159,10 @@ class LanguageContext(AbstractContext):
             application = Application.load_default(
                 client, locale=locale, source=source)
         language = application.language(locale)
-        self.set_translator(translator)
         super(LanguageContext, self).__init__(
             dictionary=self.build_dict(language),
             language=language)
+        self.set_translator(translator)
         set_current_context(self)
 
     def build_dict(self, language, **kwargs):

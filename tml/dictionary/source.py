@@ -127,5 +127,3 @@ class SourceDictionary(Hashtable):
             uri, params, _ = self.api_query
             self.language.client.reload(uri, params=params)
 
-    flush.i = 0
-

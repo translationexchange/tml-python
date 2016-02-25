@@ -17,6 +17,7 @@ class Translator(object):
     def __init__(self, **kwargs):
         for k in kwargs:
             setattr(self, k, kwargs[k])
+        print kwargs, "translator"
 
     def set_application(self, application):
         self.application = application

@@ -107,10 +107,11 @@ class Application(object):
         app_dict = client.get(
             'projects/%s/definition' % key,
             params={'locale': locale, 'source': source, 'ignored': True},
-            opts={'cache_key': cls.cache_key})
+            opts={'cache_key': cls.cache_key})['results']
+
         application = cls.from_dict(client, app_dict or default_dict)
         if not app_dict:  # if empty application
-            self.add_language(Language.load_default(application))
+            application.add_language(Language.load_default(application))
         return application
 
     def load_extensions(self, extensions):
@@ -132,13 +133,29 @@ class Application(object):
         return self.client.token
 
     def language(self, locale=None):
+
+        def lang_(app, locale, target_locale=None):
+            target_locale = locale if target_locale is None else target_locale
+            try:
+                return app.languages_by_locale.setdefault(locale, Language.load_by_locale(app, target_locale))
+            except LanguageNotSupported:
+                pass
+
+        def base_lang_(app, locale):
+            if not '-' in locale:
+                return
+            base_locale = locale.split('-')[0]
+            return lang_(app, locale, target_locale=base_locale)
+
+        locale = self._normalize_locale(locale)
+        if self.languages_by_locale.get(locale, None):
+            return self.languages_by_locale[locale]
+        return lang_(self, locale) or base_lang_(self, locale) or self.languages_by_locale.setdefault(locale, Language.load_default(self))
+
+    def _normalize_locale(self, locale):
         if locale is None:
             locale = self.default_locale or CONFIG.default_locale
-        locale = locale.strip()
-        try:
-            return self.languages_by_locale.setdefault(locale, Language.load_by_locale(self, locale))
-        except LanguageNotSupported:   # default language
-            return self.languages_by_locale.setdefault(locale, Language.load_default(self))
+        return locale.strip().replace('_', '-')  # normalize locale
 
     def default_language(self):
         return self.language(locale=self.default_locale)

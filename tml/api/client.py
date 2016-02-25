@@ -160,7 +160,7 @@ class Client(CacheFallbackMixin, AbstractClient):
                 if self.cache.is_valid():
                     data = self.cache.fetch(
                         opts['cache_key'], opts={'miss_callback': self.on_miss})
-            return data
+            return data or {'results': {}}
 
     def _api_call(self, uri, method, params=None, opts=None):
         response = None
@@ -203,6 +203,8 @@ class Client(CacheFallbackMixin, AbstractClient):
             compressed_data = response.content
             if not compressed_data:  # empty response
                 return None
+
+            read_gzip = lambda x: x   # temp
             data = read_gzip(compressed_data)
             self.debug("Compressed: %s, uncompressed: %s", len(compressed_data), len(data))
         else:
@@ -222,7 +224,7 @@ class Client(CacheFallbackMixin, AbstractClient):
     @contextlib.contextmanager
     def trace_call(self, url, method, params):
         tml_logger = get_logger()
-        line, log_tpl = '', '%(method)s: %(url)s/%(query)s takes %(sec)s seconds.'
+        line, log_tpl = '', '%(method)s: %(url)s?%(query)s takes %(sec)s seconds.'
         method = method.upper()
         query = params and self.to_query(params) or ''
         t0 = time.time()

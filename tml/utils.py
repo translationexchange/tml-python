@@ -8,6 +8,7 @@ from StringIO import StringIO
 import warnings
 from datetime import datetime, timedelta
 from time import mktime
+from .strings import to_string
 
 pj = os.path.join
 
@@ -83,3 +84,7 @@ def read_gzip(payload):
     buf.seek(0)
     gzip_f = gzip.GzipFile(fileobj=buf, mode='rb')
     return gzip_f.read()
+
+def read_json(path):
+    with open(path, 'rb') as fp:
+        return json.loads(to_string(fp.read()))

@@ -25,7 +25,8 @@
 from copy import copy
 from .rules.contexts import Contexts
 from .rules.case import Case, LazyCases
-from .utils import pj
+from .utils import pj, read_json
+from .config import CONFIG
 
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
@@ -101,9 +102,11 @@ class Language(object):
         # create instance:
         return cls.from_dict(application, data)
 
-    @property
-    def default(self):
-        """ Default language for"""
+    @classmethod
+    def load_default(cls, application):
+        locale = CONFIG.default_locale
+        locale_path = pj(CONFIG.app_dir, 'defaults/languages', '%s.json' % locale)
+        return Language.from_dict(application, read_json(locale_path), lazy=False)
 
     @property
     def client(self):

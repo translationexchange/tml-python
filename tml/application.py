@@ -108,7 +108,10 @@ class Application(object):
             'projects/%s/definition' % key,
             params={'locale': locale, 'source': source, 'ignored': True},
             opts={'cache_key': cls.cache_key})
-        return cls.from_dict(client, app_dict or default_dict)
+        application = cls.from_dict(client, app_dict or default_dict)
+        if not app_dict:  # if empty application
+            self.add_language(Language.load_default(application))
+        return application
 
     def load_extensions(self, extensions):
         """Load application extensions if any"""
@@ -132,7 +135,10 @@ class Application(object):
         if locale is None:
             locale = self.default_locale or CONFIG.default_locale
         locale = locale.strip()
-        return self.languages_by_locale.setdefault(locale, Language.load_by_locale(self, locale))
+        try:
+            return self.languages_by_locale.setdefault(locale, Language.load_by_locale(self, locale))
+        except LanguageNotSupported:   # default language
+            return self.languages_by_locale.setdefault(locale, Language.load_default(self))
 
     def default_language(self):
         return self.language(locale=self.default_locale)

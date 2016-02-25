@@ -22,7 +22,7 @@
 """
 from __future__ import absolute_import
 import re
-from tml.strings import to_string
+from ..strings import to_string
 __author__ = 'a@toukmanov.ru'
 
 from . import AbstractClient, APIError

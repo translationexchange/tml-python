@@ -52,6 +52,8 @@ class Config(BaseConfigMixin, Singleton):
         self.init_config()
         self.override_config(**kwargs)
 
+    app_dir = APP_DIR
+
     environment = 'dev'
 
     application = {

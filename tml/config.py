@@ -56,6 +56,8 @@ class Config(BaseConfigMixin, Singleton):
 
     environment = 'dev'
 
+    debug = True
+
     application = {
         #'key':
         #'token'

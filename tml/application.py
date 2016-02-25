@@ -147,7 +147,6 @@ class Application(object):
                 return
             base_locale = locale.split('-')[0]
             return lang_(app, locale, target_locale=base_locale)
-
         locale = self._normalize_locale(locale)
         if self.languages_by_locale.get(locale, None):
             return self.languages_by_locale[locale]

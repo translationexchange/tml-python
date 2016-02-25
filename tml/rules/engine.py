@@ -1,6 +1,6 @@
 # encoding: UTF-8
 """
-# Rules engine: execute rule 
+# Rules engine: execute rule
 #
 # Copyright (c) 2015, Translation Exchange, Inc.
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -22,7 +22,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-__author__ = 'a@toukmanov.ru'
+__author__ = ''
 
 from ..exceptions import Error as BaseError
 
@@ -37,7 +37,7 @@ class RulesEngine(object):
 
 
     def execute(self, rule, data):
-        """ Execute rule 
+        """ Execute rule
             Args:
                 rule (list): rule [fn_name, arg1, arg2, ...]
                 data (dict): rule arguments kwargs
@@ -130,7 +130,7 @@ class InnerExpressionCallFault(Error):
     """ Inner error """
     def __init__(self, exception, rule, data, part_number):
         """ Error in inner e
-        
+
         """
         super(InnerExpressionCallFault, self).__init__(rule, data, part_number)
         self.exception = exception

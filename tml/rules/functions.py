@@ -1,6 +1,6 @@
 # encoding: UTF-8
 """
-# Functions for rules engine 
+# Functions for rules engine
 #
 # Copyright (c) 2015, Translation Exchange, Inc.
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = ''
 
 import re
 from _ctypes import ArgumentError
@@ -83,7 +83,7 @@ def to_range(text):
 def within_f(value, range):
     """ Check is value in range
         Args:
-            value (string): 
+            value (string):
             text: range
         Throws:
             ArgumentError
@@ -162,7 +162,7 @@ def f_all(*args):
 def f_eq(*args):
     if any([type(arg) is int for arg in args]):
         # convert all arguments to int if int argumnt exists
-        try: 
+        try:
             args = [int(arg) for arg in args]
         except ValueError:
             # can not convert argument to int <-> !=
@@ -184,7 +184,7 @@ def cmp_args(arg1, arg2):
 
 
 def f_match (pattern, string, flags = None):
-    """ Match function 
+    """ Match function
         Args:
             pattern (string): regexp (pattern|/pattern/flags)
             string (string): tested string
@@ -195,9 +195,9 @@ def f_match (pattern, string, flags = None):
     if build_regexp(pattern, flags).search(to_string(string)):
         return True
     return False
-  
+
 def f_replace(search, replace, subject):
-    """ Match function 
+    """ Match function
         Args:
             search (string): search regexp (pattern|/pattern/flags)
             replace (string): replacement

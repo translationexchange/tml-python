@@ -1,6 +1,6 @@
 # encoding: UTF-8
 """
-# Language cases: apply case for variable like {user::dat} 
+# Language cases: apply case for variable like {user::dat}
 #
 # Copyright (c) 2015, Translation Exchange, Inc.
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = ''
 
 from .contexts import Gender, Value
 from . import ContextRules
@@ -63,7 +63,7 @@ class Case(ContextRules):
                 safe (boolean): handle errror
             Return:
                 (dict, dict): list of rules, list of errors
-        
+
         """
         ret = {}
         errors = {}

@@ -55,7 +55,7 @@ class Dictionary(AbstractDictionary):
         try:
             self.translations[key.key] = data = allpages(key.client,
                             'translation_keys/%s/translations' % key.key,
-                            params={'locale': key.language.locale, 'per_page': 10000},
+                            params={'locale': key.language.locale, 'all': True},
                             opts={'cache_key': self.cache_key(key.language.locale, key.key)})
             return Translation.from_data(key, data)
         except ClientError:

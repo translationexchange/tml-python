@@ -85,7 +85,7 @@ class CacheFallbackMixin(object):
 
 class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
     """ API Client """
-    API_HOST = 'https://api.translationexchange.com'
+    API_HOST = 'https://staging-api.translationexchange.com'
     CDN_HOST = 'https://cdn.translationexchange.com'
     API_PATH = 'v1'
 
@@ -150,6 +150,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         """
         params = {} if params is None else self._compact_params(params)
         opts = {} if opts is None else self._compact_params(opts)
+        # self.debug("IS LIVE MODE ACTIVATED: %s", self.is_live_api_request())
         if self.is_live_api_request():
             return self.process_response(
                 self._api_call(url, method, params=params, opts=opts),
@@ -166,23 +167,13 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
     def _api_call(self, uri, method, params=None, opts=None):
         response = None
         url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, uri)
+        params['app_id'] = self.key
         if not opts.get('public', None) and not 'access_token' in params:
             params['access_token'] = self.access_token
-        if method == 'post':
-            params['app_id'] = self.key
 
         with self.trace_call(url, method, params):
             options, headers = self.request_config()
             return requests.request(method, url, params=params, headers=headers, **options)
-
-  #   def prepare_request(request, path, params)
-  #   request.options.timeout = 5
-  #   request.options.open_timeout = 2
-  #   request.headers['User-Agent']       = "tml-ruby v#{Tml::VERSION} (Faraday v#{Faraday::VERSION})"
-  #   request.headers['Accept']           = 'application/json'
-  #   request.headers['Accept-Encoding']  = 'gzip, deflate'
-  #   request.url(path, params)
-  # end
 
     def request_config(self):
         options = {'timeout': 5}
@@ -243,3 +234,20 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         querystr = ['%s=%s' % (k, v) for k, v in params.iteritems()]
         return '&'.join(querystr)
 
+
+if CONFIG.debug:
+    # Enabling debugging at http.client level (requests->urllib3->http.client)
+    # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
+    # the only thing missing will be the response.body which is not logged.
+    import logging
+    try: # for Python 3
+        from http.client import HTTPConnection
+    except ImportError:
+        from httplib import HTTPConnection
+    HTTPConnection.debuglevel = 1
+
+    logging.basicConfig() # you need to initialize logging, otherwise you will not see anything from requests
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True

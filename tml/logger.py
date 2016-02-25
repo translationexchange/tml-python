@@ -69,12 +69,13 @@ def get_logger(**kwargs):
 
 getattr_ = object.__getattribute__
 
-class LoggerMixin(object):
 
-    def __init__(self):
-        self._logger = get_logger()
+class LoggerMixin(object):
+    _logger = None
 
     def __getattr__(self, name):
+        if not self.__dict__.get('_logger', None):
+            self.__dict__['_logger'] = get_logger()
         if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
             self._logger
             return getattr(self._logger, name)

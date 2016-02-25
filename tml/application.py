@@ -107,8 +107,9 @@ class Application(object):
         app_dict = client.get(
             'projects/%s/definition' % key,
             params={'locale': locale, 'source': source, 'ignored': True},
-            opts={'cache_key': cls.cache_key})['results']
-
+            opts={'cache_key': cls.cache_key})
+        if 'results' in app_dict:
+            app_dict = app_dict['results']
         application = cls.from_dict(client, app_dict or default_dict)
         if not app_dict:  # if empty application
             application.add_language(Language.load_default(application))

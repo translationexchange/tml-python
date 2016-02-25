@@ -33,6 +33,7 @@ from ..utils import read_gzip, pj
 from ..config import CONFIG
 from ..logger import get_logger
 from ..cache import CachedClient
+from ..logger import LoggerMixin
 from ..session_vars import get_current_translator
 from . import AbstractClient, APIError, ClientError
 
@@ -82,7 +83,7 @@ class CacheFallbackMixin(object):
         return method != 'get' and CONFIG.cache_enabled() and opts['cache_key'] is not None
 
 
-class Client(CacheFallbackMixin, AbstractClient):
+class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
     """ API Client """
     API_HOST = 'https://api.translationexchange.com'
     CDN_HOST = 'https://cdn.translationexchange.com'

@@ -51,7 +51,7 @@ class CacheFallbackMixin(object):
     def is_live_api_request(self):
         if not self.access_token: # if no access token, never use live mode
             return False
-        return self.translator and self.translator.is_inline()
+        return self.translator and self.translator.is_inline() or False
 
     def on_miss(self, key):
         return None if self.cache.read_only() else self.cdn_call(key)
@@ -85,8 +85,6 @@ class CacheFallbackMixin(object):
 
 class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
     """ API Client """
-    API_HOST = 'https://staging-api.translationexchange.com'
-    CDN_HOST = 'https://cdn.translationexchange.com'
     API_PATH = 'v1'
 
     def __init__(self, key, access_token=None):
@@ -132,9 +130,8 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             uri += '%s.json' % key
         else:
             uri += '%s/%s.json.gz' % (self.cache.version, key)
-        with self.trace_call(pj(self.CDN_HOST, uri), method, params):
-            options, headers = self.request_config()
-            response = requests.request(method, url, params=params, headers=headers, **options)
+        with self.trace_call(pj(CONFIG.cdn_host(), uri), method, params):
+            response = requests.request(method, url, **self._request_config(method, params))
             return self.process_response(response, opts)
 
     def call(self, url, method, params=None, opts=None):
@@ -166,21 +163,25 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
 
     def _api_call(self, uri, method, params=None, opts=None):
         response = None
-        url = '%s/%s/%s' % (self.API_HOST, self.API_PATH, uri)
+        url = '%s/%s/%s' % (CONFIG.api_host(), self.API_PATH, uri)
         params['app_id'] = self.key
-        if not opts.get('public', None) and not 'access_token' in params:
+        if not opts.get('public', None):
             params['access_token'] = self.access_token
 
         with self.trace_call(url, method, params):
-            options, headers = self.request_config()
-            return requests.request(method, url, params=params, headers=headers, **options)
+            return requests.request(method, url, **self._request_config(method, params))
 
-    def request_config(self):
-        options = {'timeout': 5}
-        headers = {'User-Agent': 'tml-python v0.0.1',
-                   'Accept': 'application/json',
-                   'Accept-Encoding': 'gzip, deflate'}
-        return (options, headers)
+    def _request_config(self, method, params):
+        headers = {'user-agent': 'tml-python v0.0.1',
+                   'accept': 'application/json',
+                   'accept-Encoding': 'gzip, deflate'}
+        config = {'timeout': 30, 'headers': headers}
+        if method == 'post':
+            headers['content-type'] = 'application/x-www-form-urlencoded'
+            config['data'] = params
+        else:
+            config['params'] = params
+        return config
 
     def process_response(self, response, opts):
         if response is None:  # response is empty
@@ -209,8 +210,9 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             data = None
         if opts.get('wrapper', None):   # either class or fn wrappers/modifiers
             data = opts['wrapper'](data)
-        if 'error' in data:   # if service error
-            raise APIError(data['error'], url=response.url, client=self)
+        if isinstance(data, (list, dict)):
+            if 'error' in data:   # if service error
+                raise APIError(data['error'], url=response.url, client=self)
         return data
 
     @contextlib.contextmanager
@@ -235,7 +237,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         return '&'.join(querystr)
 
 
-if CONFIG.debug:
+if CONFIG.verbose:
     # Enabling debugging at http.client level (requests->urllib3->http.client)
     # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
     # the only thing missing will be the response.body which is not logged.

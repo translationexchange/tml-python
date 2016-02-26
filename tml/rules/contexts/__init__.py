@@ -41,7 +41,7 @@ from ...strings import to_string, suggest_string
 
 class Value(object):
     """ Value contexts """
-    
+
     @classmethod
     def match(cls, data):
         """ Data is value """
@@ -54,7 +54,7 @@ class Value(object):
 class UnsupportedContext(BaseError):
     """ Base error for context """
     pass
-    
+
 
 class ValueIsNotMatchContext(UnsupportedContext):
     """ Raises when try to fetch option for invalid value """
@@ -108,7 +108,7 @@ class Context(object):
         return self.token_expression.match(token) is not None
 
     def match(self, value):
-        """ Check is value match context 
+        """ Check is value match context
             Args:
                 value: mixed data
             Raises:

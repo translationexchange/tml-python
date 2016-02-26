@@ -56,7 +56,7 @@ class Config(BaseConfigMixin, Singleton):
 
     environment = 'dev'
 
-    debug = True
+    verbose = False
 
     application = {
         #'key':
@@ -104,6 +104,24 @@ class Config(BaseConfigMixin, Singleton):
 
     def application_key(self):
         return self['application'].get('key', 'current')
+
+    def api_host(self):
+        if self.environment == 'prod':
+            return 'https://api.translationexchange.com'
+        else:
+            return 'https://staging-api.translationexchange.com'
+
+    def cdn_host(self):
+        if self.environment == 'prod':
+            return 'https://cdn.translationexchange.com'
+        else:
+            return 'https://staging-cdn.translationexchange.com'
+
+    def agent_host(self):
+        if self.environment == 'prod':
+            return 'https://tools.translationexchange.com/agent/stable/agent.min.js'
+        else:
+            return 'https://tools.translationexchange.com/agent/staging/agent.min.js'
 
 
 CONFIG = Config.instance()

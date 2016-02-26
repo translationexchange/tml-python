@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 # encoding: UTF-8
 from json import dumps
-
+from urllib import quote
 
 class MissedKeys(object):
     """ Object append missed key"""
@@ -14,7 +14,7 @@ class MissedKeys(object):
             Args:
                 missed keys
         """
-        return self.client.post('sources/register_keys', params={'source_keys': dumps(missed_keys)})
+        return self.client.post('sources/register_keys', params={'source_keys': dumps(missed_keys), 'options': '{"realtime": true}'})
 
     def append(self, key):
         """ Add key to missed

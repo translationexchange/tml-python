@@ -133,7 +133,7 @@ def fetch(context, label, description):
     try:
         # Try to suggest translation replace %(name)s -> {name}
         return context.fetch(suggest_label(label), description)
-    except TranslationIsNotExists as e:
+    except TranslationIsNotExists:
         # Try to tranlate as is
         try:
             return context.fetch(label, description)

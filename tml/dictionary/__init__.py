@@ -25,6 +25,7 @@ __author__ = 'a@toukmanov.ru'
 from ..translation import Translation, NoneTranslation
 from ..exceptions import Error
 from ..utils import deprecated
+from ..logger import LoggerMixin
 
 
 def return_label_fallback(key):
@@ -37,7 +38,7 @@ def return_label_fallback(key):
     return NoneTranslation(key)
 
 
-class AbstractDictionary(object):
+class AbstractDictionary(LoggerMixin):
     """ Dictionary """
     def __init__(self, fallback = None):
         """ Dictionary .ctor

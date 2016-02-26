@@ -152,17 +152,19 @@ class LanguageContext(AbstractContext):
 
         """
         CachedClient.instance().upgrade_version()   # reset cache
+        self.set_translator(translator)
         if key:
             application = Application.load_by_key(
                 client, key, locale=locale, source=source)
         else:
             application = Application.load_default(
                 client, locale=locale, source=source)
+        if translator:
+            translator.set_application(application)
         language = application.language(locale)
         super(LanguageContext, self).__init__(
             dictionary=self.build_dict(language),
             language=language)
-        self.set_translator(translator)
         set_current_context(self)
 
     def build_dict(self, language, **kwargs):
@@ -208,7 +210,6 @@ class LanguageContext(AbstractContext):
     def set_translator(self, translator):
         if not translator:
             return
-        translator.set_application(self.application)
         self.translator = translator
         set_current_translator(translator)
 
@@ -222,13 +223,6 @@ class LanguageContext(AbstractContext):
         """
         try:
             key = Key(label = label, description = description, language = self.default_language)
-            if 'Only in English'.lower() in label.lower():
-                print self.fallback_dict.source
-            # 16132a471f9958f96a2ed16af25e8d8e
-
-
-                # print key.key
-                # print key.key, key.label, 'hi', self.fallback_dict.translations
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)

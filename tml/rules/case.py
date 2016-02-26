@@ -77,6 +77,16 @@ class Case(ContextRules):
         return (ret, errors)
 
 
+class DummyCase(Case):
+
+    def __init__(self, engine=None):
+        super(DummyCase, self).__init__(
+            choices=[], default=['quote', '@value'], engine=engine)
+
+    def execute(self, value):
+        return self.engine.execute(self.default, {'value': value})
+
+
 class LazyCases(object):
     """ Compile case on demand """
     def __init__(self, data):
@@ -86,9 +96,21 @@ class LazyCases(object):
     def __getitem__(self, key):
         if not key in self.cache:
             # compile on demand:
-            self.cache[key] = Case.from_rules(self.data[key]['rules'])
+            if not key in self.data:
+                self.cache[key] = DummyCase()
+            else:
+                self.cache[key] = Case.from_rules(self.data[key]['rules'])
         return self.cache[key]
 
     def __len__(self):
         return len(self.data)
+
+    def get(self, key, default=None):
+        if not key in self.cache:
+            # compile on demand:
+            if not key in self.data:
+                self.cache[key] = default or DummyCase()
+            else:
+                self.cache[key] = Case.from_rules(self.data[key]['rules'])
+        return self.cache[key]
 

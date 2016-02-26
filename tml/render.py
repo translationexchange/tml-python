@@ -1,4 +1,4 @@
-# encoding: UTF-8
+    # encoding: UTF-8
 """
 # Copyright (c) 2015, Translation Exchange, Inc.
 #

@@ -53,10 +53,11 @@ class Dictionary(AbstractDictionary):
         if self.translations.get(key.key, None):
             return Translation.from_data(key, self.translations[key.key])
         try:
-            self.translations[key.key] = data = allpages(key.client,
-                            'translation_keys/%s/translations' % key.key,
-                            params={'locale': key.language.locale, 'all': True},
-                            opts={'cache_key': self.cache_key(key.language.locale, key.key)})
+            self.translations[key.key] = data = key.client.get(
+                'translation_keys/%s/translations' % key.key,
+                params={'locale': key.language.locale, 'all': True},
+                opts={'cache_key': self.cache_key(key.language.locale, key.key)})['results']
+
             return Translation.from_data(key, data)
         except ClientError:
             raise TranslationIsNotExists(key, self)

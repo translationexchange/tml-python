@@ -73,7 +73,7 @@ getattr_ = object.__getattribute__
 class LoggerMixin(object):
     _logger = None
 
-    def call(self, name, *args, **kwargs):
+    def log_it(self, name, *args, **kwargs):
         if not self._logger:
             self._logger = get_logger()
         fn = getattr(self._logger, name, None)
@@ -82,23 +82,23 @@ class LoggerMixin(object):
         raise NotImplementedError("")
 
     def debug(self, *args, **kwargs):
-        self.call('debug', *args, **kwargs)
+        self.log_it('debug', *args, **kwargs)
 
     def info(self, *args, **kwargs):
-        self.call('info', *args, **kwargs)
+        self.log_it('info', *args, **kwargs)
 
     def warning(self, *args, **kwargs):
-        self.call('warning', *args, **kwargs)
+        self.log_it('warning', *args, **kwargs)
 
     def error(self, *args, **kwargs):
-        self.call('error', *args, **kwargs)
+        self.log_it('error', *args, **kwargs)
 
     def critical(self, *args, **kwargs):
-        self.call('critical', *args, **kwargs)
+        self.log_it('critical', *args, **kwargs)
 
     def log(self, *args, **kwargs):
-        self.call('log', *args, **kwargs)
+        self.log_it('log', *args, **kwargs)
 
     def exception(self, *args, **kwargs):
-        self.call('exception', *args, **kwargs)
+        self.log_it('exception', *args, **kwargs)
 

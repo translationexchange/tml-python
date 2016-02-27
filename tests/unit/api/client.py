@@ -7,6 +7,7 @@ from mock import patch
 import requests
 import json
 import tml.api.client as client
+from tml.config import CONFIG
 from pydoc import cli
 
 
@@ -96,6 +97,14 @@ class TranslatorMock(object):
 class ClientTest(unittest.TestCase):
     """ Test client """
 
+    def diff_(self, params):
+        generic_params = set(('app_id', 'access_token', 'key'))
+        incoming_params = set(params.keys())
+        return incoming_params - generic_params
+
+    def check_in_(self, params, param):
+        return param in self.diff_(params)
+
     @patch('tml.api.client.get_current_translator', TranslatorMock)
     def test_success(self):
         """ Test success response """
@@ -107,11 +116,11 @@ class ClientTest(unittest.TestCase):
         resp = c.get('test', params={'param':'value'}, opts={'response_class': RequestMockResponse, 'uncompressed': True})
         self.assertEquals(expected, resp, 'Return response')
         # check url and query building:
-        self.assertEquals('https://api.translationexchange.com/v1/test', client.requests.url, 'Call URL')
-        self.assertEquals({'access_token':'123124512412', 'param': 'value'}, client.requests.params, 'Token sent as GET parameter')
+        self.assertEquals(CONFIG.api_host() + '/v1/test', client.requests.url, 'Call URL')
+        self.assertTrue(self.check_in_(client.requests.params, 'param'), 'Token sent as GET parameter')
         # check call with no params:
         resp = c.get('test')
-        self.assertEquals({'access_token':'123124512412'}, client.requests.params, 'Call with no params')
+        self.assertTrue(len(self.diff_(client.requests.params)) == 0)
         # check string response:
         expected = 'Hello world'
         client.requests = RequestMock(RequestMockResponse(expected))

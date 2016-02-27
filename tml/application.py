@@ -138,7 +138,7 @@ class Application(object):
     def token(self):
         return self.client.token
 
-    def language(self, locale=None):
+    def language(self, locale=None, fallback_to_dummy=True):
 
         def lang_(app, locale, target_locale=None):
             target_locale = locale if target_locale is None else target_locale
@@ -155,7 +155,13 @@ class Application(object):
         locale = self._normalize_locale(locale)
         if self.languages_by_locale.get(locale, None):
             return self.languages_by_locale[locale]
-        return lang_(self, locale) or base_lang_(self, locale) or self.languages_by_locale.setdefault(locale, Language.load_default(self))
+        language = lang_(self, locale) or base_lang_(self, locale)
+        if language:
+            return language
+        if fallback_to_dummy:
+            return self.languages_by_locale.setdefault(locale, Language.load_default(self))
+        else:
+            raise LanguageNotSupported(locale, self)
 
     def _normalize_locale(self, locale):
         if locale is None:

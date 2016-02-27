@@ -73,11 +73,32 @@ getattr_ = object.__getattribute__
 class LoggerMixin(object):
     _logger = None
 
-    def __getattr__(self, name):
-        if not self.__dict__.get('_logger', None):
-            self.__dict__['_logger'] = get_logger()
-        if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
-            self._logger
-            return getattr(self._logger, name)
-        return getattr_(self, name)
+    def call(self, name, *args, **kwargs):
+        if not self._logger:
+            self._logger = get_logger()
+        fn = getattr(self._logger, name, None)
+        if fn and callable(fn):
+            return fn(*args, **kwargs)
+        raise NotImplementedError("")
+
+    def debug(self, *args, **kwargs):
+        self.call('debug', *args, **kwargs)
+
+    def info(self, *args, **kwargs):
+        self.call('info', *args, **kwargs)
+
+    def warning(self, *args, **kwargs):
+        self.call('warning', *args, **kwargs)
+
+    def error(self, *args, **kwargs):
+        self.call('error', *args, **kwargs)
+
+    def critical(self, *args, **kwargs):
+        self.call('critical', *args, **kwargs)
+
+    def log(self, *args, **kwargs):
+        self.call('log', *args, **kwargs)
+
+    def exception(self, *args, **kwargs):
+        self.call('exception', *args, **kwargs)
 

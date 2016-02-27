@@ -2,7 +2,7 @@ from dictionary.source import SourceDictionary
 
 class SourceTranslations(object):
     """Locale => Translation dictionary per single source."""
-    
+
     def __init__(self, source, application):
         self.source = source
         self.application = application
@@ -24,7 +24,7 @@ class SourceTranslations(object):
         source_dict = SourceDictionary(self.source, language, translations=results)
         self.cache.setdefault(locale, source_dict).load_translations()
         return self
-    
+
     def hashtable_by_locale(self, locale):
         return self.cache.get(locale, None)
 
@@ -43,4 +43,5 @@ class SourceTranslations(object):
     def language_by_locale(self, locale):
         if not self.application:
             raise Exception("Application is not configured yet")
-        return self.application.language(locale=locale)
+
+        return self.application.language(locale=locale, fallback_to_dummy=False)

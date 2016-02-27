@@ -27,6 +27,8 @@ from .exceptions import Error
 from .language import Language
 from .source import SourceTranslations
 from .config import CONFIG
+from .session_vars import get_current_translator
+
 
 class Application(object):
     """ TML application """
@@ -61,6 +63,9 @@ class Application(object):
         self.load_extensions(kwargs.get('extensions', {}))
         for key in kwargs:
             setattr(self, key, kwargs[key])
+        translator = get_current_translator()
+        if translator is not None:   # if we initialized with active translator session
+            translator.set_application(self)
 
     @classmethod
     def from_dict(cls, client, data):

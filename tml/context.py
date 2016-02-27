@@ -32,7 +32,6 @@ from .language import Language
 from .dictionary import NoneDict
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
-from .cache import CachedClient
 from .session_vars import set_current_translator, set_current_context
 
 
@@ -151,7 +150,6 @@ class LanguageContext(AbstractContext):
                 key (int): API application key (use default if None)
 
         """
-        CachedClient.instance().upgrade_version()   # reset cache
         self.set_translator(translator)
         if key:
             application = Application.load_by_key(
@@ -159,8 +157,6 @@ class LanguageContext(AbstractContext):
         else:
             application = Application.load_default(
                 client, locale=locale, source=source)
-        if translator:
-            translator.set_application(application)
         language = application.language(locale)
         super(LanguageContext, self).__init__(
             dictionary=self.build_dict(language),

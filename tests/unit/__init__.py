@@ -99,7 +99,6 @@ class api_test(unittest.TestCase):
         label = 'Only in English'
         # emulate empty source for ru
         source_hash = md5(source.encode('utf-8')).hexdigest()
-        # print source_hash
         self.client.read('sources/%s/translations' % source_hash, {'locale':'ru'}, 'sources/sources_empty.json', True)
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)

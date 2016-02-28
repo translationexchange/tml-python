@@ -65,7 +65,7 @@ class CacheVersion(LoggerMixin):
         version_obj = self.cache.fetch(self._key,
                                        opts={'miss_callback': on_miss})
         version_obj['version'] = self.version = self.validate_version(version_obj)
-        return version_obj
+        return self.version
 
     def store(self, new_version):
         self.version = new_version
@@ -79,7 +79,7 @@ class CacheVersion(LoggerMixin):
 
     def is_invalid(self):
         try:
-            ('undefined', 0).index(self.version)
+            ('undefined', '0', 'None').index(str(self.version))
             return True
         except:
             return False
@@ -99,6 +99,7 @@ class CachedClient(SingletonMixin, LoggerMixin):
 
     default_adapter_module = 'tml.cache_adapters'
     version_attr = '__cache_version__'
+    _instance_dict = {}
 
     def __init__(self, *args, **kwargs):
         LoggerMixin.__init__(self)

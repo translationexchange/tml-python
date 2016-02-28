@@ -33,6 +33,7 @@ from .dictionary import NoneDict
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
 from .session_vars import set_current_translator, set_current_context
+from .cache import CachedClient
 
 
 class ContextNotConfigured(Error):
@@ -102,7 +103,6 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        # print label, Key(label = label, description = description, language = self.default_language).key
         return self.dict.fallback(Key(label = label, description = description, language = self.default_language))
 
     def tr(self, label, data = {}, description = '', options = {}):
@@ -150,6 +150,7 @@ class LanguageContext(AbstractContext):
                 key (int): API application key (use default if None)
 
         """
+        CachedClient.instance().reset_version()
         self.set_translator(translator)
         if key:
             application = Application.load_by_key(

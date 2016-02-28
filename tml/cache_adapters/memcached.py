@@ -77,6 +77,7 @@ class BaseMemcachedAdapter(object):
         data = self._cache.get(self.versioned_key(key, opts))
         if data:
             data = self._unpickle(data)
+        if data:
             self.debug('Cache hit: %s', key)
         else:
             if opts and opts.get('miss_callback', None):
@@ -102,19 +103,26 @@ class DefaultMemcachedAdapter(BaseMemcachedAdapter):
         import memcache
         for base_class in self.__class__.__bases__:
             base_class.__init__(self, server, params, library=memcache)
+        self.debug("Cache memcached-default initialized")
 
     @property
     def _cache(self):
         if getattr(self, '_client', None) is None:
-            self._client = self._lib.Client(self._servers, pickler=JSONCodec, unpickler=JSONCodec)
+            self._client = self._lib.Client(self._servers)
         return self._client
 
+    def _pickle(self, data):
+        return json.dumps(data)
+
+    def _unpickle(self, payload):
+        return json.loads(payload)
 
 class PyLibMCCacheAdapter(BaseMemcachedAdapter):
     def __init__(self, server, params):
         import pylibmc
         for base_class in self.__class__.__bases__:
             base_class.__init__(self, server, params, library=pylibmc)
+        self.debug("Cache memcached-pylibmc initialized")
 
     @property
     def _cache(self):
@@ -132,7 +140,7 @@ class PyLibMCCacheAdapter(BaseMemcachedAdapter):
 
 
 def MemcachedAdapterFactory(cache_builder):
-    server = CONFIG.cache['host']
+    server = CONFIG.cache.get('host', '127.0.0.1:11211')
     params = {
         'OPTIONS': CONFIG.cache.get('options', {}),
         'namespace': CONFIG.cache.get('namespace', 'tml'),

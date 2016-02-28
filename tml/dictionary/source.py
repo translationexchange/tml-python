@@ -107,13 +107,14 @@ class SourceDictionary(Hashtable):
         """
         return ('sources/%s/translations' % self.key,
                 {'locale': self.language.locale, 'all': True, 'ignored': True},
-                {'cache_key': self.cache_key})
+                {'cache_key': self.cache_key()})
 
     def fetch(self, key):
         try:
             ret = super(SourceDictionary, self).fetch(key)
+            # print ret, key.locale, key.label
         except TranslationIsNotExists as translation_not_exists:
-            self.debug("Missing key: %s[%s]", key.label, key.key)
+            print 'miss', key.label, key.key
             self.missed_keys.append(key)
             raise translation_not_exists
         if len(ret) == 0:

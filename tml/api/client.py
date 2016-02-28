@@ -29,7 +29,8 @@ import requests
 import contextlib
 import json
 from requests import Response
-from ..utils import read_gzip, pj
+from requests.exceptions import HTTPError
+from ..utils import read_gzip, pj, interval_timestamp
 from ..config import CONFIG
 from ..logger import get_logger
 from ..cache import CachedClient
@@ -74,13 +75,13 @@ class CacheFallbackMixin(object):
         if cur_version == 'undefined':
             self.cache.store_version(self.get_cache_version())
         else:
-            self.cache.version.set(cur_version)
+            pass
         self.debug('Version: %s', self.cache.version)
         return
 
     # cache is enabled if: get and cache enabled and cache_key
     def should_enable_cache(self, method, opts=None):
-        return method != 'get' and CONFIG.cache_enabled() and opts['cache_key'] is not None
+        return method == 'get' and CONFIG.cache_enabled() and opts.get('cache_key', None) is not None
 
 
 class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
@@ -119,7 +120,8 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         """
         return self.call(url, 'post', **kwargs)
 
-    def cdn_call(self, key, method, params=None, opts=None):
+    def cdn_call(self, key, params=None, opts=None):
+        method = 'get'
         params = {} if params is None else self._compact_params(params)
         opts = {} if opts is None else self._compact_params(opts)
         if self.cache.version.is_invalid() and key != 'version':
@@ -127,12 +129,16 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         uri = self.key
         response = None
         if key == 'version':
-            uri += '%s.json' % key
+            uri = pj(uri, 'version.json')
         else:
-            uri += '%s/%s.json.gz' % (self.cache.version, key)
-        with self.trace_call(pj(CONFIG.cdn_host(), uri), method, params):
-            response = requests.request(method, url, **self._request_config(method, params))
-            return self.process_response(response, opts)
+            uri = pj(uri, '%s/%s.json.gz' % (self.cache.version, key))
+        url = pj(CONFIG.cdn_host(), uri)
+        try:
+            with self.trace_call(url, method, params):
+                response = requests.request(method, url, **self._request_config(method, params))
+                return self.process_response(response, opts)
+        except HTTPError as e:
+            return None
 
     def call(self, url, method, params=None, opts=None):
         """ Make request to API
@@ -156,7 +162,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             data = None
             if self.should_enable_cache(method, opts):
                 self.verify_cache_version()
-                if self.cache.is_valid():
+                if self.cache.version.is_valid():
                     data = self.cache.fetch(
                         opts['cache_key'], opts={'miss_callback': self.on_miss})
             return data or {'results': {}}
@@ -191,13 +197,16 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             return response
         if 500 <= response.status_code < 600:   # server error occured
             raise APIError(response.text, url=response.url, client=self)
+        response.raise_for_status()
         compressed = response.request.method.lower() == 'get'   # if get then compressed result
         if compressed and not opts.get('uncompressed', False):   # need uncompress
             compressed_data = response.content
             if not compressed_data:  # empty response
                 return None
 
-            read_gzip = lambda x: x   # temp
+            global read_gzip
+            if response.url.startswith(CONFIG.api_host()):
+                read_gzip = lambda x: x   # temp
             data = read_gzip(compressed_data)
             self.debug("Compressed: %s, uncompressed: %s", len(compressed_data), len(data))
         else:

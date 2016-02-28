@@ -4,7 +4,7 @@ import threading
 """Singleton Mixin"""
 
 def hsh(cls):
-    return str(hash(cls))
+    return str(hash(cls.__name__))
 
 class SingletonMixin(object):
     """Singleton Mixin Class
@@ -31,6 +31,7 @@ class SingletonMixin(object):
         if not hasattr(cls, '_instance_dict'):
             cls._instance_dict = {}
         if key not in cls._instance_dict:
+            print key, cls, 'hi'
             with cls.__singleton_lock:
                 if key not in cls._instance_dict:
                     cls._instance_dict[key] = \

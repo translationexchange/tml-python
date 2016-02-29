@@ -93,6 +93,14 @@ class Config(BaseConfigMixin, Singleton):
         #'path': 'a/b/c/snapshot.tar.gz'
     }
 
+    # memcached
+    #'cache': {
+        #'enabled': True,
+        #'adapter': 'memcached',
+        #'backend': 'default',
+       # 'namespace': 'foody'  
+    #},
+
     version_check_interval = 3600
 
     @property

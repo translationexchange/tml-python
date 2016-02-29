@@ -31,6 +31,9 @@ class FileAdapter(object):
                 self.cache[key] = json.loads(to_string(fp.read()))
             return self.cache[key]
         self.debug('cache miss: %s', key)
+        if opts and opts.get('miss_callback', None):
+            if callable(opts['miss_callback']):
+                return opts['miss_callback'](key)
         return
 
     def read_only(self):

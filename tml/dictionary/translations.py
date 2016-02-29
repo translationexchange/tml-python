@@ -59,6 +59,6 @@ class Dictionary(AbstractDictionary):
                 opts={'cache_key': self.cache_key(key.language.locale, key.key)})['results']
 
             return Translation.from_data(key, data)
-        except ClientError:
+        except ClientError as e:
             raise TranslationIsNotExists(key, self)
 

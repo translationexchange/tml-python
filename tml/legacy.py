@@ -121,7 +121,7 @@ def execute(translation, data, options):
     return option.apply(data, options)
 
 
-def fetch(context, label, description):
+def fetch(context, legacy_label, description):
     """ Fetch translation for django i18n label
         Args:
             context (context.AbstractContext): translation context
@@ -130,13 +130,10 @@ def fetch(context, label, description):
         Returns:
             translation.Translation
     """
+    label = suggest_label(legacy_label)
     try:
         # Try to suggest translation replace %(name)s -> {name}
-        return context.fetch(suggest_label(label), description)
+        return context.fetch(label, description)
     except TranslationIsNotExists:
-        # Try to tranlate as is
-        try:
-            return context.fetch(label, description)
-        except TranslationIsNotExists:
-            return context.fallback(label, description)
+        return context.fallback(label, description)
 

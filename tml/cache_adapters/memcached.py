@@ -76,9 +76,8 @@ class BaseMemcachedAdapter(object):
     def fetch(self, key, opts=None):
         data = self._cache.get(self.versioned_key(key, opts))
         if data:
-            data = self._unpickle(data)
-        if data:
             self.debug('Cache hit: %s', key)
+            data = self._unpickle(data)
         else:
             if opts and opts.get('miss_callback', None):
                 if callable(opts['miss_callback']):

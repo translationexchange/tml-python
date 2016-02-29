@@ -56,11 +56,12 @@ class AbstractContext(RenderEngine):
         self.dict = dictionary
         super(AbstractContext, self).__init__()
 
-    def build_key(self, label, description):
+    def build_key(self, label, description, language=None):
         """ Build key """
+        language = language or self.language
         return Key(label = label,
                    description = description,
-                   language = self.language)
+                   language = language)
 
     def fetch(self, label, description):
         """ Fetch Translation
@@ -103,7 +104,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        return self.dict.fallback(Key(label = label, description = description, language = self.default_language))
+        return self.dict.fallback(self.build_key(label, description or '', language=self.default_language))
 
     def tr(self, label, data = {}, description = '', options = {}):
         """ Tranlate data

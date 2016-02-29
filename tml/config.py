@@ -112,7 +112,10 @@ class Config(BaseConfigMixin, Singleton):
             return 'https://staging-api.translationexchange.com'
 
     def cdn_host(self):
-        return 'http://cdn.translationexchange.com'
+        if self.environment == 'prod':
+            return 'http://cdn.translationexchange.com'
+        else:
+            return 'http://trex-snapshots.s3-us-west-1.amazonaws.com'
 
 
     def agent_host(self):

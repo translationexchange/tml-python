@@ -112,9 +112,7 @@ class SourceDictionary(Hashtable):
     def fetch(self, key):
         try:
             ret = super(SourceDictionary, self).fetch(key)
-            # print ret, key.locale, key.label
         except TranslationIsNotExists as translation_not_exists:
-            print 'miss', key.label, key.key
             self.missed_keys.append(key)
             raise translation_not_exists
         if len(ret) == 0:

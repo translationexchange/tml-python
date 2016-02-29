@@ -138,6 +138,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
                 response = requests.request(method, url, **self._request_config(method, params))
                 return self.process_response(response, opts)
         except HTTPError as e:
+            self.debug("HTTP RESPONSE ERROR for request %s", e.response.url)
             return None
 
     def call(self, url, method, params=None, opts=None):
@@ -151,13 +152,18 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             Returns:
                 dict: response
         """
+        empty_ret = {'results': {}}
         params = {} if params is None else self._compact_params(params)
         opts = {} if opts is None else self._compact_params(opts)
         # self.debug("IS LIVE MODE ACTIVATED: %s", self.is_live_api_request())
         if self.is_live_api_request():
-            return self.process_response(
-                self._api_call(url, method, params=params, opts=opts),
-                opts=opts)
+            try:
+                return self.process_response(
+                    self._api_call(url, method, params=params, opts=opts),
+                    opts=opts)
+            except HTTPError as e:
+                self.debug("HTTP RESPONSE ERROR for request %s", e.response.url)
+                return empty_ret
         else:
             data = None
             if self.should_enable_cache(method, opts):
@@ -165,7 +171,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
                 if self.cache.version.is_valid():
                     data = self.cache.fetch(
                         opts['cache_key'], opts={'miss_callback': self.on_miss})
-            return data or {'results': {}}
+            return data or empty_ret
 
     def _api_call(self, uri, method, params=None, opts=None):
         response = None

@@ -4,11 +4,13 @@ import logging.handlers
 import functools
 import json
 import gzip
+from contextlib import contextmanager
 from StringIO import StringIO
 import warnings
 from datetime import datetime, timedelta
 from time import mktime
 from .strings import to_string
+
 
 pj = os.path.join
 
@@ -88,3 +90,23 @@ def read_gzip(payload):
 def read_json(path):
     with open(path, 'rb') as fp:
         return json.loads(to_string(fp.read()))
+
+
+class cached_property(object):
+    """
+    Decorator that converts a method with a single self argument into a
+    property cached on the instance.
+
+    Optional ``name`` argument allows you to make cached properties of other
+    methods. (e.g.  url = cached_property(get_absolute_url, name='url') )
+    """
+    def __init__(self, func, name=None):
+        self.func = func
+        self.__doc__ = getattr(func, '__doc__')
+        self.name = name or func.__name__
+
+    def __get__(self, instance, type=None):
+        if instance is None:
+            return self
+        res = instance.__dict__[self.name] = self.func(instance)
+        return res

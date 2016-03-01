@@ -2,7 +2,7 @@ import unittest
 import os
 import time
 from tml.cache import CacheVersion, CachedClient
-from tml.cache_adapters import FileAdapter
+from tml.cache_adapters import file as FileAdapter
 from tml.cache_adapters.test_utils import check_alive
 from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter, BaseMemcachedAdapter
 from tml import configure
@@ -49,12 +49,11 @@ class CacheVersionTest(unittest.TestCase):
     def test_manipul(self):
         version = CacheVersion(self.cache)
         version.store(self.test_version)
-        version_obj = version.fetch()
-        self.assertTrue('t' in version_obj and 'version' in version_obj)
-        self.assertEquals(version_obj['version'], self.test_version, "version fetch")
+        cur_version = version.fetch()
+        self.assertEquals(cur_version, self.test_version, "version fetch")
         with override_config(version_check_interval=-1):
-            version_obj = version.fetch()
-            self.assertEquals(version_obj['version'], 'undefined')
+            cur_version = version.fetch()
+            self.assertEquals(cur_version, 'undefined')
             self.assertTrue(version.is_undefined())
             self.assertTrue(version.is_invalid())
         version.store('new-ver')
@@ -100,14 +99,14 @@ class CacheTest(unittest.TestCase):
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'namespace': 'tml-2', 'ttl': 3600}):
             cache = CachedClient.instance()
             self.assertIsInstance(cache, BaseMemcachedAdapter, 'proper factory build')
-            self.assertEquals(cache.default_namespace, 'tml-2')
             self.assertEquals(cache.default_timeout, 3600)
+            cache._drop_it()
 
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'backend': 'pylibmc', 'host': '127.0.0.1', 'namespace': 'tml-3', 'ttl': 1200}):
             cache = CachedClient.instance()
             self.assertIsInstance(cache, BaseMemcachedAdapter, 'proper factory build')
-            self.assertEquals(cache.default_namespace, 'tml-3')
             self.assertEquals(cache.default_timeout, 1200)
+            cache._drop_it()
 
 
     def test_memcache_funct(self):
@@ -116,6 +115,7 @@ class CacheTest(unittest.TestCase):
             check_alive(cache)
             self._test_memcache_func(cache)
             self._test_versioning(cache)
+            cache._drop_it()
 
     def test_pylibmc_funct(self):
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'backend': 'pylibmc', 'host': '127.0.0.1', 'namespace': 'tml-test'}):
@@ -123,6 +123,7 @@ class CacheTest(unittest.TestCase):
             check_alive(cache)
             self._test_memcache_func(cache)
             self._test_versioning(cache)
+            cache._drop_it()
 
     def _test_memcache_func(self, cache):
         self.assertEquals(cache.store('foo', 'bar'), 'bar', 'dummy store')

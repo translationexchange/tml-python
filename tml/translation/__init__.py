@@ -59,6 +59,9 @@ class Key(object):
         else:
             return key
 
+    def __eq__(self, other):
+        return self.key == other.key
+
 
 class TranslationOption(Context):
     """ Translation option with context """

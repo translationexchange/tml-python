@@ -34,6 +34,10 @@ from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
 from .session_vars import set_current_translator, set_current_context
 from .cache import CachedClient
+from .utils import cached_property
+
+
+__author__ = 'xepa4ep, a@toukmanov.ru'
 
 
 class ContextNotConfigured(Error):
@@ -46,15 +50,33 @@ class AbstractContext(RenderEngine):
     language = None
     dict = None
 
-    def __init__(self, language, dictionary):
+    def __init__(self, language):
         """ .ctor
             Args:
                 language (language.Language): selected language
                 dictionary (dictionary.AbstractDictionary): dict object for translation
         """
-        self.language = language
-        self.dict = dictionary
+        self._language = language
+        self._block_option_queue = []
         super(AbstractContext, self).__init__()
+        self.dict = self.build_dict(self.language)
+
+    def push_options(self, opts):
+        self._block_option_queue.append(opts)
+
+    def pop_options(self):
+        return self._block_option_queue.pop()
+
+    @property
+    def block_options(self):
+        return self._block_option_queue and self._block_option_queue[-1] or {}
+
+    def block_option(self, key, lookup=True, default=None):
+        if lookup:
+            for options in reversed(self._block_option_queue):
+                if key in options:
+                    return options.get(key, default)
+        return self.block_options.get(key, default)
 
     def build_key(self, label, description, language=None):
         """ Build key """
@@ -79,7 +101,7 @@ class AbstractContext(RenderEngine):
 
     @property
     def default_language(self):
-        """ Default languahr getter
+        """ Default language getter
             Returns:
                 language.Language
         """
@@ -87,6 +109,13 @@ class AbstractContext(RenderEngine):
             self._default_language = self.application.language(self.default_locale)
         return self._default_language
 
+    @property
+    def language(self):
+        target_locale = self.block_option('target_locale', None)
+        if target_locale:
+            return self.application.language(target_locale)
+        else:
+            return self._language
 
     @property
     def default_locale(self):
@@ -160,9 +189,7 @@ class LanguageContext(AbstractContext):
             application = Application.load_default(
                 client, locale=locale, source=source)
         language = application.language(locale)
-        super(LanguageContext, self).__init__(
-            dictionary=self.build_dict(language),
-            language=language)
+        super(LanguageContext, self).__init__(language=language)
         set_current_context(self)
 
     def build_dict(self, language, **kwargs):
@@ -225,10 +252,8 @@ class LanguageContext(AbstractContext):
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)
 
-
     def is_inline_mode(self):
         return self.translator and self.translator.is_inline()
-
 
 class SourceContext(LanguageContext):
     """ Context with source """
@@ -237,14 +262,27 @@ class SourceContext(LanguageContext):
             Args:
                 source (string): source name
         """
-        self.source = source
+        self.source = source   # ref name to main source
         super(SourceContext, self).__init__(source=source, **kwargs)
 
+    @property
+    def source_name(self):   # current source: virtual or main
+        return self.block_option('source', default=self.source)
+
+    @property
+    def source_path(self):
+        source_builder = []
+        for opts in self._block_option_queue:
+            if not 'source' in opts or not opts.get('source', None):
+                continue
+            source_builder.append(opts['source'])
+        source_builder = list(reversed(source_builder))
+        source_builder.insert(0, self.source)
+        return CONFIG['source_separator'].join(source_builder)
 
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """
-        source = language.application.source(
-            self.source, language.locale)
+        source = language.application.source(self.source_name, language.locale, source_path=self.source_path)
         return source
 
     def deactivate(self):

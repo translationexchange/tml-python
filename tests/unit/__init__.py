@@ -35,6 +35,7 @@ from tml.translation import Key
 from hashlib import md5
 import six
 from tml.strings import to_string
+from tml.session_vars import set_current_context, get_current_context
 import json
 
 __author__ = 'a@toukamnov.ru'
@@ -47,7 +48,8 @@ class api_test(unittest.TestCase):
         self.client.read('projects/2/translations', {'locale':'ru','page':1}, 'projects/1/translations.json')
 
     def test_configure_first(self):
-        tml.DEFAULT_CONTEXT = None
+        # tml.DEFAULT_CONTEXT = None
+        set_current_context(None)
         with self.assertRaises(ContextNotConfigured):
             tr('Hello')
 
@@ -61,9 +63,10 @@ class api_test(unittest.TestCase):
 
     def test_initialize_globals(self):
         initialize(locale = 'ru', application_id = None, client = self.client)
-        self.assertEquals('ru', tml.DEFAULT_CONTEXT.locale)
-        self.assertEquals(1, tml.DEFAULT_CONTEXT.application.id, 'Load default application')
-        self.assertEquals(type(tml.DEFAULT_CONTEXT.dict), Dictionary, 'No preload data')
+        context = get_current_context()
+        self.assertEquals('ru', context.locale)
+        self.assertEquals(1, context.application.id, 'Load default application')
+        self.assertEquals(type(context.dict), Dictionary, 'No preload data')
         self.assertEquals(u'Маша любезно дала тебе 2 яблока', tr('{actor} give you {count} apples', {'actor':Gender.female('Маша'),'count':2}, 'apples'))
         self.assertEquals(u'<a href="http://site.com">Маша</a> give <strong>you</strong> 2 apples', tr('[link]{actor}[/link] give [b]you[/b] {count} apples', {'actor':Gender.female('Маша'),'count':2, 'link':{'href':'http://site.com'}}, 'apple', {'link':{'href':'http://site.com'}}))
         self.assertEquals(u'Маша give you 2 apples', tr('{user.name} give you {count} apples', {'user': DummyUser('Маша', gender='female'), 'count': 2}, 'check method'))

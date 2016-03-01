@@ -8,7 +8,6 @@ class SourceTranslations(object):
         self.application = application
         self.cache = {}
         self.ignored_keys = []
-        self.sources = []
 
     def is_ignored(self, key):
         try:
@@ -17,11 +16,10 @@ class SourceTranslations(object):
             return False
 
     def add_locale(self, locale, results=None,
-                ignored_keys=None, sources=None):
+                ignored_keys=None, sources=None, **init_kwargs):
         language = self.language_by_locale(locale)
         self.ignored_keys = ignored_keys or []
-        self.sources = sources or []
-        source_dict = SourceDictionary(self.source, language, translations=results)
+        source_dict = SourceDictionary(self.source, language, translations=results, **init_kwargs)
         self.cache.setdefault(locale, source_dict).load_translations()
         return self
 

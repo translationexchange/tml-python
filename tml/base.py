@@ -31,12 +31,15 @@ class SingletonMixin(object):
         if not hasattr(cls, '_instance_dict'):
             cls._instance_dict = {}
         if key not in cls._instance_dict:
-            print key, cls, 'hi'
             with cls.__singleton_lock:
                 if key not in cls._instance_dict:
                     cls._instance_dict[key] = \
                         super(SingletonMixin, cls).__new__(cls, *args, **kwargs)
         return cls._instance_dict[key]
+
+    def _drop_it(self):
+        key = hsh(self.__class__)
+        self._instance_dict.pop(key, None)
 
 
 class Singleton(SingletonMixin):

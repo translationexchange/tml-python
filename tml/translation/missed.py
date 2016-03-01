@@ -7,7 +7,7 @@ class MissedKeys(object):
     """ Object append missed key"""
     def __init__(self, client):
         self.client = client
-        self.keys = []
+        self.keys = set([])
 
     def submit(self, missed_keys):
         """ Submit keys over API
@@ -21,7 +21,7 @@ class MissedKeys(object):
             Args:
                 key (Key): translation key
         """
-        self.keys.append(key)
+        self.keys.add(key)
 
     def as_dict(self):
         """ Dict repr of keys list """

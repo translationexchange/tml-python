@@ -30,30 +30,32 @@ from ..utils import pj
 from ..translation.missed import MissedKeys
 from ..api import APIError
 from ..cache import CachedClient
+from ..session_vars import get_current_context
+from ..config import CONFIG
 from tml.dictionary import TranslationIsNotExists
 
 
 class SourceMissed(MissedKeys):
     """ Set of missed keys in source """
-    def __init__(self, client, source):
+    def __init__(self, client, source_path):
         """ .ctor
             Args:
                 client (tml.api.AbstractClient): API client
                 source (string): source name
         """
         super(SourceMissed, self).__init__(client)
-        self.source = source
+        self.source_path = source_path
 
     def as_dict(self):
         """ Dict repr for API call """
         ret = super(SourceMissed, self).as_dict()
-        ret.update({'source': self.source})
+        ret.update({'source': self.source_path})
         return ret
 
 
 class SourceDictionary(Hashtable):
     """ Dictionary of keys grouped by source """
-    def __init__(self, source, language, fallback=None, translations=None):
+    def __init__(self, source, language, source_path=None, fallback=None, translations=None):
         """ .ctor
             Args:
                 source (string): source name
@@ -61,10 +63,15 @@ class SourceDictionary(Hashtable):
                 missed_keys (list): list of missed keys
         """
         self.source = source
+        self.source_path = source_path or source
         self.language = language
-        self.missed_keys = SourceMissed(self.language.client, source)
+        self.missed_keys = SourceMissed(self.language.client, self.source_path)
         translations = translations or self.fetch_translations()
         super(SourceDictionary, self).__init__(translations=translations, fallback=fallback)
+
+    @property
+    def context(self):
+        return get_current_context()
 
     @property
     def key(self):

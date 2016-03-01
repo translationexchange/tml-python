@@ -186,7 +186,7 @@ class Application(object):
             path = '/' + path
         return "%s%s" % (self.tools['assets'], path)
 
-    def source(self, source, locale):
+    def source(self, source, locale, **init_kwargs):
         """ .ctar
             Params:
                 source (string) - source name
@@ -196,7 +196,7 @@ class Application(object):
         source_translations = self.sources.get(source, None)
         if not source_translations:
             source_translations = self.sources[source] = SourceTranslations(source, self)
-        return source_translations.add_locale(locale).hashtable_by_locale(locale)
+        return source_translations.add_locale(locale, **init_kwargs).hashtable_by_locale(locale)
 
     def get_language_url(self, locale):
         """ Language URL for locale

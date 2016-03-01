@@ -40,7 +40,6 @@ class BaseConfigMixin(dict):
             if orig_v is not None:
                 if isinstance(orig_v, dict):
                     v = merge(copy(orig_v), v)
-                    # print merge(copy(orig_v), v)
                 self[k] = v
 
 class Config(BaseConfigMixin, Singleton):
@@ -102,6 +101,8 @@ class Config(BaseConfigMixin, Singleton):
     #},
 
     version_check_interval = 3600
+
+    source_separator = '@:@'
 
     @property
     def default_locale(self):

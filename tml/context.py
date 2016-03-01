@@ -65,7 +65,8 @@ class AbstractContext(RenderEngine):
         self._block_option_queue.append(opts)
 
     def pop_options(self):
-        return self._block_option_queue.pop()
+        opts = self._block_option_queue.pop(-1)
+        return opts
 
     @property
     def block_options(self):
@@ -263,6 +264,7 @@ class SourceContext(LanguageContext):
                 source (string): source name
         """
         self.source = source   # ref name to main source
+        self._used_sources = set([source])
         super(SourceContext, self).__init__(source=source, **kwargs)
 
     @property
@@ -279,13 +281,29 @@ class SourceContext(LanguageContext):
         source_builder.insert(0, self.source)
         return CONFIG['source_separator'].join(source_builder)
 
+    def fetch(self, label, description):
+        """ Fetch Translation
+            Args:
+                label (string): label
+                description (string): description
+            Returns:
+                Translation
+        """
+        if self.source_name == self.source:
+            return super(SourceContext, self).fetch(label, description)
+        self._used_sources.add(self.source_name)
+        dict = self.build_dict(self.language)
+        return dict.fetch(self.build_key(label, description))
+
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """
         source = language.application.source(self.source_name, language.locale, source_path=self.source_path)
         return source
 
     def deactivate(self):
-        self.dict.flush()
+        for source in self._used_sources:
+            self.application.source(source, self.locale).flush()
+        self._used_sources = set([])
 
 
 class SnapshotContext(LanguageContext):

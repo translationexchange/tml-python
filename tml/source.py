@@ -19,8 +19,10 @@ class SourceTranslations(object):
                 ignored_keys=None, sources=None, **init_kwargs):
         language = self.language_by_locale(locale)
         self.ignored_keys = ignored_keys or []
-        source_dict = SourceDictionary(self.source, language, translations=results, **init_kwargs)
-        self.cache.setdefault(locale, source_dict).load_translations()
+        if locale in self.cache:
+            self.cache[locale].load_translations()
+        else:
+            self.cache[locale] = SourceDictionary(self.source, language, translations=results, **init_kwargs).load_translations()
         return self
 
     def hashtable_by_locale(self, locale):

@@ -91,7 +91,7 @@ class SourceDictionary(Hashtable):
             3. in all other cases, fetch translations from api"""
         if translations:
             self.translations = translations
-        elif self.translations:
+        elif self.translations is not None:
             pass
         else:
             self.translations = self.fetch_translations()

@@ -49,7 +49,7 @@ class AbstractContext(RenderEngine):
     """ Wrapper for dictionary """
     language = None
     dict = None
-
+    _block_option_queue = []
     def __init__(self, language):
         """ .ctor
             Args:
@@ -57,7 +57,7 @@ class AbstractContext(RenderEngine):
                 dictionary (dictionary.AbstractDictionary): dict object for translation
         """
         self._language = language
-        self._block_option_queue = []
+        # self._block_option_queue = []
         super(AbstractContext, self).__init__()
         self.dict = self.build_dict(self.language)
 
@@ -276,7 +276,6 @@ class SourceContext(LanguageContext):
             if not 'source' in opts or not opts.get('source', None):
                 continue
             source_builder.append(opts['source'])
-        source_builder = list(reversed(source_builder))
         source_builder.insert(0, self.source)
         return CONFIG['source_separator'].join(source_builder)
 

@@ -25,6 +25,8 @@ class ListTest(unittest.TestCase):
         self.assertEquals('<b>a</b>, <b>b</b>, <b>c</b>', list.render(self.context), 'Apply template')
         list = List([{'name':to_string('Вася'),'gender':'male'},{'name':to_string('Андрей'),'gender':'male'},{'name':to_string('Анна'),'gender':'female'}], tpl = Template('{$0::dat}'), last_separator = to_string('и'))
         self.assertEquals(to_string('Васе, Андрею и Анне'), list.render(self.context))
+        list = List([{'name':to_string('Вася'),'gender':'male'},{'name':to_string('Андрей'),'gender':'male'},{'name':to_string('Анна'),'gender':'female'}], tpl='{$0::dat}', last_separator=to_string('и'))
+        self.assertEquals(to_string('Васе, Андрею и Анне'), list.render(self.context))
 
 if __name__ == '__main__':
     unittest.main()

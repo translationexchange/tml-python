@@ -28,6 +28,8 @@ from .tools import Renderable
 from argparse import ArgumentError
 from tml.dictionary import TranslationIsNotExists
 from .translation import OptionIsNotFound
+from .tools import BasePreprocessor
+
 
 class RenderEngine(object):
     """ Engine to render translations """
@@ -84,7 +86,10 @@ class Data(object):
             return self.generate_item(key)
         for preprocessor in self.context.data_preprocessors:
             # preprocess data ([] -> List etc)
-            ret = preprocessor(ret, self.context)
+            if issubclass(preprocessor, BasePreprocessor):
+                ret = preprocessor(ret, self.data).process()
+            else:
+                ret = preprocessor(ret, self.data)
         # Apply renderable data:
         if isinstance(ret, Renderable):
             ret = ret.render(self.context)

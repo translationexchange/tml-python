@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 # encoding: UTF-8
-from .template import Variable
+from .template import Variable, Template
 from ..strings import to_string
-from . import Renderable
+from . import Renderable, BasePreprocessor
 import six
 
 class List(Renderable):
@@ -13,6 +13,8 @@ class List(Renderable):
         self.separator = to_string(separator)
         self.last_separator = to_string(last_separator) if last_separator else None
         self.tpl = tpl if not tpl is None else Variable()
+        if isinstance(self.tpl, six.string_types):
+            self.tpl = Template(self.tpl)
 
     def render(self, context):
         """ Convert to unicode 
@@ -40,8 +42,26 @@ class List(Renderable):
     def render_items(self, limit, tpl):
             return self.separator.join([tpl(item) for item in self.items[0:limit]])
 
+
 def preprocess_lists(data, context):
+    reserved_keys = ('last_separator', 'separator', 'limit', 'tpl')
+    kwargs = {key:context[key] for key in reserved_keys if key in context}
     if type(data) is list:
-        return List(data, last_separator = 'and')
+        return List(data, **kwargs)
     return data
+
+
+class ListPreprocessor(BasePreprocessor):
+
+    reserved_keys = ('last_separator', 'separator', 'limit', 'tpl')
+
+    def __init__(self, items, context=None):
+        self.items = items
+        self.context = context or {}
+
+    def process(self):
+        if not type(self.items) is list:
+            return self.items
+        kwargs = {key:self.context[key] for key in self.reserved_keys if key in self.context}
+        return List(self.items, **kwargs)
 

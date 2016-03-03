@@ -9,6 +9,8 @@ dist
 django/dist
 *.egg-info/
 *.swp
+.tox
+.cache
 .coverage
 tml.log
 logs

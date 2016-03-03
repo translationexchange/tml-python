@@ -45,8 +45,8 @@ class Logger(Singleton):
 
     def __getattr__(self, name):
         if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
-            if self.logger is None:
-                raise LoggerNotConfigured('Initialize or set logger instance before accessing it\'s methods.')
+            if self.logger is None:  # suppress if not configured 
+                return lambda *args, **kwargs: None
             return getattr(self.logger, name)
         return getattr(self, name)
 

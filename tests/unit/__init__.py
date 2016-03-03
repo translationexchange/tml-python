@@ -89,7 +89,7 @@ class api_test(unittest.TestCase):
         c = build_context(client = self.client, locale = 'ru')
         key = Key(label = label, description = '', language = c.language)
         self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
-        self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
+#        self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
 
     def test_defaults(self):
         # completly empty en translation:

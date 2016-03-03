@@ -4,7 +4,7 @@ import os
 import shutil
 import unittest
 from tml.logger import Logger, LoggerNotConfigured
-from .common import FIXTURES_PATH
+from ..common import FIXTURES_PATH
 
 pj = os.path.join
 LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
@@ -29,13 +29,6 @@ class ApplicationTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.path), 'path created')
         self.assertTrue(hasattr(logger, 'logger'), 'logger is set')
         self.assertEquals(Logger(path=self.path), logger, 'test singleton')
-
-        with self.assertRaises(LoggerNotConfigured):
-            orig_logger = logger.logger
-            logger.logger = None
-            logger.debug('hi')
-            logger.logger = orig_logger
-
 
     def test_logging(self):
         logger = DummyLogger(path=self.path)

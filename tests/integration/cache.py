@@ -6,7 +6,7 @@ from tml.cache_adapters import file as FileAdapter
 from tml.cache_adapters.test_utils import check_alive
 from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter, BaseMemcachedAdapter
 from tml import configure
-from .common import override_config, FIXTURES_PATH
+from tests.common import override_config, FIXTURES_PATH
 
 
 class MockCachedClient(CachedClient):
@@ -73,7 +73,7 @@ class CacheTest(unittest.TestCase):
         self.version = '20160218065921'
 
     def test_init_adapter(self):
-        path = 'tests.unit.cache.DumbCachedClient'
+        path = 'tests.integration.cache.DumbCachedClient'
         with override_config(cache={'enabled': True}):
             cache = CachedClient.instance(adapter=path)
             self.assertTrue(isinstance(cache, CachedClient))

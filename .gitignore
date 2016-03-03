@@ -16,3 +16,4 @@ django/dist
 tml.log
 logs
 tests/fixtures/logs/tml.log
+build

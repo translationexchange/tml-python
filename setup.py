@@ -55,7 +55,7 @@ if sys.argv[-1] == 'tag':
     sys.exit()
 
 
-with open(pj(here, 'README.rst'), encoding='utf-8') as f:
+with open(pj(here, 'README.md'), encoding='utf-8') as f:
     readme = f.read()
 with open(pj(here, 'HISTORY.rst'), encoding='utf-8') as f:
     history = f.read()
@@ -67,7 +67,7 @@ requirements = [
 
 
 setup(
-    name='tml',
+    name='pytml',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see

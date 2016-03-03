@@ -12,6 +12,7 @@ django/dist
 .tox
 .cache
 .coverage
+.DS_Store
 tml.log
 logs
 tests/fixtures/logs/tml.log

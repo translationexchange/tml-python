@@ -17,3 +17,4 @@ tml.log
 logs
 tests/fixtures/logs/tml.log
 build
+.pypirc

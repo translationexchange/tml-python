@@ -50,8 +50,8 @@ if sys.argv[-1] == 'publish':
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
-    os.system("git tag -a %s -m 'version %s'" % (version, version))
-    os.system("git push --tags")
+    os.system("git tag -f -a %s -m 'version %s'" % (version, version))
+    os.system("git push --tags --force")
     sys.exit()
 
 

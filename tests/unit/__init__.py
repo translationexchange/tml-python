@@ -79,7 +79,10 @@ class api_test(unittest.TestCase):
         self.assertEquals(to_string('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
         RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
         hello_all = c.tr('Hello {name}', {'name': [to_string('Вася'),to_string('Петя'),'Коля']})
-        self.assertEquals(to_string('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists')
+        self.assertEquals(to_string('Привет Вася, Петя, Коля'), hello_all)
+        RenderEngine.data_preprocessors.append(tml_list.ListPreprocessor)
+        hello_all = c.tr('Hello {name}', {'name': [to_string('Вася'),to_string('Петя'),'Коля'], 'last_separator': 'and'})
+        self.assertEquals(to_string('Привет Вася, Петя and Коля'), hello_all, 'Preprocess lists: class preprocessor')
 
     def test_fallback_language(self):
         label = to_string('Only english tranlation')

@@ -7,7 +7,6 @@ TML Library For Python
 [![Build Status](https://travis-ci.org/translationexchange/tml-python.png?branch=master)](https://travis-ci.org/translationexchange/tml-python)
 [![Coverage Status](https://coveralls.io/repos/translationexchange/tml-python/badge.png?branch=master)](https://coveralls.io/r/translationexchange/tml-python?branch=master)
 [![Dependency Status](https://www.versioneye.com/user/projects/54c1457a6c00352081000416/badge.svg?style=flat)](https://www.versioneye.com/user/projects/54c1457a6c00352081000416)
-[![Gem Version](https://badge.fury.io/rb/tml.svg)](http://badge.fury.io/rb/tml)
 
 TML library for Python is a set of classes that provide translation functionality for any Python based application.
 The library uses Translation Markup Language that allows you to encode complex language structures in simple, yet powerful forms.

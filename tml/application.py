@@ -28,6 +28,7 @@ from .language import Language
 from .source import SourceTranslations
 from .config import CONFIG
 from .session_vars import get_current_translator
+from .logger import get_logger
 
 
 class Application(object):
@@ -198,6 +199,15 @@ class Application(object):
             source_translations = self.sources[source] = SourceTranslations(source, self)
         return source_translations.add_locale(locale, **init_kwargs).hashtable_by_locale(locale)
 
+    def ignored_key(self, key):
+        _key = key.key
+
+        for source_translations in self.sources.values():
+            if source_translations.is_ignored(_key):
+                self.logger.debug('Ignored Key[%s]: %s', _key, key.label)
+                return True
+        return False
+
     def get_language_url(self, locale):
         """ Language URL for locale
             Args:
@@ -222,6 +232,10 @@ class Application(object):
 
     def feature_enabled(self, key):
         return self.features.get(key, False)
+
+    @property
+    def logger(self):
+        return get_logger()
 
 
 class LanguageNotSupported(Error):

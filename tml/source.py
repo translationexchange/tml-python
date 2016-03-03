@@ -7,18 +7,15 @@ class SourceTranslations(object):
         self.source = source
         self.application = application
         self.cache = {}
-        self.ignored_keys = []
+        self.ignored_keys = set([])
 
     def is_ignored(self, key):
-        try:
-            return self.ignored_keys.index(key) and True
-        except ValueError:
-            return False
+        return key in self.ignored_keys
 
     def add_locale(self, locale, results=None,
                 ignored_keys=None, sources=None, **init_kwargs):
         language = self.language_by_locale(locale)
-        self.ignored_keys = ignored_keys or []
+        self.ignored_keys |= set(ignored_keys or [])
         if locale in self.cache:
             self.cache[locale].load_translations()
         else:

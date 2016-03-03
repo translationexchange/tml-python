@@ -94,6 +94,9 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
+        key = self.build_key(label, description)
+        if self.application.ignored_key(key):
+            raise TranslationIsNotExists(key, self.dict)
         if self.dict:
             return self.dict.fetch(self.build_key(label, description))
         raise ContextNotConfigured(self)
@@ -291,6 +294,9 @@ class SourceContext(LanguageContext):
         """
         if self.source_name == self.source:
             return super(SourceContext, self).fetch(label, description)
+        return self.fetch_from_virtual(label, description)
+
+    def fetch_from_virtual(self, label, description):
         self._used_sources.add(self.source_name)
         dict = self.build_dict(self.language)
         return dict.fetch(self.build_key(label, description))

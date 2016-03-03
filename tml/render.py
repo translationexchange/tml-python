@@ -86,8 +86,9 @@ class Data(object):
             return self.generate_item(key)
         for preprocessor in self.context.data_preprocessors:
             # preprocess data ([] -> List etc)
-            if issubclass(preprocessor, BasePreprocessor):
-                ret = preprocessor(ret, self.data).process()
+            if type(preprocessor) is type:
+                if isinstance(preprocessor, BasePreprocessor):
+                    ret = preprocessor(ret, self.data).process()
             else:
                 ret = preprocessor(ret, self.data)
         # Apply renderable data:

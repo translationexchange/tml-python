@@ -35,6 +35,7 @@ import six
 class Date(date):
     """ Date context """
     supported_formats = ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S']
+    
     @classmethod
     def match(cls, data):
         """ Check is data has a date context

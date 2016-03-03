@@ -188,6 +188,8 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
                    'accept': 'application/json',
                    'accept-Encoding': 'gzip, deflate'}
         config = {'timeout': 30, 'headers': headers}
+        params = {k: str(v).lower() if type(v) is bool else v
+                  for k, v in params.iteritems()}
         if method == 'post':
             headers['content-type'] = 'application/x-www-form-urlencoded'
             config['data'] = params

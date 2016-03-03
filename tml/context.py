@@ -49,7 +49,7 @@ class AbstractContext(RenderEngine):
     """ Wrapper for dictionary """
     language = None
     dict = None
-    _block_option_queue = []
+    # _block_option_queue = []
     def __init__(self, language):
         """ .ctor
             Args:
@@ -57,7 +57,7 @@ class AbstractContext(RenderEngine):
                 dictionary (dictionary.AbstractDictionary): dict object for translation
         """
         self._language = language
-        # self._block_option_queue = []
+        self._block_option_queue = []
         super(AbstractContext, self).__init__()
         self.dict = self.build_dict(self.language)
 
@@ -86,6 +86,14 @@ class AbstractContext(RenderEngine):
                    description = description,
                    language = language)
 
+    def _fetch_translation(self, dict, label, description):
+        key = self.build_key(label, description)
+        if self.application.ignored_key(key):
+            raise TranslationIsNotExists(key, self.dict)
+        if dict:
+            return dict.fetch(self.build_key(label, description))
+        raise ContextNotConfigured(self)
+
     def fetch(self, label, description):
         """ Fetch Translation
             Args:
@@ -94,12 +102,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        key = self.build_key(label, description)
-        if self.application.ignored_key(key):
-            raise TranslationIsNotExists(key, self.dict)
-        if self.dict:
-            return self.dict.fetch(self.build_key(label, description))
-        raise ContextNotConfigured(self)
+        return self._fetch_translation(self.dict, label, description)
 
     _default_language = None
 
@@ -299,7 +302,7 @@ class SourceContext(LanguageContext):
     def fetch_from_virtual(self, label, description):
         self._used_sources.add(self.source_name)
         dict = self.build_dict(self.language)
-        return dict.fetch(self.build_key(label, description))
+        return self._fetch_translation(dict, label, description)
 
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """

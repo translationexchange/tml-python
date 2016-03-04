@@ -5,7 +5,7 @@ import functools
 import json
 import gzip
 from contextlib import contextmanager
-from StringIO import StringIO
+from six import StringIO
 import warnings
 from datetime import datetime, timedelta
 from time import mktime

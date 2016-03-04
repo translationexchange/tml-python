@@ -4,6 +4,7 @@ import logging.handlers
 import functools
 import json
 import gzip
+from codecs import open
 from contextlib import contextmanager
 from six import StringIO, functools
 import warnings
@@ -89,7 +90,7 @@ def read_gzip(payload):
     return gzip_f.read()
 
 def read_json(path):
-    with open(path, 'rb') as fp:
+    with open(path, 'rb', encoding='utf-8') as fp:
         return json.loads(to_string(fp.read()))
 
 

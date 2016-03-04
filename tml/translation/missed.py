@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 # encoding: UTF-8
 from json import dumps
-from urllib import quote
 
 class MissedKeys(object):
     """ Object append missed key"""

@@ -21,15 +21,17 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
-
 from json import loads
 from os import listdir
 from os.path import isdir
+import re
+from codecs import open
 from six.moves.urllib.parse import urlencode
 from six import iteritems
 from . import AbstractClient, APIError
-import re
+
+
+__author__ = 'xepa4ep, a@toukmanov.ru'
 
 
 def clean_url(url):
@@ -174,7 +176,7 @@ class File(Hashtable):
         if path[0] != '/':
             # relative path:
             path = '%s/%s' % (self.basedir, path)
-        resp = loads(open(path).read())
+        resp = loads(open(path, encoding='utf-8').read())
         self.data[self.build_url(url, params)] = resp
         if not strict:
             self.data[url] = resp

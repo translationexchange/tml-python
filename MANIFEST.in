@@ -1,2 +1,2 @@
-include *.rst LICENSE
+include *.rst LICENSE README.md
 recursive-include tml/defaults *

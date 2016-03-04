@@ -1,4 +1,4 @@
-from dictionary.source import SourceDictionary
+from .dictionary.source import SourceDictionary
 
 class SourceTranslations(object):
     """Locale => Translation dictionary per single source."""

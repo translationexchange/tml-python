@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-from json import loads
+import json
 from os import listdir
 from os.path import isdir
 import re
@@ -175,8 +175,8 @@ class File(Hashtable):
         if path[0] != '/':
             # relative path:
             path = '%s/%s' % (self.basedir, path)
-        with open(path, encoding='utf-8') as fd:
-            resp = loads(fd.read())
+        with open(path, 'rb') as fp:
+            resp = json.loads(fp.read().decode('utf-8'))
         self.data[self.build_url(url, params)] = resp
         if not strict:
             self.data[url] = resp

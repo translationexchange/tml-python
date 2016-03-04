@@ -5,12 +5,13 @@ import functools
 import json
 import gzip
 from contextlib import contextmanager
-from six import StringIO
+from six import StringIO, functools
 import warnings
 from datetime import datetime, timedelta
 from time import mktime
 from .strings import to_string
 
+reduce = functools.reduce
 
 pj = os.path.join
 

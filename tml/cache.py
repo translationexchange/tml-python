@@ -3,15 +3,12 @@ from __future__ import absolute_import
 from six import string_types
 from importlib import import_module
 from types import FunctionType
+from six.moves.urllib.parse import urlencode
 from .base import SingletonMixin
 from .config import CONFIG
 from .utils import interval_timestamp, ts
 from .logger import LoggerMixin
-try:
-    from urllib import urlencode
-except ImportError:
-    # PY3
-    from urllib.parse import urlencode
+
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
 

@@ -23,13 +23,10 @@
 from __future__ import absolute_import
 __author__ = 'a@toukmanov.ru'
 
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
 from json import loads
 from os import listdir
 from os.path import isdir
+from six.moves.urllib.parse import urlencode
 from . import AbstractClient, APIError
 import re
 

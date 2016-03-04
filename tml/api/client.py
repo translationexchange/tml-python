@@ -259,6 +259,7 @@ if CONFIG.verbose:
     # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
     # the only thing missing will be the response.body which is not logged.
     import logging
+    from six import http_client
     try: # for Python 3
         from http.client import HTTPConnection
     except ImportError:

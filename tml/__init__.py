@@ -42,7 +42,7 @@ from .session_vars import get_current_context
 
 __author__ = 'xepa4ep, a@toukmanov.ru'
 
-__VERSION__ = '0.3.0'
+__VERSION__ = '0.2.0'
 
 
 def full_version():

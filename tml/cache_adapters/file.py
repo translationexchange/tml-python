@@ -29,7 +29,7 @@ class FileAdapter(object):
         if os.path.exists(path):
             self.debug('cache hit: %s', key)
             with open(path, 'rb') as fp:
-                self.cache[key] = json.loads(to_string(fp.read()))
+                self.cache[key] = json.load(fp)
             return self.cache[key]
         self.debug('cache miss: %s', key)
         if opts and opts.get('miss_callback', None):

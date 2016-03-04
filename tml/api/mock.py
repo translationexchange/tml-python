@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-from json import load
+from json import loads
 from os import listdir
 from os.path import isdir
 import re
@@ -29,7 +29,6 @@ from codecs import open
 from six.moves.urllib.parse import urlencode
 from six import iteritems
 from . import AbstractClient, APIError
-
 
 __author__ = 'xepa4ep, a@toukmanov.ru'
 
@@ -177,7 +176,7 @@ class File(Hashtable):
             # relative path:
             path = '%s/%s' % (self.basedir, path)
         with open(path, encoding='utf-8') as fd:
-            resp = load(fd)
+            resp = loads(fd.read())
         self.data[self.build_url(url, params)] = resp
         if not strict:
             self.data[url] = resp

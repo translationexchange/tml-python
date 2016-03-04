@@ -1,9 +1,9 @@
 # encoding: UTF-8
 import json
 import os
+from codecs import open
 from ..config import CONFIG
 from ..strings import to_string
-
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
 
@@ -28,8 +28,8 @@ class FileAdapter(object):
         path = self.file_path(key)
         if os.path.exists(path):
             self.debug('cache hit: %s', key)
-            with open(path, 'rb') as fp:
-                self.cache[key] = json.load(fp)
+            with open(path, encoding='utf-8') as fp:
+                self.cache[key] = json.loads(fp.read())
             return self.cache[key]
         self.debug('cache miss: %s', key)
         if opts and opts.get('miss_callback', None):

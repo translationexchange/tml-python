@@ -111,7 +111,7 @@ class Hashtable(AbstractClient):
                 url, url_with_params, has_params = self.rewrite_path(self.build_url(url, params))
                 self.url = url
                 return self.data[url_with_params]
-            except self.handle_nostrict:
+            except self.handle_nostrict as e:
                 # print self.rewrite_path(self.build_url(url, params)), debug(self.data, 'projects/2'), url
                 return self.data[url]
         except KeyError as key_not_exists:
@@ -130,6 +130,9 @@ class Hashtable(AbstractClient):
 
         if params is None:
             return url
+        not_important_params = ('all', )
+        for param in not_important_params:
+            params.pop(param, None)
         sorted_params = sorted(params.items(), key=lambda cur: cur[0])
         return url + ('' if not params else '?' + urlencode(sorted_params))
 

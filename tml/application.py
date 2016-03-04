@@ -23,6 +23,7 @@
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
 
+from six import iteritems
 from .exceptions import Error
 from .language import Language
 from .source import SourceTranslations
@@ -126,11 +127,11 @@ class Application(object):
         if not extensions:
             return
         source_locale = self.default_locale
-        for locale, data in extensions.get('languages', {}).iteritems():
+        for locale, data in iteritems(extensions.get('languages', {})):
             if self.default_locale != locale:
                 source_locale = locale
             self.languages_by_locale[locale] = Language.from_dict(self, data)
-        for source, data in extensions.get('sources', {}).iteritems():
+        for source, data in iteritems(extensions.get('sources', {})):
             self.sources.setdefault(
                 source,
                 SourceTranslations(source, self).add_locale(source_locale, **data))

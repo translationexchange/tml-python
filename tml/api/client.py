@@ -30,6 +30,7 @@ import contextlib
 import json
 from requests import Response
 from requests.exceptions import HTTPError
+from six import iteritems
 from ..utils import read_gzip, pj, interval_timestamp
 from ..config import CONFIG
 from ..logger import get_logger
@@ -189,7 +190,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
                    'accept-Encoding': 'gzip, deflate'}
         config = {'timeout': 30, 'headers': headers}
         params = {k: str(v).lower() if type(v) is bool else v
-                  for k, v in params.iteritems()}
+                  for k, v in iteritems(params)}
         if method == 'post':
             headers['content-type'] = 'application/x-www-form-urlencoded'
             config['data'] = params
@@ -250,7 +251,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             tml_logger.debug(log_tpl % dict(method=method.upper(), url=url, query=self.to_query(params), sec=int(t1 - t0)))
 
     def to_query(self, params):
-        querystr = ['%s=%s' % (k, v) for k, v in params.iteritems()]
+        querystr = ['%s=%s' % (k, v) for k, v in iteritems(params)]
         return '&'.join(querystr)
 
 

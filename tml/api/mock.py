@@ -27,6 +27,7 @@ from json import loads
 from os import listdir
 from os.path import isdir
 from six.moves.urllib.parse import urlencode
+from six import iteritems
 from . import AbstractClient, APIError
 import re
 
@@ -39,7 +40,7 @@ def clean_url(url):
     return _url
 
 def debug(data, contains=''):
-    return list(k for k, v in data.iteritems() if contains in k)
+    return list(k for k, v in iteritems(data) if contains in k)
 
 
 REWRITE_RULES = (

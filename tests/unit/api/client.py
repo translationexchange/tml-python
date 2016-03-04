@@ -15,7 +15,7 @@ class RequestMockResponse(object):
     """ Response for Mock """
     def __init__(self, data, *args, **kwargs):
         self.data = data
-        for k, v in kwargs.iteritems():
+        for k, v in six.iteritems(kwargs):
             setattr(self, k, v)
 
     def set_request(self, request):

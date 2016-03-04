@@ -24,6 +24,7 @@ __author__ = 'a@toukmanov.ru'
 
 from ..exceptions import Error
 from ..logger import LoggerMixin
+from six import iteritems
 
 class AbstractClient(object):
     """ Basic API client """
@@ -61,7 +62,7 @@ class AbstractClient(object):
         pass
 
     def _compact_params(self, params):
-        return dict((k, v) for k, v in params.iteritems() if v)
+        return dict((k, v) for k, v in iteritems(params) if v)
 
 
 class ClientError(Error):

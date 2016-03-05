@@ -57,6 +57,9 @@ class DecorationTest(unittest.TestCase):
     def test_simple(self):
         self.assertEquals('hello <strong>world</strong>!', parse('hello [b:world]!').render())
         self.assertEquals('hello <strong>world</strong>!', parse('hello [b]world[/b]!').render())#
+        self.assertEquals('hello <strong>world</strong>:', parse('hello [b]world[/b]:').render(), 'special symbols `:`')
+        self.assertEquals('hello <strong>world</strong>/', parse('hello [b]world[/b]/').render(), 'special symbols `\`')
+        self.assertEquals('hello <strong>world</strong>[]', parse('hello [b]world[/b][]').render(), 'special symbols `[]`')
 
     def test_embed(self):
         expected = 'say <i>hello <strong>world</strong></i>!'

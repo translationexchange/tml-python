@@ -83,8 +83,11 @@ def parse(text, tags_factory = None):
                 else:
                     raise UnexpectedToken(text, let)
     
-            elif let == TOKEN_SEPARATOR:
+            elif let == TOKEN_SEPARATOR:  # because it could be just a symbol
                 # inside short token:
+                if tag_name is None:
+                    element.append(let)
+                    continue
                 stack.append(element)
                 element = ShortTag(tags_factory.build(tag_name))
                 trace('build short', tag_name)

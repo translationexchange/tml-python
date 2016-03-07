@@ -26,18 +26,19 @@ from __future__ import absolute_import
 __author__ = 'a@toukmanov.ru'
 
 
-
+import six
 from .gender import Gender
 from _ctypes import ArgumentError
+
 
 class Genders(object):
     """ List of objects having gender """
     @classmethod
     def match(cls, data):
         """ Check is data list of genders """
-        if type(data) is str:
+        if isinstance(data, six.string_types):
             raise ArgumentError('String is not genders list', data)
-        
+
         try:
             ret = []
             for el in data:

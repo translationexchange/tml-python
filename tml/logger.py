@@ -34,7 +34,7 @@ class Logger(Singleton):
     backup_count = 30
     mode = 'a'
     namespace = 'trex.TML'
-        
+
     def init(self, path=None, log_level=None, **kwargs):
         self.path = Logger.default_path if path is None else path
         dirname = os.path.dirname(self.path)
@@ -45,8 +45,8 @@ class Logger(Singleton):
 
     def __getattr__(self, name):
         if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
-            if self.logger is None:
-                raise LoggerNotConfigured('Initialize or set logger instance before accessing it\'s methods.')
+            if self.logger is None:  # suppress if not configured 
+                return lambda *args, **kwargs: None
             return getattr(self.logger, name)
         return getattr(self, name)
 
@@ -65,4 +65,40 @@ class LoggerNotConfigured(Error):
 
 def get_logger(**kwargs):
     return Logger.instance(**CONFIG.logger)
+
+
+getattr_ = object.__getattribute__
+
+
+class LoggerMixin(object):
+    _logger = None
+
+    def log_it(self, name, *args, **kwargs):
+        if not self._logger:
+            self._logger = get_logger()
+        fn = getattr(self._logger, name, None)
+        if fn and callable(fn):
+            return fn(*args, **kwargs)
+        raise NotImplementedError("")
+
+    def debug(self, *args, **kwargs):
+        self.log_it('debug', *args, **kwargs)
+
+    def info(self, *args, **kwargs):
+        self.log_it('info', *args, **kwargs)
+
+    def warning(self, *args, **kwargs):
+        self.log_it('warning', *args, **kwargs)
+
+    def error(self, *args, **kwargs):
+        self.log_it('error', *args, **kwargs)
+
+    def critical(self, *args, **kwargs):
+        self.log_it('critical', *args, **kwargs)
+
+    def log(self, *args, **kwargs):
+        self.log_it('log', *args, **kwargs)
+
+    def exception(self, *args, **kwargs):
+        self.log_it('exception', *args, **kwargs)
 

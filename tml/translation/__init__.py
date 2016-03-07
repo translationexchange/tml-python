@@ -55,9 +55,12 @@ class Key(object):
 
     def build_key(self, key=None):
         if key is None:
-            return generate_key(self.label, description=self.description)
+            return generate_key(self.label, description=self.description or '')
         else:
             return key
+
+    def __eq__(self, other):
+        return self.key == other.key
 
 
 class TranslationOption(Context):
@@ -112,7 +115,7 @@ class Translation(object):
 
     @classmethod
     def from_data(cls, key, data):
-        """ Create translation instance from API response 
+        """ Create translation instance from API response
             Args:
                 key (Key): translated key
                 data (dict[]): list of options
@@ -130,7 +133,7 @@ class Translation(object):
                 pass
             except RequiredArgumentIsNotPassed:
                 pass
-        raise OptionIsNotFound(self.key) 
+        raise OptionIsNotFound(self.key)
 
     def execute(self, data, options):
         """ Execute translation """
@@ -146,7 +149,7 @@ class NoneTranslation(Translation):
         self.key = key
 
     def fetch_option(self, data, options):
-        """ Use key label as translation by default 
+        """ Use key label as translation by default
             Returns:
                 TranslationOption
         """

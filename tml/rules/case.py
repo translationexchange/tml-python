@@ -1,6 +1,6 @@
 # encoding: UTF-8
 """
-# Language cases: apply case for variable like {user::dat} 
+# Language cases: apply case for variable like {user::dat}
 #
 # Copyright (c) 2015, Translation Exchange, Inc.
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = ''
 
 from .contexts import Gender, Value
 from . import ContextRules
@@ -63,7 +63,7 @@ class Case(ContextRules):
                 safe (boolean): handle errror
             Return:
                 (dict, dict): list of rules, list of errors
-        
+
         """
         ret = {}
         errors = {}
@@ -77,6 +77,16 @@ class Case(ContextRules):
         return (ret, errors)
 
 
+class DummyCase(Case):
+
+    def __init__(self, engine=None):
+        super(DummyCase, self).__init__(
+            choices=[], default=['quote', '@value'], engine=engine)
+
+    def execute(self, value):
+        return self.engine.execute(self.default, {'value': value})
+
+
 class LazyCases(object):
     """ Compile case on demand """
     def __init__(self, data):
@@ -86,9 +96,21 @@ class LazyCases(object):
     def __getitem__(self, key):
         if not key in self.cache:
             # compile on demand:
-            self.cache[key] = Case.from_rules(self.data[key]['rules'])
+            if not key in self.data:
+                self.cache[key] = DummyCase()
+            else:
+                self.cache[key] = Case.from_rules(self.data[key]['rules'])
         return self.cache[key]
 
     def __len__(self):
         return len(self.data)
+
+    def get(self, key, default=None):
+        if not key in self.cache:
+            # compile on demand:
+            if not key in self.data:
+                self.cache[key] = default or DummyCase()
+            else:
+                self.cache[key] = Case.from_rules(self.data[key]['rules'])
+        return self.cache[key]
 

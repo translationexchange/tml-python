@@ -59,7 +59,7 @@ def main():
         actors = [{'name':'Анна','gender':'female'}, {'name':'Мария','gender':'female'}, {'name':'Вася','gender':'male'}, {'name':'Артем','gender':'male'}]
         t.execute({'count': randint(1, 1000), 'actor': choice(actors)}, {})
 
-    t = Timer().call(translate, 100)
+    t = Timer().call(translate, 10000)
     print 'Translate %f' % t.per_action()
     def execute():
         count = randint(1, 100)

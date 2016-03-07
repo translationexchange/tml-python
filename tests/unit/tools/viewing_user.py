@@ -15,7 +15,7 @@ class ViewingUserTest(unittest.TestCase):
         RenderEngine.env_generators.append(get_viewing_user)
 
     def test_viewing_user(self):
-        initialize(client = Client.read_all())
+        initialize(client=Client.read_all())
         set_viewing_user({'gender':'male','name':'Bond'})
         self.assertEquals('Mr', tr('honorific'))
         set_viewing_user('female')

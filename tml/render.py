@@ -1,4 +1,4 @@
-# encoding: UTF-8
+    # encoding: UTF-8
 """
 # Copyright (c) 2015, Translation Exchange, Inc.
 #
@@ -28,6 +28,8 @@ from .tools import Renderable
 from argparse import ArgumentError
 from tml.dictionary import TranslationIsNotExists
 from .translation import OptionIsNotFound
+from .tools import BasePreprocessor
+
 
 class RenderEngine(object):
     """ Engine to render translations """
@@ -38,7 +40,7 @@ class RenderEngine(object):
     env_generators = []
 
     def render(self, translation, data, options, fallback = False):
-        """ Render translation 
+        """ Render translation
             Args:
                 translation (Transaltion): translation to render
                 data (dict): user data
@@ -77,7 +79,6 @@ class Data(object):
         self.context = context
 
     def __getitem__(self, key, *args, **kwargs):
-        # raise
         try:
             # get item for data:
             ret = self.data[key]
@@ -85,7 +86,11 @@ class Data(object):
             return self.generate_item(key)
         for preprocessor in self.context.data_preprocessors:
             # preprocess data ([] -> List etc)
-            ret = preprocessor(ret, self.context)
+            if type(preprocessor) is type:
+                if isinstance(preprocessor, BasePreprocessor):
+                    ret = preprocessor(ret, self.data).process()
+            else:
+                ret = preprocessor(ret, self.data)
         # Apply renderable data:
         if isinstance(ret, Renderable):
             ret = ret.render(self.context)
@@ -100,5 +105,5 @@ class Data(object):
                     return ret
             except ArgumentError:
                 pass
-        raise KeyError('%s key is not found in translation data' % key) 
+        raise KeyError('%s key is not found in translation data' % key)
 

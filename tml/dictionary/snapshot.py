@@ -43,7 +43,12 @@ class SnapshotDictionary(Hashtable):
         self.translations = self.fetch_translations()
 
     def fetch_translations(self):
-        return self.language.client.get(*self.api_query)['results']
+        try:
+            result = self.language.client.get(*self.api_query)['results']
+        except ApiError:
+            return {}
+        else:
+            return result.get('results', result)
 
     @property
     def api_query(self):

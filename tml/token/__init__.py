@@ -30,6 +30,7 @@ __author__ = 'a@toukmanov.ru'
 import re
 from ..exceptions import Error, RequiredArgumentIsNotPassed, MethodDoesNotExist
 from ..rules.contexts import Value, ContextNotFound
+from ..rules.case import DummyCase
 from tml.strings import to_string, suggest_string
 
 def need_to_escape(options):
@@ -65,7 +66,7 @@ ESCAPE_CHARS = (('&', '&amp;'),
                 ("'", '&#39;'))
 
 def escape(text):
-    """ Escape text 
+    """ Escape text
         Args:
             text: input text
         Returns:
@@ -106,14 +107,14 @@ class TextToken(AbstractToken):
         self.text = text
 
     def execute(self, data, options):
-        """ Execute token 
+        """ Execute token
             Returns: (string)
         """
         return self.text
 
     @classmethod
     def validate(cls, text, language):
-        """ Validate tokenized string 
+        """ Validate tokenized string
             Args:
                 text(string): token text
                 language (Language): token language
@@ -188,9 +189,9 @@ class VariableToken(AbstractVariableToken):
 class MethodToken(VariableToken):
     # Method Token Forms
     #
-    # {user.name}  
+    # {user.name}
     # {user.name:gender}
-    
+
     HAS_METHOD = '\.(\w*\s*)'
     IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + HAS_METHOD))
 
@@ -207,6 +208,8 @@ class MethodToken(VariableToken):
                 string
         """
         obj = self.fetch(data)
+        if isinstance(obj, dict) and self.method_name in obj:  # if dict
+            return obj[self.method_name]
         try:
             prop = getattr(obj, self.method_name)
             rv = callable(prop) and prop() or prop
@@ -226,10 +229,10 @@ class MethodToken(VariableToken):
 
 
 class RulesToken(AbstractVariableToken):
-    """ 
-        Token which execute some rules on variable 
+    """
+        Token which execute some rules on variable
         {count|token, tokens}: count = 1   -> token
-                               count = 100 -> tokens 
+                               count = 100 -> tokens
     """
     def __init__(self, name, rules, language):
         """ .ctor
@@ -245,7 +248,7 @@ class RulesToken(AbstractVariableToken):
     TOKEN_TYPE_REGEX = '\|([^\|]{1}(.*))'
     IS_TOKEN = re.compile(AbstractVariableToken.REGEXP_TOKEN % (AbstractVariableToken.IS_VARIABLE + TOKEN_TYPE_REGEX,))
     """ Compiler for rules """
-    
+
     @classmethod
     def validate(cls, text, language):
         m = cls.IS_TOKEN.match(text)
@@ -282,13 +285,13 @@ class CaseToken(RulesToken):
 
     def __init__(self, name, case, language):
         super(RulesToken, self).__init__(name)
-        self.case = language.cases[str(case)]
+        self.case = language.cases.get(str(case), DummyCase())
 
     def execute(self, data, options):
         """ Execute with rules options """
         return escape_if_needed(
-            self.case.execute(self.fetch(data)), options)
-        
+            suggest_string(self.case.execute(self.fetch(data))), options)
+
     def __str__(self):
         return "CaseToken[%s, case=%s]" % (self.name, self.case)
 
@@ -299,7 +302,7 @@ class CaseMethodToken(RulesMethodToken):
 
     def __init__(self, name, method_name, case, language):
         self.token = MethodToken(name, method_name)
-        self.case = language.cases[str(case)]
+        self.case = language.cases.get(str(case), DummyCase())
 
     def execute(self, data, options):
         """ Execute with rules options """
@@ -321,7 +324,7 @@ class UnsupportedCase(Error):
 
 
 class PipeToken(RulesToken):
-    """ 
+    """
         Token which pipe rules and join it with variable
         {count||token, tokens}: count = 1    -> 1 token
                                 count = 100  -> 100 tokens

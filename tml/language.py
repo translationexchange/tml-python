@@ -22,15 +22,22 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+from copy import copy
 from .rules.contexts import Contexts
 from .rules.case import Case, LazyCases
-from .utils import pj
+from .utils import pj, read_json
+from .config import CONFIG
+
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
 
 class Language(object):
     """ Language object """
-    def __init__(self, application, id, locale, native_name, right_to_left, contexts, cases):
+
+    flag_url = None
+    english_name = None
+
+    def __init__(self, application, id, locale, native_name, right_to_left, contexts, cases, **kwargs):
         """ .ctor
             Args:
                 application (Application): current application
@@ -48,29 +55,37 @@ class Language(object):
         self.right_to_left = right_to_left
         self.contexts = contexts
         self.cases = cases
+        for k in kwargs:
+            setattr(self, k, kwargs[k])
+
+    @classmethod
+    def cache_key(cls, locale):
+        return pj(locale, 'language')
 
     @classmethod
     def from_dict(cls, application, data, safe=True, lazy=True):
         """ Build language instance from API response """
+        data = copy(data)  # shallow copy
         if lazy:
             # Use lazy cases (do not compile all)
-            cases = LazyCases(data.get('cases', {}))
+            cases = LazyCases(data.pop('cases', {}))
         else:
             # Compile all cases:
-            cases, case_errors = Case.from_data(data['cases'], safe = True)
+            cases, case_errors = Case.from_data(data.pop('cases'), safe = True)
             if len(case_errors) and not safe:
                 raise Exception('Language contains invalid cases', case_errors)
         return cls(application,
-                   data['id'],
-                   data['locale'],
-                   data['native_name'],
-                   data['right_to_left'],
-                   Contexts.from_dict(data.get('contexts', {})),
-                   cases)
-    
+                   data.pop('id', None),
+                   data.pop('locale', None),
+                   data.pop('native_name', None),
+                   data.pop('right_to_left', None),
+                   Contexts.from_dict(data.pop('contexts', {})),
+                   cases,
+                   **data)
+
     @classmethod
     def load_by_locale(cls, application, locale):
-        """ Load language by locale 
+        """ Load language by locale
             Args:
                 application (Application): app instance
                 locale (string): locale code (ru|en)
@@ -83,14 +98,16 @@ class Language(object):
         # check is language supported by APP:
         url = application.get_language_url(locale)
         # load data by API:
-        data = application.client.get(pj(url, 'definition'), {})
+        data = application.client.get(pj(url, 'definition'), params={}, opts={'cache_key': cls.cache_key(locale)})
         # create instance:
         return cls.from_dict(application, data)
 
-    @property
-    def default(self):
-        """ Default language for"""
-        
+    @classmethod
+    def load_default(cls, application):
+        locale = CONFIG.default_locale
+        locale_path = pj(CONFIG.app_dir, 'defaults/languages', '%s.json' % locale)
+        return Language.from_dict(application, read_json(locale_path), lazy=False)
+
     @property
     def client(self):
         """ Client property

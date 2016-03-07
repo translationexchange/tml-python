@@ -23,7 +23,7 @@ class Tokens(object):
 
 
 class Template(object):
-    """ Template compileable """
+    """Template compileable"""
     def __init__(self, tpl):
         self.tpl = tpl
 

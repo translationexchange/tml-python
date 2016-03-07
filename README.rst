@@ -36,7 +36,7 @@ At the end of the registration process you will be given a key and a secret. You
 Usage
 ==================
 
-The library can be invoked from the python command. To use tr8n client you must require it, and instantiate the application with the key and secret of your app from tr8nhub.com:
+The library can be invoked from the python command. To use client you must require it, and instantiate the application with the key and secret of your app from tr8nhub.com:
 
 Code Coverage
 =============
@@ -46,6 +46,12 @@ Code Coverage
 * Execute `nosetests tests/unit/* --all --verbose --with-coverage --cover-package=tml`
 
 * Enjoy the numbers
+
+
+Debugging
+---------
+---------
+curl -F "access_token=<access-token>" -F "source_keys=<url-encoded-payload>" "https://staging-api.translationexchange.com/v1/sources/register_keys"
 
 
 Links

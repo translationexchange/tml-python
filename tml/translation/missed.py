@@ -1,27 +1,27 @@
 from __future__ import absolute_import
 # encoding: UTF-8
 from json import dumps
-
+from urllib import quote
 
 class MissedKeys(object):
     """ Object append missed key"""
     def __init__(self, client):
         self.client = client
-        self.keys = []
+        self.keys = set([])
 
     def submit(self, missed_keys):
         """ Submit keys over API
             Args:
                 missed keys
         """
-        return self.client.post('sources/register_keys',{'source_keys': dumps(missed_keys)})
+        return self.client.post('sources/register_keys', params={'source_keys': dumps(missed_keys), 'options': '{"realtime": true}'})
 
     def append(self, key):
         """ Add key to missed
             Args:
                 key (Key): translation key
         """
-        self.keys.append(key)
+        self.keys.add(key)
 
     def as_dict(self):
         """ Dict repr of keys list """

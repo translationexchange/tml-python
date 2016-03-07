@@ -25,6 +25,7 @@ __author__ = 'a@toukmanov.ru'
 from ..translation import Translation, NoneTranslation
 from ..exceptions import Error
 from ..utils import deprecated
+from ..logger import LoggerMixin
 
 
 def return_label_fallback(key):
@@ -37,7 +38,7 @@ def return_label_fallback(key):
     return NoneTranslation(key)
 
 
-class AbstractDictionary(object):
+class AbstractDictionary(LoggerMixin):
     """ Dictionary """
     def __init__(self, fallback = None):
         """ Dictionary .ctor
@@ -55,7 +56,7 @@ class AbstractDictionary(object):
                 Translation
         """
         return self.get_translation(key)
-    
+
     def get_translation(self, key):
         """Get key translation
             Args:
@@ -83,7 +84,7 @@ class AbstractDictionary(object):
 
     @property
     def fallback_function(self):
-        """ Fallback getter 
+        """ Fallback getter
             Returns:
                 FunctionType
         """
@@ -97,11 +98,11 @@ class Hashtable(AbstractDictionary):
             Args:
                 tranlations (dict): key- tranlation code, value - tranlation options
         """
-        self.translations = translations
+        self.translations = translations or {}
         super(Hashtable, self).__init__(fallback)
 
     def fetch(self, key):
-        """ Tranlate key 
+        """ Tranlate key
             Args:
                 key (Key): translated key
             Returns:

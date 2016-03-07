@@ -37,13 +37,20 @@ from .context import (LanguageContext,
                       SnapshotContext)
 from .api.snapshot import open_snapshot
 from .render import RenderEngine
-from .utils import enable_warnings
+from .utils import enable_warnings, contextmanager
+from .session_vars import get_current_context
 
-__author__ = 'a@toukmanov.ru'
+__author__ = 'xepa4ep, a@toukmanov.ru'
+
+__VERSION__ = '0.1.0'
+
+
+def full_version():
+    return "tml-python v#%s" % (__VERSION__)
 
 
 def build_client(client, snapshot_path, token):
-    """ Client builder 
+    """ Client builder
         Args:
             client (api.client.Client): custom client
             snapshot_path (string): path to snapshot (returns SnapshotClient)
@@ -84,25 +91,26 @@ def build_context(token=None,
     else:
         return LanguageContext(**kwargs)
 
-DEFAULT_CONTEXT = None
-
 
 def initialize(**kwargs):
     """ Build context and set as default """
-    global DEFAULT_CONTEXT
-    DEFAULT_CONTEXT = build_context(**kwargs)
+    build_context(**kwargs)
     enable_warnings()
-    
+    context = get_current_context()
+    if not context:
+        raise ContextNotConfigured()
+
 
 def configure(**kwargs):
-    config.configure(**kwargs)
+    return config.configure(**kwargs)
 
 
 def get_context():
     """ Get current context """
-    if not DEFAULT_CONTEXT:
+    context = get_current_context()
+    if not context:
         raise ContextNotConfigured()
-    return DEFAULT_CONTEXT
+    return context
 
 
 def tr(label, data = {}, description = '', options = {}):
@@ -112,7 +120,7 @@ def tr(label, data = {}, description = '', options = {}):
             data (dict): user data
             description (string): tranlation description
             language (Language):
-            options (dict): options 
+            options (dict): options
     """
     context = get_context()
     return context.tr(
@@ -121,4 +129,11 @@ def tr(label, data = {}, description = '', options = {}):
         description,
         options)
 
+@contextmanager
+def with_block_options(**options):
+    """Override default context/session attributes to simplify testing and sometimes used as value added for tml."""
+    context = get_context()
+    context.push_options(options)
+    yield
+    context.pop_options()
 

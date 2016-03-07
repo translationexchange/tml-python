@@ -23,6 +23,7 @@
 from __future__ import absolute_import
 __author__ = 'a@toukmanov.ru'
 
+from ..utils import pj
 from . import Hashtable
 from tml.api.pagination import allpages
 
@@ -38,17 +39,28 @@ class LanguageDictionary(Hashtable):
         translations = translations or self.fetch_translations()
         super(LanguageDictionary, self).__init__(translations=translations, fallback=fallback)
 
-    def load_translations(self):
-        self.translations = self.fetch_translations()
+    @property
+    def cache_key(self):
+        return pj(self.language.locale, 'translations')
+
+    def load_translations(self, translations=None):
+        if translations:
+            self.translations = translations
+        elif self.translations:
+            pass
+        else:
+            self.translations = self.fetch_translations()
 
     def fetch_translations(self):
-        return allpages(self.language.client, *self.api_query)
+        uri, params, opts = self.api_query
+        return allpages(self.language.client, uri, params=params, opts=opts)
 
     @property
     def api_query(self):
-        """ Params to API call 
+        """ Params to API call
             Returns:
                 tuple: url, params
         """
         return ('projects/%d/translations' % self.language.application.id,
-                {'locale': self.language.locale})
+                {'locale': self.language.locale},
+                {'cache_key': self.cache_key})

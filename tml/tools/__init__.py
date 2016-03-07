@@ -7,3 +7,9 @@ class Renderable(object):
 
     def render(self, context):
         raise NotImplemented()
+
+
+class BasePreprocessor(object):
+
+    def process(self):
+        raise NotImplementedError("")

@@ -26,47 +26,59 @@ __author__ = 'a@toukmanov.ru'
 
 from . import Hashtable
 from hashlib import md5
+from ..utils import pj
 from ..translation.missed import MissedKeys
 from ..api import APIError
+from ..cache import CachedClient
+from ..session_vars import get_current_context
+from ..config import CONFIG
 from tml.dictionary import TranslationIsNotExists
 
 
 class SourceMissed(MissedKeys):
     """ Set of missed keys in source """
-    def __init__(self, client, source):
+    def __init__(self, client, source_path):
         """ .ctor
             Args:
                 client (tml.api.AbstractClient): API client
                 source (string): source name
         """
         super(SourceMissed, self).__init__(client)
-        self.source = source
+        self.source_path = source_path
 
     def as_dict(self):
         """ Dict repr for API call """
         ret = super(SourceMissed, self).as_dict()
-        ret.update({'source': self.source})
+        ret.update({'source': self.source_path})
         return ret
 
 
 class SourceDictionary(Hashtable):
     """ Dictionary of keys grouped by source """
-    def __init__(self, source, language, fallback=None, translations=None):
-        """ .ctor 
+    def __init__(self, source, language, source_path=None, fallback=None, translations=None):
+        """ .ctor
             Args:
                 source (string): source name
                 lang (Language): language
                 missed_keys (list): list of missed keys
         """
         self.source = source
+        self.source_path = source_path or source
         self.language = language
-        self.missed_keys = SourceMissed(self.language.client, source)
+        self.missed_keys = SourceMissed(self.language.client, self.source_path)
         translations = translations or self.fetch_translations()
         super(SourceDictionary, self).__init__(translations=translations, fallback=fallback)
 
     @property
+    def context(self):
+        return get_current_context()
+
+    @property
     def key(self):
         return self.compute_key()
+
+    def cache_key(self):
+        return pj(self.language.locale, 'sources', *self.source.split('/'))
 
     def compute_key(self):
         return md5(self.source.encode('utf-8')).hexdigest()
@@ -79,7 +91,7 @@ class SourceDictionary(Hashtable):
             3. in all other cases, fetch translations from api"""
         if translations:
             self.translations = translations
-        elif self.translations:
+        elif self.translations is not None:
             pass
         else:
             self.translations = self.fetch_translations()
@@ -87,18 +99,22 @@ class SourceDictionary(Hashtable):
 
     def fetch_translations(self):
         try:
-            return self.language.client.get(*self.api_query)['results']
+            uri, params, opts = self.api_query
+            result = self.language.client.get(uri, params=params, opts=opts)
         except APIError:
             return {}
+        else:
+            return result.get('results', result)
 
     @property
     def api_query(self):
-        """ Params to API call 
+        """ Params to API call
             Returns:
                 tuple: url, params
         """
         return ('sources/%s/translations' % self.key,
-                {'locale': self.language.locale, 'all': True, 'ignored': True})
+                {'locale': self.language.locale, 'all': True, 'ignored': True},
+                {'cache_key': self.cache_key()})
 
     def fetch(self, key):
         try:
@@ -112,12 +128,12 @@ class SourceDictionary(Hashtable):
         return ret
 
     def __del__(self):
-        self.flush()
+        if self:
+            self.flush()
 
     def flush(self):
         """ Submit all missed keys on delete """
         if self.missed_keys.submit_all():
-            self.language.client.reload(*self.api_query)
-
-    flush.i = 0
+            uri, params, _ = self.api_query
+            self.language.client.reload(uri, params=params)
 

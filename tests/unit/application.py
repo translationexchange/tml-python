@@ -30,28 +30,28 @@ class ApplicationTest(unittest.TestCase):
             app.get_language_url('de')
 
     def test_load_extensions(self):
-        app = Application.load_by_id(self.client, 1768, locale='ru,en', source='/home/index')
+        app = Application.load_by_key(self.client, 1768, locale='ru,en', source='/home/index')
         self.assertTrue(len(app.extensions) > 0)
         self.assertTrue(len(app.languages_by_locale) > 0)
         self.assertIsInstance(app.languages_by_locale['ru'], Language)
         self.assertIsInstance(app.sources['/home/index'], SourceTranslations)
 
     def test_source(self):
-        app = Application.load_by_id(self.client, 1768, locale='ru,en', source='/home/index')
+        app = Application.load_by_key(self.client, 1768, locale='ru,en', source='/home/index')
         source_dict = app.source('/home/index', locale='ru')
         self.assertIsInstance(source_dict, SourceDictionary, 'source dict ru')
         with self.assertRaises(LanguageNotSupported):
             h = app.sources['/home/index'].add_locale('de')
-    
+
     def test_asset_url(self):
-        app = Application.load_by_id(self.client, 1768, locale='ru,en', source='/home/index')
+        app = Application.load_by_key(self.client, 1768, locale='ru,en', source='/home/index')
         prefix = app.tools['assets']
         self.assertEqual(prefix + '/', app.asset_url('/'))
         self.assertEqual(prefix + '/a/b/c', app.asset_url('/a/b/c'))
 
     def test_load(self):
-        app = Application.load_by_id(self.client, 2).id
-        self.assertEquals(2, Application.load_by_id(self.client, 2).id, 'Load by id')
+        app = Application.load_by_key(self.client, 2).id
+        self.assertEquals(2, Application.load_by_key(self.client, 2).id, 'Load by id')
         self.assertEquals(1, Application.load_default(self.client).id, 'Load default')
 
 

@@ -27,6 +27,9 @@ from .exceptions import Error
 from .language import Language
 from .source import SourceTranslations
 from .config import CONFIG
+from .session_vars import get_current_translator
+from .logger import get_logger
+
 
 class Application(object):
     """ TML application """
@@ -41,8 +44,11 @@ class Application(object):
     shortcuts = None
     tools = None # tools URLS
     extensions = None
+    css = None
 
-    def __init__(self, client, id, languages, default_locale, **kwargs):
+    cache_key = 'application'
+
+    def __init__(self, client=None, key=None, languages=None, default_locale=None, **kwargs):
         """ .ctor
             Args:
                 client (api.client.Client): API client
@@ -50,15 +56,17 @@ class Application(object):
                 languages (list): list of languages
         """
         self.client = client
-        self.id = id
+        self.key = key
         self.sources = {}
         self.languages_by_locale = {}
-        self.languages = [Language.from_dict(self, lang_meta) for lang_meta in languages]
+        self.languages = [Language.from_dict(self, lang_meta) for lang_meta in languages or []]
         self.default_locale = default_locale
         self.load_extensions(kwargs.get('extensions', {}))
         for key in kwargs:
             setattr(self, key, kwargs[key])
-
+        translator = get_current_translator()
+        if translator is not None:   # if we initialized with active translator session
+            translator.set_application(self)
 
     @classmethod
     def from_dict(cls, client, data):
@@ -69,8 +77,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return Application(client, **data)
-
+        return Application(client=client, **data)
 
     @classmethod
     def load_default(cls, client, source=None, locale=None):
@@ -80,8 +87,7 @@ class Application(object):
             Returns:
                 Application
         """
-        return cls.from_dict(client, client.get('projects/current/definition', {'source': source, 'locale': locale}))
-
+        return cls.load_by_key(client, key=CONFIG.application_key(), source=source, locale=locale)
 
     @property
     def supported_locales(self):
@@ -92,7 +98,7 @@ class Application(object):
         return [lang.locale for lang in self.languages]
 
     @classmethod
-    def load_by_id(cls, client, id, locale=None, source=None):
+    def load_by_key(cls, client, key, locale=None, source=None):
         """ Load application by id
             Args:
                 client (api.client.Client): API client
@@ -103,8 +109,17 @@ class Application(object):
             Returns:
                 Application
         """
-        return cls.from_dict(client, client.get('projects/%s/definition' % id,
-                                        {'locale': locale, 'source': source, 'ignored': True}))
+        default_dict = {'key': key}
+        app_dict = client.get(
+            'projects/%s/definition' % key,
+            params={'locale': locale, 'source': source, 'ignored': True},
+            opts={'cache_key': cls.cache_key})
+        if 'results' in app_dict:
+            app_dict = app_dict['results']
+        application = cls.from_dict(client, app_dict or default_dict)
+        if not app_dict:  # if empty application
+            application.add_language(Language.load_default(application))
+        return application
 
     def load_extensions(self, extensions):
         """Load application extensions if any"""
@@ -120,11 +135,39 @@ class Application(object):
                 source,
                 SourceTranslations(source, self).add_locale(source_locale, **data))
 
-    def language(self, locale=None):
+    @property
+    def token(self):
+        return self.client.token
+
+    def language(self, locale=None, fallback_to_dummy=True):
+
+        def lang_(app, locale, target_locale=None):
+            target_locale = locale if target_locale is None else target_locale
+            try:
+                return app.languages_by_locale.setdefault(locale, Language.load_by_locale(app, target_locale))
+            except LanguageNotSupported:
+                pass
+
+        def base_lang_(app, locale):
+            if not '-' in locale:
+                return
+            base_locale = locale.split('-')[0]
+            return lang_(app, locale, target_locale=base_locale)
+        locale = self._normalize_locale(locale)
+        if self.languages_by_locale.get(locale, None):
+            return self.languages_by_locale[locale]
+        language = lang_(self, locale) or base_lang_(self, locale)
+        if language:
+            return language
+        if fallback_to_dummy:
+            return self.languages_by_locale.setdefault(locale, Language.load_default(self))
+        else:
+            raise LanguageNotSupported(locale, self)
+
+    def _normalize_locale(self, locale):
         if locale is None:
             locale = self.default_locale or CONFIG.default_locale
-        locale = locale.strip()
-        return self.languages_by_locale.setdefault(locale, Language.load_by_locale(self, locale))
+        return locale.strip().replace('_', '-')  # normalize locale
 
     def default_language(self):
         return self.language(locale=self.default_locale)
@@ -144,7 +187,7 @@ class Application(object):
             path = '/' + path
         return "%s%s" % (self.tools['assets'], path)
 
-    def source(self, source, locale):
+    def source(self, source, locale, **init_kwargs):
         """ .ctar
             Params:
                 source (string) - source name
@@ -154,7 +197,16 @@ class Application(object):
         source_translations = self.sources.get(source, None)
         if not source_translations:
             source_translations = self.sources[source] = SourceTranslations(source, self)
-        return source_translations.add_locale(locale).hashtable_by_locale(locale)
+        return source_translations.add_locale(locale, **init_kwargs).hashtable_by_locale(locale)
+
+    def ignored_key(self, key):
+        _key = key.key
+
+        for source_translations in self.sources.values():
+            if source_translations.is_ignored(_key):
+                self.logger.debug('Ignored Key[%s]: %s', _key, key.label)
+                return True
+        return False
 
     def get_language_url(self, locale):
         """ Language URL for locale
@@ -177,9 +229,13 @@ class Application(object):
         if not language:
             raise LanguageNotSupported(locale, self)
         return 'languages/%s' % locale
-    
+
     def feature_enabled(self, key):
         return self.features.get(key, False)
+
+    @property
+    def logger(self):
+        return get_logger()
 
 
 class LanguageNotSupported(Error):
@@ -194,8 +250,8 @@ class LanguageNotSupported(Error):
         self.locale = locale
         self.application = application
 
-    MESSAGE = 'Locale %s is not suppored by application %d'
+    MESSAGE = 'Locale %s is not suppored by application %s'
 
     def __str__(self):
-        return self.MESSAGE % (self.locale, self.application.id)
+        return self.MESSAGE % (self.locale, self.application.key)
 

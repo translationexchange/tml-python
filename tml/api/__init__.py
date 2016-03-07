@@ -23,13 +23,13 @@
 __author__ = 'a@toukmanov.ru'
 
 from ..exceptions import Error
-
+from ..logger import LoggerMixin
 
 class AbstractClient(object):
     """ Basic API client """
 
-    def get(self, url, params = {}):
-        """ GET request to API 
+    def get(self, url, **kwargs):
+        """ GET request to API
             Args:
                 url (string): URL
                 params (dict): params
@@ -38,10 +38,10 @@ class AbstractClient(object):
             Returns:
                 dict: response
         """
-        return self.call(url, 'get', params)
+        return self.call(url, 'get', **kwargs)
 
-    def post(self, url, params):
-        """ POST request to API 
+    def post(self, url, **kwargs):
+        """ POST request to API
             Args:
                 url (string): URL
                 params (dict): params
@@ -50,9 +50,9 @@ class AbstractClient(object):
             Returns:
                 dict: response
         """
-        return self.call(url, 'post', params)
+        return self.call(url, 'post', **kwargs)
 
-    def call(self, url, method, params = {}):
+    def call(self, url, method, params = None, opts=None):
         """ Make request to API """
         raise NotImplementedError('call is not implemented')
 

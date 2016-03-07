@@ -49,11 +49,24 @@ REWRITE_RULES = (
     ('projects/current/definition?locale=ru', 'projects/current'),
     ('projects/current/definition', 'projects/current'),
     (r'^projects\/(\w+)\/definition', 'projects/%(0)s'),
-    (r'^projects\/(\w+)\/definition\?locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
+    (r'^projects\/(\w+)\/definition.*[\?\&]locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
     (r'^languages\/(\w+)\/definition$', 'languages/%(0)s'),
-    (r'^sources\/(\w+)\/translations\?locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s')
+    (r'^sources\/(\w+)\/translations.*[\?\&]locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s'),
+    (r'^translation_keys\/(\w+)\/translations\?all=True&locale=(\w+)&page=(\d+).*$', 'translation_keys/%(0)s/translations?locale=%(1)s&page=%(2)s')
 )
 
+def rewrite_path(url):
+    for pattern, replacer in REWRITE_RULES:
+        if pattern == url:  # if equal
+            url = replacer
+        else: # if match by regex
+            match_obj = re.compile(pattern).match(url)
+            if not match_obj:
+                continue
+            ctx = dict([(str(idx), v) for idx, v
+                        in enumerate(match_obj.groups())])
+            url = replacer % ctx
+    return url.split('?')[0], url, len(url.split('?')) == 2
 
 
 class Hashtable(AbstractClient):
@@ -64,7 +77,7 @@ class Hashtable(AbstractClient):
         """ .ctor
             Args:
                 data (dict): responses key - URL, value - response
-                strict (boolean): key depends params (if False - return  
+                strict (boolean): key depends params (if False - return
         """
         super(Hashtable, self).__init__()
         self.data = data
@@ -75,7 +88,7 @@ class Hashtable(AbstractClient):
         self.params = None
         self.status = 0
 
-    def call(self, url, method, params = {}):
+    def call(self, url, method, params = None, opts=None):
         """ Emulate request
             Args:
                 url (string): url part
@@ -86,6 +99,8 @@ class Hashtable(AbstractClient):
             Returns:
                 dict
         """
+        params = {} if params is None else self._compact_params(params)
+        opts = {} if opts is None else self._compact_params(opts)
         self.__class__.last_url = url
         self.__class__.last_params = params
         self.url = url
@@ -106,7 +121,7 @@ class Hashtable(AbstractClient):
 
     @classmethod
     def build_url(cls, url, params):
-        """ Build full URL 
+        """ Build full URL
             Args:
                 url (string): url
                 params (dict): get params
@@ -116,7 +131,8 @@ class Hashtable(AbstractClient):
 
         if params is None:
             return url
-        return url + ('' if not params else '?' + urlencode(params))
+        sorted_params = sorted(params.items(), key=lambda cur: cur[0])
+        return url + ('' if not params else '?' + urlencode(sorted_params))
 
     reloaded = []
 
@@ -125,33 +141,25 @@ class Hashtable(AbstractClient):
 
     @classmethod
     def rewrite_path(cls, url):
-        """ Build path from URL 
+        """ Build path from URL
             Args:
                 url (string): API url
             Returns:
-                string: path in snapshot matches API URL 
+                string: path in snapshot matches API URL
         """
-        for pattern, replacer in REWRITE_RULES:
-            if pattern == url:  # if equal
-                url = replacer
-            else: # if match by regex
-                match_obj = re.compile(pattern).match(url)
-                if not match_obj:
-                    continue
-                ctx = dict([(str(idx), v) for idx, v
-                            in enumerate(match_obj.groups())])
-                url = replacer % ctx
-        return url.split('?')[0], url, len(url.split('?')) == 2
+        return rewrite_path(url)
 
 
 class File(Hashtable):
     """ Read data from file """
-    def __init__(self, basedir, data = {}, strict = False):
+    def __init__(self, basedir, key=None, access_token=None, data = {}, strict = False):
         """ .ctor
             Args:
                 basedir (string): basedir for files
         """
         self.basedir = basedir
+        self.key = key
+        self.access_token = access_token
         super(File, self).__init__(data, strict)
 
     def read(self, url, params = None, path = None, strict = False):
@@ -173,7 +181,7 @@ class File(Hashtable):
         if not strict:
             self.data[url] = resp
         return self
-    
+
     JSON_FILE = re.compile('(.*)\.json', re.I)
     JSON_PAGING = re.compile('(.*)_(\d+)\.json', re.I)
 

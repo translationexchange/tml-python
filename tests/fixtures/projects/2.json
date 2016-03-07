@@ -1,6 +1,6 @@
 {
 "id":2,
-"key":"qwerty 2",
+"key":"2",
 "name":"Test application",
 "threshold":1,
 "default_language": {"id":64,"locale":"en","english_name":"English","native_name":"English","right_to_left":false,"flag_url":"https://d23w63adpjpix6.cloudfront.net/7/55/1/27/c9262c9538cda82c6.png","status":"published"},

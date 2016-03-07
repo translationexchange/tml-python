@@ -9,7 +9,10 @@ dist
 django/dist
 *.egg-info/
 *.swp
+.tox
+.cache
 .coverage
+.DS_Store
 tml.log
 logs
 tests/fixtures/logs/tml.log

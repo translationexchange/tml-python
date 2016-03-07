@@ -22,6 +22,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from .application import Application
+from .config import CONFIG
 from .translation import Key
 from .render import RenderEngine
 from .exceptions import Error
@@ -31,6 +32,12 @@ from .language import Language
 from .dictionary import NoneDict
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
+from .session_vars import set_current_translator, set_current_context
+from .cache import CachedClient
+from .utils import cached_property
+
+
+__author__ = 'xepa4ep, a@toukmanov.ru'
 
 
 class ContextNotConfigured(Error):
@@ -42,47 +49,80 @@ class AbstractContext(RenderEngine):
     """ Wrapper for dictionary """
     language = None
     dict = None
-
-    def __init__(self, language, dictionary):
+    # _block_option_queue = []
+    def __init__(self, language):
         """ .ctor
             Args:
                 language (language.Language): selected language
                 dictionary (dictionary.AbstractDictionary): dict object for translation
         """
-        self.language = language
-        self.dict = dictionary
+        self._language = language
+        self._block_option_queue = []
         super(AbstractContext, self).__init__()
+        self.dict = self.build_dict(self.language)
 
-    def build_key(self, label, description):
+    def push_options(self, opts):
+        self._block_option_queue.append(opts)
+
+    def pop_options(self):
+        opts = self._block_option_queue.pop(-1)
+        return opts
+
+    @property
+    def block_options(self):
+        return self._block_option_queue and self._block_option_queue[-1] or {}
+
+    def block_option(self, key, lookup=True, default=None):
+        if lookup:
+            for options in reversed(self._block_option_queue):
+                if key in options:
+                    return options.get(key, default)
+        return self.block_options.get(key, default)
+
+    def build_key(self, label, description, language=None):
         """ Build key """
+        language = language or self.language
         return Key(label = label,
                    description = description,
-                   language = self.language)
+                   language = language)
+
+    def _fetch_translation(self, dict, label, description):
+        key = self.build_key(label, description)
+        if self.application.ignored_key(key):
+            raise TranslationIsNotExists(key, self.dict)
+        if dict:
+            return dict.fetch(self.build_key(label, description))
+        raise ContextNotConfigured(self)
 
     def fetch(self, label, description):
-        """ Fetch Translation 
+        """ Fetch Translation
             Args:
                 label (string): label
                 description (string): description
             Returns:
                 Translation
         """
-        if self.dict:
-            return self.dict.fetch(self.build_key(label, description))
-        raise ContextNotConfigured(self)
+        return self._fetch_translation(self.dict, label, description)
 
     _default_language = None
 
     @property
     def default_language(self):
-        """ Default languahr getter
+        """ Default language getter
             Returns:
                 language.Language
         """
         if not self._default_language:
-            self._default_language = Language.load_by_locale(self.application, self.default_locale)
+            self._default_language = self.application.language(self.default_locale)
         return self._default_language
 
+    @property
+    def language(self):
+        target_locale = self.block_option('target_locale', None)
+        if target_locale:
+            return self.application.language(target_locale)
+        else:
+            return self._language
 
     @property
     def default_locale(self):
@@ -100,8 +140,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        # print label, Key(label = label, description = description, language = self.default_language).key
-        return self.dict.fallback(Key(label = label, description = description, language = self.default_language))
+        return self.dict.fallback(self.build_key(label, description or '', language=self.default_language))
 
     def tr(self, label, data = {}, description = '', options = {}):
         """ Tranlate data
@@ -109,7 +148,7 @@ class AbstractContext(RenderEngine):
                 label (string): tranlation label
                 data (dict): user data
                 description (string): tranlation description
-                options (dict): options 
+                options (dict): options
                 language (Language):
             Returns:
                 unicode
@@ -132,23 +171,33 @@ class AbstractContext(RenderEngine):
 
 class LanguageContext(AbstractContext):
     """ Context with selected language """
-    def __init__(self, client, locale=None, source=None, application_id=None, **kwargs):
+
+    client = None
+    key = None
+    translator = None
+    locale = None
+    source = None
+
+    def __init__(self, client, key=None, translator=None, locale=None, source=None, **kwargs):
         """ .ctor
             Args:
                 client (Client): custom API client
                 locale (string): selected locale
                 source (string): which source to load in a single fetch (e.g. /home/index)
-                application_id (int): API application id (use default if None)
+                key (int): API application key (use default if None)
 
         """
-        if application_id:
-            application = Application.load_by_id(client, application_id, locale=locale, source=source)
+        CachedClient.instance().reset_version()
+        self.set_translator(translator)
+        if key:
+            application = Application.load_by_key(
+                client, key, locale=locale, source=source)
         else:
-            application = Application.load_default(client, locale=locale)
+            application = Application.load_default(
+                client, locale=locale, source=source)
         language = application.language(locale)
-        super(LanguageContext, self).__init__(
-            dictionary=self.build_dict(language),
-            language=language)
+        super(LanguageContext, self).__init__(language=language)
+        set_current_context(self)
 
     def build_dict(self, language, **kwargs):
         """ Dictionary factory (uses API directly for each fetch request) """
@@ -158,7 +207,7 @@ class LanguageContext(AbstractContext):
 
     @property
     def fallback_dict(self):
-        """ Dictionary used if tranlation is not found in primary dictionary 
+        """ Dictionary used if tranlation is not found in primary dictionary
             Returns:
                 dictionary.AbstractDictionary
         """
@@ -186,8 +235,18 @@ class LanguageContext(AbstractContext):
         """
         return self.language.application
 
+    @property
+    def client(self):
+        return self.application.client
+
+    def set_translator(self, translator):
+        if not translator:
+            return
+        self.translator = translator
+        set_current_translator(translator)
+
     def fallback(self, label, description):
-        """ Fallback translation: try to use default language 
+        """ Fallback translation: try to use default language
             Args:
                 label (string): tranlated label
                 description (string): desctioption
@@ -196,17 +255,12 @@ class LanguageContext(AbstractContext):
         """
         try:
             key = Key(label = label, description = description, language = self.default_language)
-            if 'Only in English'.lower() in label.lower():
-                print self.fallback_dict.source
-            # 16132a471f9958f96a2ed16af25e8d8e
-            
-                
-                # print key.key 
-                # print key.key, key.label, 'hi', self.fallback_dict.translations
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)
 
+    def is_inline_mode(self):
+        return self.translator and self.translator.is_inline()
 
 class SourceContext(LanguageContext):
     """ Context with source """
@@ -215,18 +269,50 @@ class SourceContext(LanguageContext):
             Args:
                 source (string): source name
         """
-        self.source = source
+        self.source = source   # ref name to main source
+        self._used_sources = set([source])
         super(SourceContext, self).__init__(source=source, **kwargs)
-        
-        
+
+    @property
+    def source_name(self):   # current source: virtual or main
+        return self.block_option('source', default=self.source)
+
+    @property
+    def source_path(self):
+        source_builder = []
+        for opts in self._block_option_queue:
+            if not 'source' in opts or not opts.get('source', None):
+                continue
+            source_builder.append(opts['source'])
+        source_builder.insert(0, self.source)
+        return CONFIG['source_separator'].join(source_builder)
+
+    def fetch(self, label, description):
+        """ Fetch Translation
+            Args:
+                label (string): label
+                description (string): description
+            Returns:
+                Translation
+        """
+        if self.source_name == self.source:
+            return super(SourceContext, self).fetch(label, description)
+        return self.fetch_from_virtual(label, description)
+
+    def fetch_from_virtual(self, label, description):
+        self._used_sources.add(self.source_name)
+        dict = self.build_dict(self.language)
+        return self._fetch_translation(dict, label, description)
+
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """
-        source = language.application.source(
-            self.source, language.locale)
+        source = language.application.source(self.source_name, language.locale, source_path=self.source_path)
         return source
 
     def deactivate(self):
-        self.dict.flush()
+        for source in self._used_sources:
+            self.application.source(source, self.locale).flush()
+        self._used_sources = set([])
 
 
 class SnapshotContext(LanguageContext):
@@ -238,7 +324,7 @@ class SnapshotContext(LanguageContext):
         """
         self.source = source
         super(SnapshotContext, self).__init__(source=source, **kwargs)
-        
+
 
     def build_dict(self, language, **kwargs):
         """ Build snapshot dictionary """

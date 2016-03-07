@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
+__author__ = ''
 
 import re
 from ..exceptions import Error
@@ -35,11 +35,11 @@ QUOTES = ['"',"'"]
 
 
 def parse(text):
-    """ Parse rule 
+    """ Parse rule
         Args:
             rule (string): string
         Returns:
-            list: list of notations 
+            list: list of notations
     """
     pos = 0 # current symbol position
     expression = [] # current expression
@@ -83,7 +83,7 @@ def parse(text):
                 # Start new argument:
                 # (upper ^"Any data inside")
                 if not argument is None:
-                    # Unexpected quotation inside argument: 
+                    # Unexpected quotation inside argument:
                     # (print like^"to mix quotes")
                     raise ParseError('Unexpected quote',
                                      ParseError.INVALID_SYNTAX,

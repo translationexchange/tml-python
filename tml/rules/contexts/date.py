@@ -29,10 +29,13 @@ __author__ = 'a@toukmanov.ru'
 
 from _ctypes import ArgumentError
 from datetime import date, datetime
+import six
+
 
 class Date(date):
     """ Date context """
     supported_formats = ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S']
+    
     @classmethod
     def match(cls, data):
         """ Check is data has a date context
@@ -47,7 +50,7 @@ class Date(date):
             return data.date()
         elif isinstance(data, date):
             return data
-        elif type(data) is str or type(data) is six.text_type:
+        elif isinstance(data, six.string_types) or type(data) is six.text_type:
             for date_format in cls.supported_formats:
                 try:
                     return datetime.strptime(data, date_format).date()

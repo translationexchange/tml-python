@@ -5,18 +5,66 @@ https://github.com/pypa/sampleproject
 """
 from __future__ import absolute_import
 
+import os
+import sys
+import re
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from distutils.core import setup, find_packages
 # To use a consistent encoding
 from codecs import open
-from os import path
+pj = os.path.join
+dirname = os.path.dirname
+abspath = os.path.abspath
 
-here = path.abspath(path.dirname(__file__))
+
+def get_version(*path):
+    filename = pj(dirname(__file__), *path)
+    version_file = open(filename).read()
+    version_match = re.search(r"^__VERSION__ = (['\"])([^'\"]*)\1",
+                              version_file, re.M)
+    if version_match:
+        groups = version_match.groups()
+        if len(groups) > 1:
+            return version_match.group(2)
+    raise RuntimeError('Unable to find version string.')
+
+version = get_version('tml', '__init__.py')
+here = abspath(dirname(__file__))
 
 # Get the long description from the relevant file
 
-with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+
+
+if sys.argv[-1] == 'publish':
+    try:
+        import wheel
+    except ImportError:
+        print('Wheel library missing. Please run "pip install wheel"')
+        sys.exit()
+    os.system('python setup.py sdist upload')
+    os.system('python setup.py bdist_wheel upload')
+    sys.exit()
+
+if sys.argv[-1] == 'tag':
+    print("Tagging the version on github:")
+    os.system("git tag -a %s -m 'version %s'" % (version, version))
+    os.system("git push --tags")
+    sys.exit()
+
+
+with open(pj(here, 'README.rst'), encoding='utf-8') as f:
+    readme = f.read()
+with open(pj(here, 'HISTORY.rst'), encoding='utf-8') as f:
+    history = f.read()
+
+requirements = [
+    'requests==2.7.0',
+    'six==1.10.0'
+]
+
 
 setup(
     name='tml',
@@ -24,21 +72,18 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.0',
+    version=version,
 
-    description='Python SDK for tranlationexchange.com API',
-    long_description=long_description,
-
+    description='Python SDK for tranlationexchange.com',
+    long_description=readme,
     # The project's main homepage.
-    url='https://github.com/pypa/sampleproject',
-
+    url='https://github.com/translationexchange/tml-python.git',
     # Author details
     author='Translation Exchange, Inc.',
-    author_email='a@toukmanov.ru',
-
+    author_email='r.kamun@gmail.com',
     # Choose your license
     license='MIT',
-
+    zip_safe=False,
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         # How mature is this project? Common values are
@@ -65,26 +110,24 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='sample setuptools development',
-
+    keywords='tml tml-python translationexchange',
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['tests','demo','django']),
-
+    include_package_data=True,
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests','six'],
-    tests_require=['mock'],
-
+    install_requires=requirements,
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
-    # $ pip install -e .[dev,test]
+    # $ pip install -e .[memcached,pylibmc] or
+    # tml django setup.py: install_requires = ["tml[memcached]"],
     extras_require={
-        'dev': ['check-manifest'],
-        'test': ['coverage'],
+        'memcached': ['python-memcached>=1.57'],
+        'pylibmc': ['pylibmc>=1.5.0']
     },
 
 )

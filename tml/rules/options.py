@@ -1,6 +1,6 @@
 # encoding: UTF-8
 """
-# Token options: parsing and mapping 
+# Token options: parsing and mapping
 #
 # Copyright (c) 2015, Translation Exchange, Inc.
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -34,7 +34,7 @@ import re
 
 class TokenMapping(object):
     """ Class which maps list of args to assoc args"""
-    
+
     UNSUPPORTED = 'unsupported'
 
     def __init__(self, mapping):
@@ -58,7 +58,7 @@ class TokenMapping(object):
 
     @classmethod
     def build(cls, settings):
-        """ Build a mapping from arguments 
+        """ Build a mapping from arguments
             Args:
                 settings (list): list of settings, each element is a mapping dict or "unsupported" string
             Returns:
@@ -79,7 +79,7 @@ class Error(BaseError):
 
 
 def apply_mapping_rule(rule, args):
-    """ Apply mapping rule on args 
+    """ Apply mapping rule on args
         Args:
             rule (string): string rule where ${\d+} is replaced with argument value with expression index
             args (list): list of args
@@ -151,7 +151,7 @@ class Parser(object):
     def parse(self, text):
         """ Parse argument string
             Args:
-                text (string): argument 
+                text (string): argument
                                 named e.c. one: argument, many: arguments
                                 list e.c argument, arguments
         """
@@ -166,7 +166,7 @@ class Parser(object):
         return self.validate_kwargs(kwargs, text)
 
     def apply_token_mapping(self, args, text):
-        """ Apply token mapping on args 
+        """ Apply token mapping on args
             Args:
                 args (list): list of arguments
                 text (string): original expression (for exception)
@@ -180,7 +180,7 @@ class Parser(object):
                 return self.token_mapping[len(args) - 1].apply(args)
             except KeyError:
                 raise  InvalidNumberOfArguments(text)
-    
+
     def validate_kwargs(self, kwargs, text):
         """ Validate parsed kwargs
             Args:
@@ -246,7 +246,7 @@ class InvalidNumberOfArguments(Error):
         return 'Unsupported arguments count in expression "%s"' % (self.rule)
 
     def apply(self):
-        """ Apply exception 
+        """ Apply exception
             Raises:
                 InvalidNumberOfArguments
         """

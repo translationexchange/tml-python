@@ -24,8 +24,8 @@ __author__ = 'a@toukmanov.ru'
 from ..exceptions import Error
 
 
-def allpages(client, url, params):
-    """ Return results from all pages 
+def allpages(client, url, params=None, opts=None):
+    """ Return results from all pages
         Args:
             client (Client): API client
             url (string): URL
@@ -34,10 +34,10 @@ def allpages(client, url, params):
     total_pages = 1
     params['page'] = 0
     ret = None
-    
+
     while params['page'] < total_pages:
         params['page'] = params['page'] + 1
-        resp = client.get(url, params)
+        resp = client.get(url, params=params, opts=opts)
         if ret is None:
             ret = resp['results']
         elif type(ret) is list:

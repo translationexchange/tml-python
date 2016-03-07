@@ -27,7 +27,7 @@ __author__ = ''
 
 from .contexts import Gender, Value
 from . import ContextRules
-from argparse import ArgumentError
+from _ctypes import ArgumentError
 from .parser import parse
 
 

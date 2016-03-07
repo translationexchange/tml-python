@@ -1,5 +1,6 @@
 import logging
 from copy import copy
+from six import iteritems
 from .base import Singleton
 from .utils import APP_DIR, rel, merge
 
@@ -29,13 +30,13 @@ class BaseConfigMixin(dict):
         def is_callable(k, v):
             return callable(v)
 
-        for k, v in Config.__dict__.iteritems():
+        for k, v in iteritems(Config.__dict__):
             if is_builtin(k, v) or is_callable(k, v):
                 continue
             self[k] = v
 
     def override_config(self, **kwargs):
-        for k, v in kwargs.iteritems():
+        for k, v in iteritems(kwargs):
             orig_v = getattr(self, k, getattr(Config, k))
             if orig_v is not None:
                 if isinstance(orig_v, dict):

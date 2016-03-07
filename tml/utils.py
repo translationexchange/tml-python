@@ -4,13 +4,15 @@ import logging.handlers
 import functools
 import json
 import gzip
+from codecs import open
 from contextlib import contextmanager
-from StringIO import StringIO
+from six import StringIO, functools
 import warnings
 from datetime import datetime, timedelta
 from time import mktime
 from .strings import to_string
 
+reduce = functools.reduce
 
 pj = os.path.join
 
@@ -88,7 +90,7 @@ def read_gzip(payload):
     return gzip_f.read()
 
 def read_json(path):
-    with open(path, 'rb') as fp:
+    with open(path, 'rb', encoding='utf-8') as fp:
         return json.loads(to_string(fp.read()))
 
 

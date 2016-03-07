@@ -19,10 +19,13 @@ pj = os.path.join
 dirname = os.path.dirname
 abspath = os.path.abspath
 
+# need to kill off link if we're in docker builds
+if os.environ.get('PYTHON_BUILD_DOCKER', None) == 'true':
+    del os.link
 
 def get_version(*path):
     filename = pj(dirname(__file__), *path)
-    version_file = open(filename).read()
+    version_file = open(filename, encoding='utf-8').read()
     version_match = re.search(r"^__VERSION__ = (['\"])([^'\"]*)\1",
                               version_file, re.M)
     if version_match:
@@ -50,12 +53,12 @@ if sys.argv[-1] == 'publish':
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
-    os.system("git tag -a %s -m 'version %s'" % (version, version))
-    os.system("git push --tags")
+    os.system("git tag -f -a %s -m 'version %s'" % (version, version))
+    os.system("git push --tags --force")
     sys.exit()
 
 
-with open(pj(here, 'README.rst'), encoding='utf-8') as f:
+with open(pj(here, 'README.md'), encoding='utf-8') as f:
     readme = f.read()
 with open(pj(here, 'HISTORY.rst'), encoding='utf-8') as f:
     history = f.read()
@@ -67,7 +70,7 @@ requirements = [
 
 
 setup(
-    name='tml',
+    name='pytml',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -107,13 +110,14 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ],
 
     # What does your project relate to?
     keywords='tml tml-python translationexchange',
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['tests','demo','django']),
+    packages=find_packages(exclude=('tests',)),
     include_package_data=True,
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's

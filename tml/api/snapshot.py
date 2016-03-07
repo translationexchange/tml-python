@@ -22,14 +22,15 @@
 """
 from __future__ import absolute_import
 import re
+from codecs import open
 from ..strings import to_string
-__author__ = 'a@toukmanov.ru'
-
 from . import AbstractClient, APIError
 from tarfile import TarFile
 from json import loads
 from os.path import isdir, exists
 from ..exceptions import Error
+
+__author__ = 'xepa4ep, a@toukmanov.ru'
 
 
 REWRITE_RULES = (
@@ -71,7 +72,7 @@ class SnapshotDir(AbstractClient):
     def fetch(self, path):
         """ Fetch data for path from file """
         path = '%s/%s.json' % (self.path, path)
-        with open(path) as fp:
+        with open(path, encoding='utf-8') as fp:
             return loads(to_string(fp.read()))
 
     @classmethod

@@ -21,17 +21,16 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-__author__ = 'a@toukmanov.ru'
-
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-from json import loads
+import json
 from os import listdir
 from os.path import isdir
-from . import AbstractClient, APIError
 import re
+from codecs import open
+from six.moves.urllib.parse import urlencode
+from six import iteritems
+from . import AbstractClient, APIError
+
+__author__ = 'xepa4ep, a@toukmanov.ru'
 
 
 def clean_url(url):
@@ -42,7 +41,7 @@ def clean_url(url):
     return _url
 
 def debug(data, contains=''):
-    return list(k for k, v in data.iteritems() if contains in k)
+    return list(k for k, v in iteritems(data) if contains in k)
 
 
 REWRITE_RULES = (
@@ -112,7 +111,7 @@ class Hashtable(AbstractClient):
                 url, url_with_params, has_params = self.rewrite_path(self.build_url(url, params))
                 self.url = url
                 return self.data[url_with_params]
-            except self.handle_nostrict:
+            except self.handle_nostrict as e:
                 # print self.rewrite_path(self.build_url(url, params)), debug(self.data, 'projects/2'), url
                 return self.data[url]
         except KeyError as key_not_exists:
@@ -131,6 +130,9 @@ class Hashtable(AbstractClient):
 
         if params is None:
             return url
+        not_important_params = ('all', )
+        for param in not_important_params:
+            params.pop(param, None)
         sorted_params = sorted(params.items(), key=lambda cur: cur[0])
         return url + ('' if not params else '?' + urlencode(sorted_params))
 
@@ -176,7 +178,8 @@ class File(Hashtable):
         if path[0] != '/':
             # relative path:
             path = '%s/%s' % (self.basedir, path)
-        resp = loads(open(path).read())
+        with open(path, 'rb') as fp:
+            resp = json.loads(fp.read().decode('utf-8'))
         self.data[self.build_url(url, params)] = resp
         if not strict:
             self.data[url] = resp

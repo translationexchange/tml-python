@@ -5,6 +5,7 @@ import shutil
 import unittest
 from tml.logger import Logger, LoggerNotConfigured
 from ..common import FIXTURES_PATH
+from codecs import open
 
 pj = os.path.join
 LANGUAGES = [{'locale':'ru'},{'locale':'en'}]
@@ -17,11 +18,11 @@ class ApplicationTest(unittest.TestCase):
     path = pj(FIXTURES_PATH, 'logs', 'tml.log')
 
     def _extract_last_line(self, path):
-        with open(path, 'r') as f:
+        with open(path, 'rb') as f:  # as binary for compat issues in py3
             f.seek(-2, 2)  # jump to the second last byte
             while f.read(1) != b'\n':  # until EOL
                 f.seek(-2, 1)
-            return f.readline()
+            return f.readline().decode('utf-8')
 
     def test_init(self):
         logger = Logger(path=self.path)

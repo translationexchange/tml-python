@@ -67,7 +67,7 @@ def parse(text, tags_factory = None):
                     # Clean:
                     close = False
                     tag_name = None
-                elif not tag_name is None:
+                elif tag_name:
                     # Finish of tag definition [link^]site.com[/link]
                     new_element = tags_factory.build(tag_name)
                     if new_element.self_closed:
@@ -81,10 +81,17 @@ def parse(text, tags_factory = None):
                     # Finish of short tag: [i: text^]
                     element = end(element) # append current piece to short tag
                 else:
-                    raise UnexpectedToken(text, let)
+                    if not tag_name:  # []
+                        element.append(BEGIN_TOKEN)
+                        element.append(END_TOKEN)
+                        continue    
+                    # raise UnexpectedToken(text, let)
     
-            elif let == TOKEN_SEPARATOR:
+            elif let == TOKEN_SEPARATOR:  # because it could be just a symbol
                 # inside short token:
+                if tag_name is None:
+                    element.append(let)
+                    continue
                 stack.append(element)
                 element = ShortTag(tags_factory.build(tag_name))
                 trace('build short', tag_name)

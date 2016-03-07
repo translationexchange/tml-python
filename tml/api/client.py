@@ -30,6 +30,7 @@ import contextlib
 import json
 from requests import Response
 from requests.exceptions import HTTPError
+import six
 from ..utils import read_gzip, pj, interval_timestamp
 from ..config import CONFIG
 from ..logger import get_logger
@@ -189,7 +190,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
                    'accept-Encoding': 'gzip, deflate'}
         config = {'timeout': 30, 'headers': headers}
         params = {k: str(v).lower() if type(v) is bool else v
-                  for k, v in params.iteritems()}
+                  for k, v in six.iteritems(params)}
         if method == 'post':
             headers['content-type'] = 'application/x-www-form-urlencoded'
             config['data'] = params
@@ -244,13 +245,13 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         except Exception as e:
             tml_logger.exception(e)
             exc_info = sys.exc_info()
-            raise exc_info[0], exc_info[1], exc_info[2]
+            six.reraise(*exc_info)
         else:
             t1 = time.time()
             tml_logger.debug(log_tpl % dict(method=method.upper(), url=url, query=self.to_query(params), sec=int(t1 - t0)))
 
     def to_query(self, params):
-        querystr = ['%s=%s' % (k, v) for k, v in params.iteritems()]
+        querystr = ['%s=%s' % (k, v) for k, v in six.iteritems(params)]
         return '&'.join(querystr)
 
 
@@ -259,6 +260,7 @@ if CONFIG.verbose:
     # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
     # the only thing missing will be the response.body which is not logged.
     import logging
+    from six import http_client
     try: # for Python 3
         from http.client import HTTPConnection
     except ImportError:

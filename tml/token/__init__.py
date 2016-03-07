@@ -24,7 +24,7 @@
 """
 from __future__ import absolute_import
 import six
-__author__ = 'a@toukmanov.ru'
+__author__ = 'xepa4ep, a@toukmanov.ru'
 
 
 import re

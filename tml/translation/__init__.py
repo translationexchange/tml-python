@@ -62,6 +62,8 @@ class Key(object):
     def __eq__(self, other):
         return self.key == other.key
 
+    def __hash__(self):
+        return hash(self.key)
 
 class TranslationOption(Context):
     """ Translation option with context """

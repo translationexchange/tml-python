@@ -34,7 +34,7 @@ class SingletonMixin(object):
             with cls.__singleton_lock:
                 if key not in cls._instance_dict:
                     cls._instance_dict[key] = \
-                        super(SingletonMixin, cls).__new__(cls, *args, **kwargs)
+                        super(SingletonMixin, cls).__new__(cls)
         return cls._instance_dict[key]
 
     def _drop_it(self):

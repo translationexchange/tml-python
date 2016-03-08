@@ -2,6 +2,7 @@ import pytest
 import os
 import time
 import unittest
+from tml.config import CONFIG
 from tml.cache import CacheVersion, CachedClient
 from tml.cache_adapters import file as FileAdapter
 from tml.cache_adapters.test_utils import check_alive
@@ -96,10 +97,20 @@ class TestCache(unittest.TestCase):
             app_data = cache.fetch('application')
 
     def test_memcache_init(self):
+        with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'ttl': 3600, 'namespace': ''}):
+            cache = CachedClient.instance()
+            self.assertEquals(cache.namespace, CONFIG.application_key()[:5], 'namespace set first 5 symbols of key')
+        
+        with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'ttl': 3600, 'namespace': ''}, application={'access_token': 'foobar'}):
+            cache = CachedClient.instance()
+            self.assertEquals(cache.namespace, CONFIG.access_token()[:5], 'namespace set first 5 symbols of token')
+
+
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'namespace': 'tml-2', 'ttl': 3600}):
             cache = CachedClient.instance()
             self.assertIsInstance(cache, BaseMemcachedAdapter, 'proper factory build')
             self.assertEquals(cache.default_timeout, 3600)
+            self.assertEquals(cache.namespace, 'tml-2', 'namespace set')
             cache._drop_it()
 
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'backend': 'pylibmc', 'host': '127.0.0.1', 'namespace': 'tml-3', 'ttl': 1200}):

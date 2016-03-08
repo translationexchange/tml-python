@@ -146,7 +146,10 @@ class CachedClient(SingletonMixin, LoggerMixin):
 
     @property
     def namespace(self):
-        return CONFIG.cache.get('namespace', '#')
+        ns = CONFIG.cache.get('namespace', None)
+        if not ns:
+            ns = CONFIG.access_token(default=CONFIG.application_key())[:5]
+        return ns
 
     def versioned_key(self, key, opts=None):
         return self.version.versioned_key(key, self.namespace)

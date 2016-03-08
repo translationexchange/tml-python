@@ -123,6 +123,9 @@ class Config(BaseConfigMixin, Singleton):
     def application_key(self):
         return self['application'].get('key', 'current')
 
+    def access_token(self, default=None):
+        return self['application'].get('access_token', default)
+
     def api_host(self):
         return self.application['path']
         if self.environment == 'prod':

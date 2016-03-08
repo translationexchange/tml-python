@@ -1,7 +1,7 @@
-import unittest
 import pytest
 import os
 import time
+import unittest
 from tml.cache import CacheVersion, CachedClient
 from tml.cache_adapters import file as FileAdapter
 from tml.cache_adapters.test_utils import check_alive
@@ -34,7 +34,7 @@ class DumbCachedClient(object):
     def fetch(self, key):
         return self.cache[key]
 
-class CacheVersionTest:
+class TestCacheVersion(unittest.TestCase):
 
     def setUp(self):
         configure()
@@ -69,11 +69,7 @@ class CacheVersionTest:
 
 
 @pytest.mark.usefixtures("memcached")
-class CacheTest(unittest.TestCase):
-
-    def setUp(self):
-        self.snapshot_path = FIXTURES_PATH
-        self.version = '20160307120415'
+class TestCache(unittest.TestCase):
 
     def test_init_adapter(self):
         path = 'tests.integration.cache.DumbCachedClient'
@@ -90,10 +86,11 @@ class CacheTest(unittest.TestCase):
             self.assertIsInstance(cache, CachedClient)
             self.assertEquals(cache.cache_name, 'file')
 
-        with override_config(cache={'enabled': True, 'path': self.snapshot_path, 'version': self.version}):
+        with override_config(cache={'enabled': True, 'path': TML['cache']['path'], 'version': TML['cache']['version']}):
             cache = CachedClient.instance(adapter=FileAdapter)
-            self.assertEquals(cache.get_cache_path(), os.path.join(self.snapshot_path, self.version))
-            self.assertEquals(cache.file_path('application'), os.path.join(self.snapshot_path, self.version, 'application.json'))
+            self.assertEquals(cache.get_cache_path(), os.path.join(TML['cache']['path'], TML['cache']['version']))
+            self.assertEquals(cache.file_path('application'), os.path.join(TML['cache']['path'], TML['cache']['version'], 'application.json'))
+            print cache.file_path('application')
             app_data = cache.fetch('application')
             self.assertEquals(app_data['key'], TML['application']['key'])
             app_data = cache.fetch('application')
@@ -148,6 +145,3 @@ class CacheTest(unittest.TestCase):
         self.assertEquals(cache.fetch('a'), 'b', 'upgrade version')
         cache.upgrade_version()
         self.assertEquals(cache.fetch('a'), None, 'upgrade version works')
-
-if __name__ == '__main__':
-    unittest.main()

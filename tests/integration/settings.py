@@ -8,8 +8,8 @@ TML = {
     'cache': {
         'enabled': True,
         'adapter': 'file',
-        'version': '20160303075532',
-        'path': pj(FIXTURES_PATH, 'tml/cache')
+        'version': '20160307120415',
+        'path': FIXTURES_PATH
        # 'path': pj(os.path.dirname(BASE_DIR), 'tests/fixtures/snapshot.tar.gz')
     }
     # 'logger': {

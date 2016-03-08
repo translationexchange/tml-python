@@ -61,6 +61,10 @@ class Config(BaseConfigMixin, Singleton):
     application = {
         #'key':
         #'token'
+        #"path": 'https://staging-api.translationexchange.com'
+        #"cdn_path": "http://trex-snapshots.s3-us-west-1.amazonaws.com"
+        "path": "https://api.translationexchange.com",
+        "cdn_path": "http://cdn.translationexchange.com"
     }
 
     logger = {
@@ -81,7 +85,9 @@ class Config(BaseConfigMixin, Singleton):
     agent = {
         'enabled': True,
         'type': 'agent',
-        'cache':   86400  # timeout every 24 hours
+        'cache':   86400,  # timeout every 24 hours
+        'host': "https://tools.translationexchange.com/agent/stable/agent.min.js",
+        #'host': "https://tools.translationexchange.com/agent/staging/agent.min.js"
     }
 
     data_preprocessors = ('tml.tools.list.preprocess_lists',)
@@ -118,23 +124,17 @@ class Config(BaseConfigMixin, Singleton):
         return self['application'].get('key', 'current')
 
     def api_host(self):
+        return self.application['path']
         if self.environment == 'prod':
             return 'https://api.translationexchange.com'
         else:
-            return 'https://staging-api.translationexchange.com'
+            return 
 
     def cdn_host(self):
-        if self.environment == 'prod':
-            return 'http://cdn.translationexchange.com'
-        else:
-            return 'http://trex-snapshots.s3-us-west-1.amazonaws.com'
-
+        return self.application['cdn_path']
 
     def agent_host(self):
-        if self.environment == 'prod':
-            return 'https://tools.translationexchange.com/agent/stable/agent.min.js'
-        else:
-            return 'https://tools.translationexchange.com/agent/staging/agent.min.js'
+        return self.agent['host']
 
 
 CONFIG = Config.instance()

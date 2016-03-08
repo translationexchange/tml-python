@@ -123,6 +123,13 @@ class TranslationIsNotExists(Error):
         self.dict = dict
 
 
+class TranslationIgnored(Error):
+    def __init__(self, key, dict):
+        super(TranslationIgnored, self).__init__()
+        self.key = key
+        self.dict = dict
+
+
 class NoneDict(AbstractDictionary):
     """ Translate nothing """
     def fetch(self, key):

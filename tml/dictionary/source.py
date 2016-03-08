@@ -66,7 +66,9 @@ class SourceDictionary(Hashtable):
         self.source_path = source_path or source
         self.language = language
         self.missed_keys = SourceMissed(self.language.client, self.source_path)
-        translations = translations or self.fetch_translations()
+        if translations is None:
+            translations = self.fetch_translations()
+        # translations = translations or self.fetch_translations()
         super(SourceDictionary, self).__init__(translations=translations, fallback=fallback)
 
     @property

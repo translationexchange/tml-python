@@ -26,10 +26,10 @@ from .config import CONFIG
 from .translation import Key
 from .render import RenderEngine
 from .exceptions import Error
-from .dictionary import TranslationIsNotExists
+from .dictionary import TranslationIsNotExists, TranslationIgnored
 from .dictionary.snapshot import SnapshotDictionary
 from .language import Language
-from .dictionary import NoneDict
+from .dictionary import NoneDict, return_label_fallback
 from .dictionary.translations import Dictionary
 from .dictionary.source import SourceDictionary
 from .session_vars import set_current_translator, set_current_context
@@ -91,8 +91,8 @@ class AbstractContext(RenderEngine):
 
     def _fetch_translation(self, dict, label, description):
         key = self.build_key(label, description)
-        if self.application.ignored_key(key):
-            raise TranslationIsNotExists(key, self.dict)
+        if self.application.ignored_key(key):  # if ignored, return label
+            return return_label_fallback(key)
         if dict:
             return dict.fetch(self.build_key(label, description))
         raise ContextNotConfigured(self)

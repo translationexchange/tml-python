@@ -93,6 +93,8 @@ class Config(BaseConfigMixin, Singleton):
         #'path': 'a/b/c/snapshot.tar.gz'
     }
 
+    default_source = "index"
+
     # memcached
     #'cache': {
         #'enabled': True,

@@ -31,7 +31,8 @@ from .translation import Key
 from .rules.contexts.gender import Gender
 from .decoration import system_tags as system_decoration_tags
 from .dictionary import AbstractDictionary
-from .context import (LanguageContext,
+from .context import (AbstractContext,
+                      LanguageContext,
                       ContextNotConfigured,
                       SourceContext,
                       SnapshotContext)
@@ -84,12 +85,15 @@ def build_context(token=None,
             tml.context.AbstractContext: context instance
     """
     kwargs['client'] = build_client(client, snapshot_path, token)
+    context = kwargs.pop('context', None)  # for unit test purpose
+    if context and issubclass(context, AbstractContext):
+        return context(source=source, **kwargs)
+    source = source
     if use_snapshot:
         return SnapshotContext(source, **kwargs)
-    if source:
-        return SourceContext(source, **kwargs)
-    else:
-        return LanguageContext(**kwargs)
+    return SourceContext(source, **kwargs)
+    # else:
+    #     return LanguageContext(**kwargs)
 
 
 def initialize(**kwargs):

@@ -120,7 +120,8 @@ class SourceDictionary(Hashtable):
         try:
             ret = super(SourceDictionary, self).fetch(key)
         except TranslationIsNotExists as translation_not_exists:
-            self.missed_keys.append(key)
+            if key.label:
+                self.missed_keys.append(key)
             raise translation_not_exists
         if len(ret) == 0:
             """ Empty translation """

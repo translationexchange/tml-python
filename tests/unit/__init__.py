@@ -22,25 +22,34 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
+import six
+import json
+import unittest
+import pytest
+from hashlib import md5
 from tml.dictionary.language import LanguageDictionary
 from tml.dictionary.translations import Dictionary
-from tml import initialize, tr, build_context, Gender, ContextNotConfigured, RenderEngine
+from tml import initialize, tr, Gender, ContextNotConfigured, RenderEngine
 import tml
 from tests.mock import Client as ClientMock
-import unittest
 from tests.mock import DummyUser
 from tml.dictionary.source import SourceDictionary
 from tml.tools import list as tml_list
 from tml.translation import Key
-from hashlib import md5
-import six
 from tml.strings import to_string
 from tml.session_vars import set_current_context, get_current_context
-import json
+
 
 __author__ = 'a@toukamnov.ru'
 
 
+import pytest
+import tml
+from tml.context import LanguageContext
+from ..common import unittest_fixture
+
+
+@pytest.mark.usefixtures("build_context")
 class api_test(unittest.TestCase):
     """ Test configuration """
     def setUp(self):
@@ -54,16 +63,15 @@ class api_test(unittest.TestCase):
             tr('Hello')
 
     def test_configure(self):
-        c = build_context(client=self.client)
+        c = self.build_context(client=self.client)
         self.assertEquals('en', c.language.locale, 'Load app defaults')
         self.assertEquals(Dictionary, type(c.dict), 'Default dictionary')
-        c = build_context(locale='ru', key='2', client = self.client)
+        c = self.build_context(locale='ru', key='2', client = self.client)
         self.assertEquals('ru', c.language.locale, 'Custom locale')
         self.assertEquals('2', c.language.application.key, 'Custom application id')
 
     def test_initialize_globals(self):
-        initialize(locale = 'ru', application_id = None, client = self.client)
-        context = get_current_context()
+        context = self.build_context(locale='ru', application_id=None, client=self.client)
         self.assertEquals('ru', context.locale)
         self.assertEquals(1, context.application.id, 'Load default application')
         self.assertEquals(type(context.dict), Dictionary, 'No preload data')
@@ -74,7 +82,7 @@ class api_test(unittest.TestCase):
 
 
     def test_renderable_items(self):
-        c = build_context(client = self.client)
+        c = self.build_context(client = self.client)
         hello_all = c.tr('Hello {name}', {'name': tml_list.List([to_string('Вася'),to_string('Петя'),'Коля'], last_separator='и')})
         self.assertEquals(to_string('Привет Вася, Петя и Коля'), hello_all, 'Pass List instance')
         RenderEngine.data_preprocessors.append(tml_list.preprocess_lists)
@@ -86,7 +94,7 @@ class api_test(unittest.TestCase):
 
     def test_fallback_language(self):
         label = to_string('Only english tranlation')
-        c = build_context(client = self.client, locale = 'ru')
+        c = self.build_context(client = self.client, locale = 'ru')
         key = Key(label = label, description = '', language = c.language)
         self.client.read('translation_keys/%s/translations' % key.key, {'page':1, 'locale': 'en'}, 'translation_keys/hello_en.json', True)
 #        self.assertEquals('Hello (en)', c.tr(label, description = ''), 'Fallback to en')
@@ -94,7 +102,7 @@ class api_test(unittest.TestCase):
     def test_defaults(self):
         # completly empty en translation:
         self.client.read('sources/5b7c7408d7cb048fc86170fdb3a691a8/translations',{'locale':'en'},'sources/2c1743a391305fbf367df8e4f069f9f9/translations.json',True)
-        c = build_context(source = 'empty_source', client = self.client, locale = 'ru')
+        c = self.build_context(skip=True, source = 'empty_source', client = self.client, locale = 'ru')
         few_apples = c.tr('{count|apple,apples}',{'count':22})
         self.assertEquals(to_string('яблока'), few_apples, 'Use few from translation')
         self.assertEquals('apple', c.tr('{count|apple,apples}',{'count':1}), 'Use one from fallback')
@@ -108,19 +116,18 @@ class api_test(unittest.TestCase):
         self.client.read('sources/%s/translations' % source_hash, {'locale':'ru'}, 'sources/sources_empty.json', True)
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
-        c = build_context(client=self.client, locale='ru', source=source)
-
+        c = self.build_context(client=self.client, locale='ru', source=source, skip=True)
         self.assertEquals('Has english translation', c.tr(label), 'Use fallback source for en')
         c.deactivate()
         self.assertEquals(self.client.last_url, 'sources/register_keys', 'Submit missed keys url')
         expected_keys = [{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]
         submited_keys = json.loads(self.client.last_params['source_keys'])
         self.assertEquals(expected_keys, submited_keys, 'Submit missed key data')
-        c = build_context(client = self.client, locale = 'ru', source = source)
+        c = self.build_context(client = self.client, locale = 'ru', source = source)
         self.assertEquals('Never translated', c.tr('Never translated'), 'Never tranlated parent fallback')
 
     def test_fallback_rules(self):
-        c = build_context(locale = 'ru', client = self.client)
+        c = self.build_context(locale = 'ru', client = self.client)
         f = c.fallback('{count|banana:bananas}', '')
         self.assertEquals('en', f.key.language.locale, 'Fetch translation with default language')
         self.assertEquals('2 bananas', c.tr('{count||banana,bananas}',{'count':2}), 'Use fallback rules')

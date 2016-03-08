@@ -51,7 +51,7 @@ REWRITE_RULES = (
     (r'^projects\/(\w+)\/definition.*[\?\&]locale=(\w+).*$', 'projects/%(0)s?locale=%(1)s'),
     (r'^languages\/(\w+)\/definition$', 'languages/%(0)s'),
     (r'^sources\/(\w+)\/translations.*[\?\&]locale=(\w+).*$', 'sources/%(0)s/translations?locale=%(1)s'),
-    (r'^translation_keys\/(\w+)\/translations\?all=True&locale=(\w+)&page=(\d+).*$', 'translation_keys/%(0)s/translations?locale=%(1)s&page=%(2)s')
+    (r'^translation_keys\/(\w+)\/translations\?locale=(\w+)&page=(\d+).*$', 'translation_keys/%(0)s/translations?locale=%(1)s&page=%(2)s')
 )
 
 def rewrite_path(url):

@@ -10,27 +10,7 @@ from tml.dictionary import Hashtable
 from tml.dictionary.language import LanguageDictionary
 import six
 from tml.strings import to_string
-
-class FakeLanguage(object):
-    def __init__(self):
-        self.contexts = self
-        self.cases = {'dat': CaseMock()}
-
-    def execute(self, rule, value):
-        return rule
-
-class ContextsMock(object):
-    """ Stupid class to test context matching """
-    @property
-    def contexts(self):
-        return self
-
-    def execute(self, rules, data):
-        return data.__class__.__name__
-
-class CaseMock(object):
-    def execute(self, data):
-        return data.upper()
+from ..common import FakeLanguage, ContextsMock, CaseMock
 
 
 class LegacyTest(unittest.TestCase):

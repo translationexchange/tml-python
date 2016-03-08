@@ -61,6 +61,9 @@ class AbstractContext(RenderEngine):
         super(AbstractContext, self).__init__()
         self.dict = self.build_dict(self.language)
 
+    def build_dict(self, language):
+        pass
+
     def push_options(self, opts):
         self._block_option_queue.append(opts)
 
@@ -103,6 +106,14 @@ class AbstractContext(RenderEngine):
                 Translation
         """
         return self._fetch_translation(self.dict, label, description)
+
+    @property
+    def application(self):
+        """ Application getter
+            Returns:
+                application.Application
+        """
+        return self.language.application
 
     _default_language = None
 
@@ -189,13 +200,14 @@ class LanguageContext(AbstractContext):
         """
         CachedClient.instance().reset_version()
         self.set_translator(translator)
+        locale = locale or CONFIG.default_locale
         if key:
             application = Application.load_by_key(
                 client, key, locale=locale, source=source)
         else:
             application = Application.load_default(
                 client, locale=locale, source=source)
-        language = application.language(locale)
+        language = application.language(locale or application.default_locale)
         super(LanguageContext, self).__init__(language=language)
         set_current_context(self)
 
@@ -226,14 +238,6 @@ class LanguageContext(AbstractContext):
                 string: locale name
         """
         return self.language.locale
-
-    @property
-    def application(self):
-        """ Application getter
-            Returns:
-                application.Application
-        """
-        return self.language.application
 
     @property
     def client(self):
@@ -269,9 +273,9 @@ class SourceContext(LanguageContext):
             Args:
                 source (string): source name
         """
-        self.source = source   # ref name to main source
-        self._used_sources = set([source])
-        super(SourceContext, self).__init__(source=source, **kwargs)
+        self.source = source or CONFIG.default_source   # ref name to mainsource
+        self._used_sources = set([self.source])
+        super(SourceContext, self).__init__(source=self.source, **kwargs)
 
     @property
     def source_name(self):   # current source: virtual or main

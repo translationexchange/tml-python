@@ -1,4 +1,5 @@
 import unittest
+import pytest
 import os
 import time
 from tml.cache import CacheVersion, CachedClient
@@ -7,6 +8,9 @@ from tml.cache_adapters.test_utils import check_alive
 from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter, BaseMemcachedAdapter
 from tml import configure
 from tests.common import override_config, FIXTURES_PATH
+from .settings import TML
+
+MEMCACHE_CONNECTION = ['127.0.0.1:11211']
 
 
 class MockCachedClient(CachedClient):
@@ -30,8 +34,7 @@ class DumbCachedClient(object):
     def fetch(self, key):
         return self.cache[key]
 
-
-class CacheVersionTest(unittest.TestCase):
+class CacheVersionTest:
 
     def setUp(self):
         configure()
@@ -65,12 +68,12 @@ class CacheVersionTest(unittest.TestCase):
         self.assertTrue(version.is_invalid(), '0 is not valid')
 
 
-
+@pytest.mark.usefixtures("memcached")
 class CacheTest(unittest.TestCase):
 
     def setUp(self):
         self.snapshot_path = FIXTURES_PATH
-        self.version = '20160218065921'
+        self.version = '20160307120415'
 
     def test_init_adapter(self):
         path = 'tests.integration.cache.DumbCachedClient'
@@ -92,7 +95,7 @@ class CacheTest(unittest.TestCase):
             self.assertEquals(cache.get_cache_path(), os.path.join(self.snapshot_path, self.version))
             self.assertEquals(cache.file_path('application'), os.path.join(self.snapshot_path, self.version, 'application.json'))
             app_data = cache.fetch('application')
-            self.assertEquals(app_data['key'], 'ca77401b70d5efb91db42f15091a21a68e032ee20e93cd3539ce72b7b810fa1a')
+            self.assertEquals(app_data['key'], TML['application']['key'])
             app_data = cache.fetch('application')
 
     def test_memcache_init(self):

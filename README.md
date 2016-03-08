@@ -2,7 +2,7 @@
   <img src="https://avatars0.githubusercontent.com/u/1316274?v=3&s=200">
 </p>
 
-TML Library For Python
+TML library For Python
 ==================
 [![Build Status](https://travis-ci.org/translationexchange/tml-python.png?branch=master)](https://travis-ci.org/translationexchange/tml-python)
 [![Coverage Status](https://coveralls.io/repos/translationexchange/tml-python/badge.png?branch=master)](https://coveralls.io/r/translationexchange/tml-python?branch=master)

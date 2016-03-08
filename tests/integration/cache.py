@@ -91,7 +91,6 @@ class TestCache(unittest.TestCase):
             cache = CachedClient.instance(adapter=FileAdapter)
             self.assertEquals(cache.get_cache_path(), os.path.join(TML['cache']['path'], TML['cache']['version']))
             self.assertEquals(cache.file_path('application'), os.path.join(TML['cache']['path'], TML['cache']['version'], 'application.json'))
-            print cache.file_path('application')
             app_data = cache.fetch('application')
             self.assertEquals(app_data['key'], TML['application']['key'])
             app_data = cache.fetch('application')

@@ -23,13 +23,23 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
+import re
 from six.moves import range
-__author__ = 'a@toukmanov.ru'
-
-
+from tml.session_vars import get_current_context
 from tml.exceptions import Error as BaseError
 from ..strings import to_string
-import re
+
+
+__author__ = 'xepa4ep, a@toukmanov.ru'
+
+
+def is_language_cases_enabled():
+    context = get_current_context()
+    if not context:
+        return False
+    if not context.application:
+        return False
+    return context.application.feature_enabled('language_cases')
 
 
 class TokenMapping(object):
@@ -51,9 +61,9 @@ class TokenMapping(object):
                 dict: kwargs mapped by rules
         """
         ret = {}
+        context = get_current_context()
         for key in self.mapping:
             ret[key] = apply_mapping_rule(self.mapping[key], args)
-
         return ret
 
     @classmethod
@@ -73,10 +83,17 @@ class TokenMapping(object):
 
 class Error(BaseError):
     """ Abstract options parse error """
-    def __init__(self, rule):
+    def __init__(self, rule, msg=None):
         super(Error, self).__init__()
         self.rule = rule
+        self.msg = msg
 
+    def __str__(self):
+        return self.msg
+
+
+IS_KWARG = re.compile('^(\w+)\s*\:(.*)$')
+SCAN_VALUE = re.compile('({\$(\d+)(::\w+)*})')
 
 def apply_mapping_rule(rule, args):
     """ Apply mapping rule on args
@@ -84,16 +101,29 @@ def apply_mapping_rule(rule, args):
             rule (string): string rule where ${\d+} is replaced with argument value with expression index
             args (list): list of args
     """
-    i = 0
+    context = get_current_context()
     rule = to_string(rule)
-    for arg in args:
-        rule = rule.replace('{$%d}' % i, arg)
-        i = i + 1
-    return rule
-
-
-IS_KWARG = re.compile('^(\w+)\s*\:(.*)$')
-
+    value = rule  # {$0::plural}
+    
+    for group in SCAN_VALUE.findall(rule):
+        token = group[0]
+        var_idx, cases = int(group[1]), []
+        if len(args) < var_idx:  # $5, but there is only 2 args ['message', 'messages']
+            raise IndexOutOfBounds(rule)
+        token_value = args[var_idx]
+        if len(group) > 2:
+            cases = group[2].split('::')[1:]
+        if cases and is_language_cases_enabled():
+            while cases:
+                case_key = cases.pop(0)
+                lcase = context.language.case_by_keyword(case_key)
+                if not lcase:
+                    raise Error(rule, msg='Language case %s is not defined: %s' % (case_key, rule))
+                token_value = lcase.execute(token_value)
+        value = value.replace(token, token_value)
+    print value
+    return value
+    
 
 def parse_args(text):
     """ Fetch arges from text
@@ -252,3 +282,8 @@ class InvalidNumberOfArguments(Error):
         """
         raise self
 
+
+class IndexOutOfBounds(Error):
+
+    def __str__(self, *args, **kwargs):
+        return "The index inside `%s` is out of bounds" % self.rule

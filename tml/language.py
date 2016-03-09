@@ -116,6 +116,9 @@ class Language(object):
         """
         return self.application.client
 
+    def case_by_keyword(self, case_key):
+        return self.cases.get(case_key, None)
+
     def __eq__(self, other):
         return self.id == other.id and self.locale == other.locale
 

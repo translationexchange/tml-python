@@ -2,11 +2,18 @@
 """ Test rules built-in functions """
 from __future__ import absolute_import
 import unittest
+import pytest
+from tests.mock import Client as ClientMock
 from tml.rules.options import *
 
 
+@pytest.mark.usefixtures("build_context")
 class OptionsTest(unittest.TestCase):
     """ Test for options """
+
+    def setUp(self):
+        self.client = ClientMock.read_all()
+
     def test_parse_args(self):
         """ Test parser """
         self.assertEquals((['a', 'b'],{}), parse_args('a, b'), 'a,b')
@@ -19,7 +26,7 @@ class OptionsTest(unittest.TestCase):
         self.assertEquals({'one':'one','few':'few','many':'many','other':'many'},
                           TokenMapping({"one":"{$0}","few":"{$1}","many":"{$2}","other":"{$2}"}).
                           apply(['one','few','many']),
-                          'One, few, many')
+                          )
         self.assertEquals({'male':'he','female':'she','other':'he or she'},
                           TokenMapping({"male":"{$0}","female":"{$1}","other":"{$0} or {$1}"}).
                           apply(['he','she']),
@@ -66,6 +73,18 @@ class OptionsTest(unittest.TestCase):
 
         with self.assertRaises(MissedKey):
             p.parse('male: he, female: she')
+
+    def test_parser_with_cases(self):
+        c = self.build_context(client=self.client)
+        token_mapping = TokenMapping.build([
+            {"one": "{$0}", "other": "{$0::plural}"},
+            {"one": "{$0}", "other": "{$1}"}])
+        p = Parser(['one', 'other'], 'other', token_mapping)
+        self.assertEquals({'one': 'message', 'other': 'messages'},
+                          p.parse('one: message, other: messages'))
+        self.assertEquals({'one': 'message', 'other': 'messages'},
+                          p.parse('message'))
+
 
 
 if __name__ == '__main__':

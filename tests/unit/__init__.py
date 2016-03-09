@@ -117,7 +117,7 @@ class api_test(unittest.TestCase):
         # emulate source for en:
         self.client.read('sources/%s/translations' % source_hash, {'locale':'en'}, 'sources/sources_en.json', True)
         c = self.build_context(client=self.client, locale='ru', source=source, skip=True)
-        self.assertEquals('Has english translation', c.tr(label), 'Use fallback source for en')
+        self.assertEquals(label, c.tr(label), 'Use fallback source for en')
         c.deactivate()
         self.assertEquals(self.client.last_url, 'sources/register_keys', 'Submit missed keys url')
         expected_keys = [{"keys": [{"locale": "ru", "level": 0, "description": "", "label": "Only in English"}], "source": "test_source_fallback"}]

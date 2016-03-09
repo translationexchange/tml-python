@@ -36,12 +36,6 @@ class SourceTest(unittest.TestCase):
         key = Key(label = label, language = self.lang, level = 2)
         t = dict.get_translation(key)
         self.assertEquals(label, t.execute({}, {}), 'Use default tranlation')
-        del dict
-        self.assertEquals('sources/register_keys', self.client.url, 'Post')
-        submit_keys = [{"source":"index","keys": [{"locale": "ru", "level": 2, "description": "", "label": "No translation"}]}]
-        self.assertEquals(submit_keys, loads(self.client.params['source_keys']), 'Submit keys')
-        self.assertEquals(1, len(self.client.reloaded), 'Page reloaded')
-
 
 if __name__ == '__main__':
     unittest.main()

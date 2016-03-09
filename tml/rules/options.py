@@ -121,7 +121,6 @@ def apply_mapping_rule(rule, args):
                     raise Error(rule, msg='Language case %s is not defined: %s' % (case_key, rule))
                 token_value = lcase.execute(token_value)
         value = value.replace(token, token_value)
-    print value
     return value
     
 

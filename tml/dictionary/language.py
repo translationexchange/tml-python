@@ -33,7 +33,6 @@ class LanguageDictionary(Hashtable):
         """ .ctor
             Args:
                 lang (Language): language
-                missed_keys (list): list for missed keys
         """
         self.language = lang
         translations = translations or self.fetch_translations()

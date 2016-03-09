@@ -30,6 +30,7 @@ from .source import SourceTranslations
 from .config import CONFIG
 from .session_vars import get_current_translator
 from .logger import get_logger
+from .translation.missed import MissedKeys
 
 
 class Application(object):
@@ -68,6 +69,7 @@ class Application(object):
         translator = get_current_translator()
         if translator is not None:   # if we initialized with active translator session
             translator.set_application(self)
+        self.missed_keys = MissedKeys(self.client)
 
     @classmethod
     def from_dict(cls, client, data):
@@ -237,6 +239,14 @@ class Application(object):
     @property
     def logger(self):
         return get_logger()
+
+    def register_missing_key(self, key, source_path):
+        self.missed_keys.append(key, source_path)
+        if CONFIG.is_interactive_mode():
+            self.flush()
+
+    def flush(self):
+        self.missed_keys.submit_all()
 
 
 class LanguageNotSupported(Error):

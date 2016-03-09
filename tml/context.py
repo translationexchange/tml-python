@@ -223,12 +223,13 @@ class LanguageContext(AbstractContext):
             Returns:
                 dictionary.AbstractDictionary
         """
-        if not self._fallback_dict:
-            if self.default_locale == self.locale:
-                # Use default language:
-                return NoneDict()
-            self._fallback_dict = self.build_dict(self.default_language)
-        return self._fallback_dict
+        return NoneDict()  # it seem fallback have to be the default lang
+        # if not self._fallback_dict:
+        #     if self.default_locale == self.locale:
+        #         # Use default language:
+        #         return NoneDict()
+        #     self._fallback_dict = self.build_dict(self.default_language)
+        # return self._fallback_dict
 
 
     @property
@@ -314,8 +315,7 @@ class SourceContext(LanguageContext):
         return source
 
     def deactivate(self):
-        for source in self._used_sources:
-            self.application.source(source, self.locale).flush()
+        self.application.flush()
         self._used_sources = set([])
 
 

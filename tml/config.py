@@ -1,6 +1,7 @@
 import logging
 from copy import copy
 from six import iteritems
+import sys
 from .base import Singleton
 from .utils import APP_DIR, rel, merge
 
@@ -138,6 +139,10 @@ class Config(BaseConfigMixin, Singleton):
 
     def agent_host(self):
         return self.agent['host']
+
+    def is_interactive_mode(self):
+        return False
+        #return sys.stdout.isatty()
 
 
 CONFIG = Config.instance()

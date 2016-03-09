@@ -84,8 +84,14 @@ class OptionsTest(unittest.TestCase):
                           p.parse('one: message, other: messages'))
         self.assertEquals({'one': 'message', 'other': 'messages'},
                           p.parse('message'))
+        token_mapping = TokenMapping.build([{"one": "{$0}", "other": "{$10}"}])
+        p = Parser(['one', 'other'], 'other', token_mapping)
+        with self.assertRaises(IndexOutOfBounds):
+            p.parse('message')
 
-
+        token_mapping = TokenMapping.build([{"one": "{$0}", "other": "{$0::bad}"}])
+        p = Parser(['one', 'other'], 'other', token_mapping)
+        self.assertEquals({'one': 'message', 'other': 'message'}, p.parse('message'), 'dummy case if case does not exist')
 
 if __name__ == '__main__':
     unittest.main()

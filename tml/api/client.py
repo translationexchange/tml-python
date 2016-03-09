@@ -70,6 +70,8 @@ class CacheFallbackMixin(object):
 
     def verify_cache_version(self):
         """If version is not available in cache, then ask cdn."""
+        if self.cache.version.is_defined():
+            return
         if not CONFIG.cache_enabled():
             return False
         cur_version = self.cache.version.fetch()

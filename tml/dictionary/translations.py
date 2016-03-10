@@ -56,7 +56,7 @@ class Dictionary(AbstractDictionary):
             self.translations[key.key] = data = key.client.get(
                 'translation_keys/%s/translations' % key.key,
                 params={'locale': key.language.locale, 'all': True},
-                opts={'cache_key': self.cache_key(key.language.locale, key.key)})['results']
+                opts={'cache_key': self.cache_key(key.language.locale, key.key)}).get('results', [])
 
             return Translation.from_data(key, data)
         except ClientError as e:

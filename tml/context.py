@@ -156,7 +156,7 @@ class AbstractContext(RenderEngine):
         dict = self.build_dict(self.language)
         return dict.fallback(self.build_key(label, description or '', language=self.default_language))
 
-    def tr(self, label, data={}, description="", options = {}):
+    def tr(self, label, data=None, description="", options=None):
         """ Tranlate data
             Args:
                 label (string): tranlation label
@@ -167,6 +167,8 @@ class AbstractContext(RenderEngine):
             Returns:
                 unicode
         """
+        data = data or {}
+        options = options or {}
         error = None
         try:
             # Get transaltion:
@@ -178,17 +180,18 @@ class AbstractContext(RenderEngine):
         # Render result:
         return translation.key, self.render(translation, data, options), error
 
-    def tr_legacy(self, legacy_label, data={}, description="", options={}):
+    def tr_legacy(self, legacy_label, data=None, description="", options=None):
+        data = data or {}
+        options = options or {}
         error = None
-        label = tml_legacy.fetch(self, legacy_label, description)
+        label = tml_legacy.suggest_label(legacy_label)
         try:
             translation = self.fetch(label, description)
         except TranslationIsNotExists as e:
             translation = self.fallback(label, description)
             error = e
-
         option = translation.fetch_option(data, options=options)
-        return tml_legacy.execute(translation, data=data, options=options), error
+        return translation.key, tml_legacy.execute(translation, data=data, options=options), error
 
     def deactivate(self):
         pass

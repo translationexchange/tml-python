@@ -102,6 +102,8 @@ class Config(BaseConfigMixin, Singleton):
 
     default_source = "index"
 
+    context_class = None   # just for testing purpose
+
     # memcached
     #'cache': {
         #'enabled': True,

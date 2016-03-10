@@ -253,7 +253,7 @@ class Application(object):
 
     def feature_enabled(self, key):
         if not self.features:
-            return False
+            return True
         return self.features.get(key, False)
 
     @property

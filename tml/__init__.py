@@ -40,6 +40,7 @@ from .api.snapshot import open_snapshot
 from .render import RenderEngine
 from .utils import enable_warnings, contextmanager
 from .session_vars import get_current_context
+from .logger import get_logger
 
 __author__ = 'xepa4ep, a@toukmanov.ru'
 
@@ -127,11 +128,10 @@ def tr(label, data = {}, description = '', options = {}):
             options (dict): options
     """
     context = get_context()
-    return context.tr(
-        label,
-        data,
-        description,
-        options)
+    _, value, error = context.tr(label, data, description, options)
+    get_logger().exception(error)
+    return value
+    
 
 @contextmanager
 def with_block_options(**options):

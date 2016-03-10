@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from .template import Variable, Template
 from ..strings import to_string
 from . import Renderable, BasePreprocessor
+from ..logger import get_logger
 import six
 
 class List(Renderable):
@@ -30,7 +31,10 @@ class List(Renderable):
         tpl = self.tpl.compile(context)
         if self.last_separator is None:
             return self.render_items(limit, tpl)
-        return six.u('%s %s %s') % (self.render_items(limit - 1, tpl), context.tr(self.last_separator), tpl(self.items[limit-1]))
+        _, value, error = context.tr(self.last_separator)
+        if error:
+            get_logger().exception(error)
+        return six.u('%s %s %s') % (self.render_items(limit - 1, tpl), value, tpl(self.items[limit-1]))
 
     @classmethod
     def from_list(self, items):

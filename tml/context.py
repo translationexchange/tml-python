@@ -227,10 +227,13 @@ class LanguageContext(AbstractContext):
         language = application.language(locale or application.default_locale)
         super(LanguageContext, self).__init__(language=language)
         set_current_context(self)
+        self.dict = self.build_dict(language)
 
     def build_dict(self, language, **kwargs):
         """ Dictionary factory (uses API directly for each fetch request) """
-        return Dictionary()
+        if not self.dict:
+            self.dict = Dictionary()
+        return self.dict
 
     _fallback_dict = None
 

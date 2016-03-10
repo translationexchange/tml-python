@@ -133,6 +133,7 @@ def fetch(context, legacy_label, description):
     label = suggest_label(legacy_label)
     try:
         # Try to suggest translation replace %(name)s -> {name}
+        # print context.dict.translations['8a7c891aa103e45e904a173f218cab9a']
         return context.fetch(label, description)
     except TranslationIsNotExists:
         return context.fallback(label, description)

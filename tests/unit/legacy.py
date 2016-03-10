@@ -1,6 +1,7 @@
 # encoding: UTF-8
 from __future__ import absolute_import
 import unittest
+import pytest
 from tml.legacy import text_to_sprintf, suggest_label, translate
 from tml import build_context
 from tests.mock import Client
@@ -13,6 +14,7 @@ from tml.strings import to_string
 from ..common import FakeLanguage, ContextsMock, CaseMock
 
 
+@pytest.mark.usefixtures("build_context")
 class LegacyTest(unittest.TestCase):
     def test_legacy(self):
         label = '{name||дал,дала,дал(а)} {to::dat} {count} {count|one:яблоко,few:яблока,many:яблок}'
@@ -30,7 +32,7 @@ class LegacyTest(unittest.TestCase):
     def test_translate(self):
         """ Support legacy """
         c = Client.read_all()
-        context = build_context(client = c)
+        context = self.build_context(client=c)
         context.dict = LanguageDictionary(context.language, [])
         t = translate(context, 'Hello %(name)s', {'name':'Bill'}, 'Greeting', {})
         self.assertEquals(to_string('Хелло Bill'), t)

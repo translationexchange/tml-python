@@ -121,7 +121,7 @@ class Application(object):
             app_dict = app_dict['results']
         application = cls.from_dict(client, app_dict or default_dict)
         if not app_dict:  # if empty application
-            application.add_language(Language.load_default(application))
+            application.add_language(Language.load_default(application, locale))
         return application
 
     def load_extensions(self, extensions):
@@ -162,8 +162,9 @@ class Application(object):
         language = lang_(self, locale) or base_lang_(self, locale)
         if language:
             return language
+        
         if fallback_to_dummy:
-            return self.languages_by_locale.setdefault(locale, Language.load_default(self))
+            return self.languages_by_locale.setdefault(locale, Language.load_default(self, locale))
         else:
             raise LanguageNotSupported(locale, self)
 
@@ -251,6 +252,8 @@ class Application(object):
         return 'languages/%s' % locale
 
     def feature_enabled(self, key):
+        if not self.features:
+            return False
         return self.features.get(key, False)
 
     @property

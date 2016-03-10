@@ -103,10 +103,16 @@ class Language(object):
         return cls.from_dict(application, data)
 
     @classmethod
-    def load_default(cls, application):
-        locale = CONFIG.default_locale
-        locale_path = pj(CONFIG.app_dir, 'defaults/languages', '%s.json' % locale)
-        return Language.from_dict(application, read_json(locale_path), lazy=False)
+    def load_default(cls, application, locale):
+
+        def _load_default(application, locale):
+            locale_path = pj(CONFIG.app_dir, 'defaults/languages', '%s.json' % locale)
+            return Language.from_dict(application, read_json(locale_path), lazy=False)
+
+        try:
+            return _load_default(application, locale)
+        except IOError:
+            return _load_default(application, CONFIG.default_locale)
 
     @property
     def client(self):

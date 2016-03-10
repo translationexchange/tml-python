@@ -98,6 +98,8 @@ class SourceDictionary(Hashtable):
             Returns:
                 tuple: url, params
         """
+        # import pdb
+        # pdb.set_trace()
         return ('sources/%s/translations' % self.key,
                 {'locale': self.language.locale, 'all': True, 'ignored': True},
                 {'cache_key': self.cache_key()})
@@ -113,6 +115,10 @@ class SourceDictionary(Hashtable):
             """ Empty translation """
             raise TranslationIsNotExists(key, self)
         return ret
+
+    def verify_path(self):
+        """Source is registered under main source, if not registered yet."""
+        self.application.verify_source_path(self.source, self.source_path)
 
     def __del__(self):
         if self:

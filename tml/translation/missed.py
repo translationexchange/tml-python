@@ -21,6 +21,9 @@ class MissedKeys(object):
         source_path = CONFIG['default_source'] if source_path is None else source_path
         self.key_folder[source_path].add(key)
 
+    def register(self, source_path):
+        self.key_folder[source_path] = set()
+
     def prepare(self):
         """ Dict repr of keys list """
         ret = []

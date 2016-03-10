@@ -35,6 +35,7 @@ from .dictionary.source import SourceDictionary
 from .session_vars import set_current_translator, set_current_context
 from .cache import CachedClient
 from .utils import cached_property
+from . import legacy as tml_legacy
 
 
 __author__ = 'xepa4ep, a@toukmanov.ru'
@@ -59,7 +60,7 @@ class AbstractContext(RenderEngine):
         self._language = language
         self._block_option_queue = []
         super(AbstractContext, self).__init__()
-        self.dict = self.build_dict(self.language)
+        # self.dict = self.build_dict(self.language)
 
     def build_dict(self, language):
         pass
@@ -89,10 +90,11 @@ class AbstractContext(RenderEngine):
                    description = description,
                    language = language)
 
-    def _fetch_translation(self, dict, label, description):
+    def _fetch_translation(self, label, description):
         key = self.build_key(label, description)
         if self.application.ignored_key(key):  # if ignored, return label
             return return_label_fallback(key)
+        dict = self.build_dict(self.language)
         if dict:
             return dict.fetch(self.build_key(label, description))
         raise ContextNotConfigured(self)
@@ -105,7 +107,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        return self._fetch_translation(self.dict, label, description)
+        return self._fetch_translation(label, description)
 
     @property
     def application(self):
@@ -151,9 +153,10 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        return self.dict.fallback(self.build_key(label, description or '', language=self.default_language))
+        dict = self.build_dict(self.language)
+        return dict.fallback(self.build_key(label, description or '', language=self.default_language))
 
-    def tr(self, label, data = {}, description = '', options = {}):
+    def tr(self, label, data={}, description="", options = {}):
         """ Tranlate data
             Args:
                 label (string): tranlation label
@@ -164,14 +167,28 @@ class AbstractContext(RenderEngine):
             Returns:
                 unicode
         """
+        error = None
         try:
             # Get transaltion:
             translation = self.fetch(label, description)
-        except TranslationIsNotExists:
+        except TranslationIsNotExists as e:
             # Translation does not exists: use fallback
             translation = self.fallback(label, description)
+            error = e
         # Render result:
-        return self.render(translation, data, options)
+        return translation.key, self.render(translation, data, options), error
+
+    def tr_legacy(self, legacy_label, data={}, description="", options={}):
+        error = None
+        label = tml_legacy.fetch(self, legacy_label, description)
+        try:
+            translation = self.fetch(label, description)
+        except TranslationIsNotExists as e:
+            translation = self.fallback(label, description)
+            error = e
+
+        option = translation.fetch_option(data, options=options)
+        return tml_legacy.execute(translation, data=data, options=options), error
 
     def deactivate(self):
         pass
@@ -301,22 +318,23 @@ class SourceContext(LanguageContext):
                 Translation
         """
         if self.source_name == self.source:
-            return super(SourceContext, self).fetch(label, description)
-        return self.fetch_from_virtual(label, description)
+            return  self._fetch_translation(label, description)
+        return self._fetch_from_virtual(label, description)
 
-    def fetch_from_virtual(self, label, description):
+    def _fetch_from_virtual(self, label, description):
         self._used_sources.add(self.source_name)
-        dict = self.build_dict(self.language)
-        return self._fetch_translation(dict, label, description)
+        return self._fetch_translation(label, description)
 
     def build_dict(self, language):
         """ Fetches or builds source dictionary for language """
         source = language.application.source(self.source_name, language.locale, source_path=self.source_path)
+        source.verify_path()
         return source
 
     def deactivate(self):
-        self.application.flush()
-        self._used_sources = set([])
+        if self:
+            self.application.flush()
+            self._used_sources = set([])
 
 
 class SnapshotContext(LanguageContext):

@@ -88,9 +88,9 @@ def build_context(token=None,
     context = kwargs.pop('context', None)  # for unit test purpose
     if context and issubclass(context, AbstractContext):
         return context(source=source, **kwargs)
-    source = source
     if use_snapshot:
         return SnapshotContext(source, **kwargs)
+    source = source
     return SourceContext(source, **kwargs)
     # else:
     #     return LanguageContext(**kwargs)

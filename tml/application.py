@@ -202,6 +202,23 @@ class Application(object):
             source_translations = self.sources[source] = SourceTranslations(source, self)
         return source_translations.add_locale(locale, **init_kwargs).hashtable_by_locale(locale)
 
+    def verify_source_path(self, source_key, source_path):
+        # 1. cache enabled and TM turned off
+        if CONFIG.cache_enabled() and not self.is_inline_mode():
+            return
+        # 2. app does not use sources here
+        if not self.extensions or not self.extensions.get('sources', None):
+            return
+        # 3. if this source is already registered under the main source
+        if source_key in self.extensions['sources']:
+            return
+        # 4. otherwise register nested source
+        self.missed_keys.register(source_path)
+
+    def is_inline_mode(self):
+        translator = get_current_translator()
+        return translator and translator.is_inline()
+
     def ignored_key(self, key):
         _key = key.key
 

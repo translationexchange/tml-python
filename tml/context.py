@@ -66,10 +66,10 @@ class AbstractContext(RenderEngine):
         pass
 
     def push_options(self, opts):
-        self._block_option_queue.append(opts)
+        self._block_option_queue.insert(0, opts)
 
     def pop_options(self):
-        opts = self._block_option_queue.pop(-1)
+        opts = self._block_option_queue.pop(0)
         return opts
 
     @property
@@ -79,7 +79,7 @@ class AbstractContext(RenderEngine):
     def block_option(self, key, lookup=True, default=None):
         if lookup:
             for options in reversed(self._block_option_queue):
-                if key in options:
+                if options.get(key, None):
                     return options.get(key, default)
         return self.block_options.get(key, default)
 
@@ -196,8 +196,8 @@ class AbstractContext(RenderEngine):
     def deactivate(self):
         pass
 
-    def __del__(self):
-        self.deactivate()
+    # def __del__(self):
+    #     self.deactivate()
 
 
 class LanguageContext(AbstractContext):
@@ -290,6 +290,10 @@ class LanguageContext(AbstractContext):
     def is_inline_mode(self):
         return self.translator and self.translator.is_inline()
 
+    def deactivate(self):
+        set_current_context(None)
+
+
 class SourceContext(LanguageContext):
     """ Context with source """
     def __init__(self, source, **kwargs):
@@ -297,7 +301,7 @@ class SourceContext(LanguageContext):
             Args:
                 source (string): source name
         """
-        self.source = source or CONFIG.default_source   # ref name to mainsource
+        self.source = source or CONFIG.default_source  # ref name to mainsource
         self._used_sources = set([self.source])
         super(SourceContext, self).__init__(source=self.source, **kwargs)
 
@@ -341,6 +345,7 @@ class SourceContext(LanguageContext):
         if self:
             self.application.flush()
             self._used_sources = set([])
+        super(SourceContext, self).deactivate()
 
 
 class SnapshotContext(LanguageContext):

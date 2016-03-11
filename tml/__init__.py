@@ -131,7 +131,7 @@ def tr(label, data = {}, description = '', options = {}):
     _, value, error = context.tr(label, data, description, options)
     get_logger().exception(error)
     return value
-    
+
 
 @contextmanager
 def with_block_options(**options):

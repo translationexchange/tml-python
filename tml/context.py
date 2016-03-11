@@ -292,6 +292,7 @@ class LanguageContext(AbstractContext):
 
     def deactivate(self):
         set_current_context(None)
+        set_current_translator(None)
 
 
 class SourceContext(LanguageContext):

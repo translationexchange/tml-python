@@ -86,9 +86,9 @@ class AbstractContext(RenderEngine):
     def build_key(self, label, description, language=None):
         """ Build key """
         language = language or self.language
-        return Key(label = label,
-                   description = description,
-                   language = language)
+        return Key(label=label,
+                   description=description,
+                   language=language)
 
     def _fetch_translation(self, label, description):
         key = self.build_key(label, description)
@@ -177,6 +177,7 @@ class AbstractContext(RenderEngine):
             # Translation does not exists: use fallback
             translation = self.fallback(label, description)
             error = e
+            options['pending'] = e.is_pending()
         # Render result:
         return translation.key, self.render(translation, data, options), error
 
@@ -282,7 +283,7 @@ class LanguageContext(AbstractContext):
                 translation.Translation
         """
         try:
-            key = Key(label = label, description = description, language = self.default_language)
+            key = Key(label=label, description=description, language=self.default_language)
             return self.fallback_dict.fetch(key)
         except TranslationIsNotExists:
             return super(LanguageContext, self).fallback(label, description)

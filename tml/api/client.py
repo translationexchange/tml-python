@@ -189,7 +189,7 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
     def _request_config(self, method, params):
         headers = {'user-agent': 'tml-python v0.0.1',
                    'accept': 'application/json',
-                   'accept-Encoding': 'gzip, deflate'}
+                   'accept-encoding': 'gzip, deflate'}
         config = {'timeout': 30, 'headers': headers}
         params = {k: str(v).lower() if type(v) is bool else v
                   for k, v in six.iteritems(params)}
@@ -215,10 +215,11 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             if not compressed_data:  # empty response
                 return None
 
-            global read_gzip
             if response.url.startswith(CONFIG.api_host()):
-                read_gzip = lambda x: x   # temp
-            data = read_gzip(compressed_data)
+                data = compressed_data   # requests automatically decompresses
+            else:
+                data = read_gzip(compressed_data)
+
             self.debug("Compressed: %s, uncompressed: %s", len(compressed_data), len(data))
         else:
             data = response.text

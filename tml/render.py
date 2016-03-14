@@ -22,11 +22,11 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from __future__ import absolute_import
-
-from .decoration.parser import parse as decoration_parser
-from .tools import Renderable
+import six
 from argparse import ArgumentError
 from tml.dictionary import TranslationIsNotExists
+from .decoration.parser import parse as decoration_parser
+from .tools import Renderable
 from .translation import OptionIsNotFound
 from .tools import BasePreprocessor
 
@@ -51,14 +51,56 @@ class RenderEngine(object):
         # Wrap data:
         translation_data = self.prepare_data(data)
         try:
-            # Apply tokens:
-            ret = translation.execute(translation_data, options)
+            option = translation.fetch_option(translation_data, options)
         except OptionIsNotFound as e:
-            # Option does not exists for data, use fallback translation:
             translation = self.fallback(e.label, e.description)
-            ret = translation.execute(translation_data, options)
-        # Apply decoration:
-        return decoration_parser(ret).render(translation_data)
+            option = translation.fetch_option(translation_data, options)
+        trans_value = decoration_parser(option.execute(translation_data, options)).render(translation_data)
+        trans_options = option.get_options()
+        trans_options.update(options)
+        return self.wrap_to_tml(translation.key, trans_value, self.language, trans_options)
+
+    def wrap_to_tml(self, key, translated_value, target_language, translation_options):
+        """
+            translation_options
+                locked - bool flag, if translation option marked as locked
+                pending - bool flag, indicates that translation is either registering or there is no options.
+                locale - locale string, used to check whether string used fallback or translated labels
+        """
+        if not self.wrap_enabled(translation_options):
+            return translated_value
+        if self.application.feature_enabled('lock_original_content') and self.default_language == target_language:
+            return translated_value
+        classes = set(['tml_translatable'])
+        if translation_options.get('locked', False):
+            classes.add('tml_locked')
+        elif 'pending' in translation_options:
+            classes.add('tml_pending' if translation_options['pending'] else 'tml_not_translated')
+        elif 'locale' in translation_options:
+            if translation_options['locale'] != target_language.locale:
+                classes.add('tml_fallback')
+        else:
+            classes.add('tml_translated')
+        element = self.decoration_element('tml:label', translation_options)
+        context = {
+            'element': element,
+            'class_name': " ".join(classes),
+            'key': key.key,
+            'locale': target_language.locale,
+            'text': translated_value}
+        return six.u('<%(element)s class="%(class_name)s" data-translation_key="%(key)s" data-target_locale="%(locale)s">%(text)s</%(element)s>') % context   # temporary
+
+    def wrap_enabled(self, options):
+        if options.get('nowrap', False):
+            return False
+        return self.is_inline_mode()
+
+    def decoration_element(self, default, options):
+        if options.get('use_span', False):
+            return 'span'
+        if options.get('use_div', False):
+            return 'div'
+        return default
 
     def fallback(self, label, description):
         raise NotImplemented('Fallback is not implemented for context')

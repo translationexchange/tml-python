@@ -117,11 +117,18 @@ class Hashtable(AbstractDictionary):
 
 class TranslationIsNotExists(Error):
     """ Translation for key is not found """
+
     def __init__(self, key, dict):
         super(TranslationIsNotExists, self).__init__()
         self.key = key
         self.dict = dict
+        self._is_pending = False
 
+    def make_pending(self):
+        self._is_pending = True
+
+    def is_pending(self):
+        return self._is_pending
 
 class TranslationIgnored(Error):
     def __init__(self, key, dict):

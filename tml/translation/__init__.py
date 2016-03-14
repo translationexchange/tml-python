@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 # encoding: UTF-8
+from copy import copy
 from tml.token.parser import default_parser
 from tml.token import execute_all
 from hashlib import md5
@@ -67,15 +68,17 @@ class Key(object):
 
 class TranslationOption(Context):
     """ Translation option with context """
-    def __init__(self, label, language, context = {}):
+    def __init__(self, label, language, context = {}, **options):
         """ .ctor
             Args:
                 text (string): translation text
                 context (dict): context rules
+                options (kwargs): translation options
         """
         super(TranslationOption, self).__init__(context)
         self.label = label
         self.language = language
+        self.options = options
 
     def check(self, data, options):
         """ Check is option supported
@@ -104,6 +107,8 @@ class TranslationOption(Context):
         extracted_tokens = parse_tokens(self.label, self.language)
         return execute_all(extracted_tokens, data, options) # execute with data
 
+    def get_options(self):
+        return copy(self.options)
 
 class Translation(object):
     """ Translation instance """
@@ -115,6 +120,9 @@ class Translation(object):
         self.key = key
         self.options = options
 
+    def application(self):
+        return self.key.language.application
+
     @classmethod
     def from_data(cls, key, data):
         """ Create translation instance from API response
@@ -124,8 +132,15 @@ class Translation(object):
             Returns:
                 Translation
         """
-        return cls(key,
-                   [TranslationOption(label= option['label'], context = option['context'] if 'context' in option else {}, language = key.language) for option in data])
+        options = []
+        for option in data:
+            context = option.pop('context') if 'context' in option else {}
+            label = option.pop('label')
+            language = key.language
+            if 'locale' in option:
+                language = self.application.language(option['locale'])
+            options.append(TranslationOption(label=label, context=context, language=language, **option))
+        return cls(key, options)
 
     def fetch_option(self, data, options):
         for option in self.options:

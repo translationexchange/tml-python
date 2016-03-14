@@ -117,6 +117,8 @@ class Application(object):
             'projects/%s/definition' % key,
             params={'locale': locale, 'source': source, 'ignored': True},
             opts={'cache_key': cls.cache_key})
+        # import pdb
+        # pdb.set_trace()
         if 'results' in app_dict:
             app_dict = app_dict['results']
         application = cls.from_dict(client, app_dict or default_dict)
@@ -162,7 +164,7 @@ class Application(object):
         language = lang_(self, locale) or base_lang_(self, locale)
         if language:
             return language
-        
+
         if fallback_to_dummy:
             return self.languages_by_locale.setdefault(locale, Language.load_default(self, locale))
         else:

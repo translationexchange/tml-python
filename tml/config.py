@@ -109,12 +109,14 @@ class Config(BaseConfigMixin, Singleton):
         #'enabled': True,
         #'adapter': 'memcached',
         #'backend': 'default',
-       # 'namespace': 'foody'  
+       # 'namespace': 'foody'
     #},
 
     version_check_interval = 3600
 
     source_separator = '@:@'
+
+    strict_mode = False
 
     @property
     def default_locale(self):
@@ -134,7 +136,7 @@ class Config(BaseConfigMixin, Singleton):
         if self.environment == 'prod':
             return 'https://api.translationexchange.com'
         else:
-            return 
+            return
 
     def cdn_host(self):
         return self.application['cdn_path']

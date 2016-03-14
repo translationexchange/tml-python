@@ -110,6 +110,7 @@ class SourceDictionary(Hashtable):
         except TranslationIsNotExists as translation_not_exists:
             if key.label:
                 self.application.register_missing_key(key, self.source_path)
+                translation_not_exists.make_pending()
             raise translation_not_exists
         if len(ret) == 0:
             """ Empty translation """

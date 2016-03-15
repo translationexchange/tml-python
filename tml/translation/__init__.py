@@ -79,6 +79,13 @@ class TranslationOption(Context):
         self.label = label
         self.language = language
         self.options = options
+        if 'locale' in options and options['locale'] != language.locale:
+            print self.language.application
+            self.language = self.application.language(options['locale'])
+
+    @property
+    def application(self):
+        return self.language.application
 
     def check(self, data, options):
         """ Check is option supported
@@ -134,12 +141,11 @@ class Translation(object):
         """
         options = []
         for option in data:
-            context = option.pop('context') if 'context' in option else {}
-            label = option.pop('label')
+            cur_option = copy(option)
+            context = cur_option.pop('context') if 'context' in cur_option else {}
+            label = cur_option.pop('label')
             language = key.language
-            if 'locale' in option:
-                language = self.application.language(option['locale'])
-            options.append(TranslationOption(label=label, context=context, language=language, **option))
+            options.append(TranslationOption(label=label, context=context, language=language, **cur_option))
         return cls(key, options)
 
     def fetch_option(self, data, options):

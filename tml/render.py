@@ -39,7 +39,7 @@ class RenderEngine(object):
     # List of objects which add custom values to data (like viewing_user)
     env_generators = []
 
-    def render(self, translation, data, options, fallback = False):
+    def render(self, translation, data, options=None, fallback = False):
         """ Render translation
             Args:
                 translation (Transaltion): translation to render
@@ -49,6 +49,7 @@ class RenderEngine(object):
                 unicode
         """
         # Wrap data:
+        options = {} if options is None else options
         translation_data = self.prepare_data(data)
         try:
             option = translation.fetch_option(translation_data, options)
@@ -76,11 +77,12 @@ class RenderEngine(object):
             classes.add('tml_locked')
         elif 'pending' in translation_options:
             classes.add('tml_pending' if translation_options['pending'] else 'tml_not_translated')
-        elif 'locale' in translation_options:
-            if translation_options['locale'] != target_language.locale:
-                classes.add('tml_fallback')
         else:
-            classes.add('tml_translated')
+            if 'locale' in translation_options:
+                if translation_options['locale'] != target_language.locale:
+                    classes.add('tml_fallback')
+                else:
+                    classes.add('tml_translated')
         element = self.decoration_element('tml:label', translation_options)
         context = {
             'element': element,

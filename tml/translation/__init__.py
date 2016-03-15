@@ -117,6 +117,9 @@ class TranslationOption(Context):
     def get_options(self):
         return copy(self.options)
 
+    def set_options(self, opts):
+        self.options.update(copy(opts))
+
 class Translation(object):
     """ Translation instance """
     def __init__(self, key, options):

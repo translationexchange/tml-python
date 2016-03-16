@@ -46,6 +46,20 @@ class CaseMock(object):
         return data.upper()
 
 
+class FakeUser(object):
+
+    first_name = 'Tom'
+    last_name = 'Anderson'
+    gender = 'male'
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.iteritems():
+            setattr(self, k, v)
+
+    def __str__(self):
+        return self.first_name + " " + self.last_name
+
+
 def unittest_fixture(request, key, value):
     setattr(request.cls, key, value)
 

@@ -3,23 +3,11 @@ from __future__ import absolute_import
 import unittest
 import pytest
 from mock import patch
+from tests.common import FakeUser
 from tml.strings import to_string
 from tml.token.transform import TransformToken, Error, PIPE_CHAR, DBL_PIPE_CHAR
 import tml.token.data
 
-
-class FakeUser(object):
-
-    first_name = 'Tom'
-    last_name = 'Anderson'
-    gender = 'male'
-
-    def __init__(self, **kwargs):
-        for k, v in kwargs.iteritems():
-            setattr(self, k, v)
-
-    def __str__(self):
-        return self.first_name + " " + self.last_name
 
 
 @pytest.mark.usefixtures("init_app")

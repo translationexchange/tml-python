@@ -1,17 +1,9 @@
 from __future__ import absolute_import
 import unittest
 import pytest
+from tests.common import FakeUser
 from tml.token.data import DataToken, Error
 import tml.rules.options
-
-class FakeUser(object):
-
-    first_name = 'Tom'
-    last_name = 'Anderson'
-    gender = 'male'
-
-    def __str__(self):
-        return self.first_name + " " + self.last_name
 
 
 @pytest.mark.usefixtures("init_app")

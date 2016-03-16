@@ -69,11 +69,16 @@ class TransformToken(DataToken):
     def substitute(self, label, context, language, options=None):
         options = {} if options is None else {}
         obj = self.token_object(context, self.key)
+        language_context = None
         if not obj:
             raise Error("Missing value for a token `%s` in `%s`\"" % (self.key, label))
         if not self.piped_params:
             raise Error("Piped params may not be empty for token %s in %s" % (self.key, label))
-        value = language.contexts.execute(self.piped_params, obj).strip()
+        try:
+            language_context = self.context_for_language(language)
+        except:   # language context is absent, try to guess
+            language_context = None
+        value = language.contexts.execute(self.piped_params, obj, utils.merge_opts({}, language_context=language_context)).strip()
         if not value:
             return label
         cases = self.parse_cases(value)   # message::plural => messages

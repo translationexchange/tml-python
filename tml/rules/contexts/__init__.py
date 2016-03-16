@@ -190,21 +190,39 @@ class Contexts(object):
         self.index = index
 
 
-    def execute(self, token_options, value):
+    def execute(self, token_options, value, options=None):
         """ Execute token options for value at first supported context
             Args:
                 token_options (string): token options as 'he, she, it'
                 value: token value
+                options: ...
             Returns:
                 string
         """
-        for context in self.contexts:
+        options = {} if options is None else options
+        context = None
+        if options.get('language_context', None):    # force to use context
             try:
-                return context.execute(token_options, value)
-            except UnsupportedContext:
+                context = options.get('language_context')
+            except ContextNotFound:
                 pass
+        if context:  # if context was already defined in options (no guess)
+            ret = self.execute_context(context, token_options, value, options)
+            if ret:
+                return ret
+        else:   # try to guess (try each context)
+            for context in self.contexts:
+                ret = self.execute_context(context, token_options, value, options)
+                if ret:
+                    return ret
         raise ArgumentError('Could not detect context for object %s' % value,
                             value)
+
+    def execute_context(self, context, token_options, value, options=None):
+        try:
+            return context.execute(token_options, value)
+        except UnsupportedContext:
+            return False
 
     def option(self, value):
         """ Get context option for given value """

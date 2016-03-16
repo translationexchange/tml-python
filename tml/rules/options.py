@@ -104,7 +104,7 @@ def apply_mapping_rule(rule, args):
     context = get_current_context()
     rule = to_string(rule)
     value = rule  # {$0::plural}
-    
+
     for group in SCAN_VALUE.findall(rule):
         token = group[0]
         var_idx, cases = int(group[1]), []
@@ -120,7 +120,7 @@ def apply_mapping_rule(rule, args):
                 token_value = lcase.execute(token_value)
         value = value.replace(token, token_value)
     return value
-    
+
 
 def parse_args(text):
     """ Fetch arges from text

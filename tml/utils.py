@@ -4,6 +4,7 @@ import logging.handlers
 import functools
 import json
 import gzip
+from copy import copy
 from codecs import open
 from contextlib import contextmanager
 from six import StringIO, functools
@@ -57,6 +58,12 @@ def merge(a, b):
         else:
             a[key] = b[key]
     return a
+
+def merge_opts(a, **b):
+    """Creates shallow copy from source and updates with kwargs"""
+    c = copy(a)
+    c.update(b)
+    return c
 
 multi_merge = functools.partial(reduce, merge)
 

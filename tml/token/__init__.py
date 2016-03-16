@@ -418,3 +418,5 @@ class InvalidTokenSyntax(Error):
     def __str__(self):
         return six.u('Token syntax is not supported for token "%s"') % self.text
 
+
+from .data import DataToken

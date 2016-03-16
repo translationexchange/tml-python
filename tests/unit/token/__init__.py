@@ -66,10 +66,10 @@ class TokenTest(unittest.TestCase):
         class Hello(object):
             def __str__(self, *args, **kwargs):
                 return 'Hello'
-        
+
         v = VariableToken('name')
         self.assertEquals('John', v.execute({'name':'John'}, {}), 'Fetch name')
-        self.assertEquals(six.u('Hello'), 
+        self.assertEquals(six.u('Hello'),
                           v.execute({'name':Hello()}, {}),
                           'Fetch name')
         escape_me = '<John & "qouted\'>'

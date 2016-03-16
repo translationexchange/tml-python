@@ -60,3 +60,5 @@ class DataTokenTest(unittest.TestCase):
         )
         for pair in cases:
             self.assertEquals(self.token.substitute(self.label, pair[0], self.en), pair[1])
+
+

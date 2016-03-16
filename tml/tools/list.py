@@ -18,7 +18,7 @@ class List(Renderable):
             self.tpl = Template(self.tpl)
 
     def render(self, context):
-        """ Convert to unicode 
+        """ Convert to unicode
             Args:
                 context (Context): translation context
         """

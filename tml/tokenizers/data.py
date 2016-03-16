@@ -16,14 +16,14 @@ class DataTokenizer(object):
         self.text = text
         self.context = context if context is not None else {}
         self.options = options if options is not None else {}
-        self.tokens = set()
+        self.tokens = []
         self.tokenize()
 
     def tokenize(self):
         ret = set()
         for token_class in DataTokenizer.SUPPORTED_TOKENS:
-            ret |= token_class.parse(self.text)
-        self.tokens = ret
+            ret |= set(token_class.parse(self.text))   # just unique
+        self.tokens = list(ret)
         return self.tokens   # for testing reasons
 
     def token_allowed(self, token):

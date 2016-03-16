@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 # encoding: UTF-8
 from copy import copy
-from tml.token.parser import default_parser
-from tml.token import execute_all
+from tml.tokenizers import execute_all
 from hashlib import md5
 from .context import Context
 from ..exceptions import Error
 from ..strings import to_string
-from ..token.parser import default_parser
 from ..exceptions import RequiredArgumentIsNotPassed
 import six
 
@@ -110,8 +108,7 @@ class TranslationOption(Context):
         return self.check(data, options).apply(data, options)
 
     def apply(self, data, options = {}):
-        extracted_tokens = parse_tokens(self.label, self.language)
-        return execute_all(extracted_tokens, data, options) # execute with data
+        return execute_all(self.label, data, self.language, options)
 
     def get_options(self):
         return copy(self.options)

@@ -34,4 +34,4 @@ class MethodToken(DataToken):
         try:
             return self.sanitize(getattr(obj, self.object_method_name), obj, language, utils.merge_opts(options, safe=False))
         except AttributeError:
-            raise Error('Missing value for `%s` in `%s`' % (self.full_name, self.label))
+            self.error('Missing value for `%s` in `%s`', self.full_name, self.label)

@@ -419,5 +419,11 @@ class InvalidTokenSyntax(Error):
         return six.u('Token syntax is not supported for token "%s"') % self.text
 
 
-# from .data import DataToken
-# from .method import MethodToken
+from .data import DataToken as NewDataToken
+from .method import MethodToken as NewMethodToken
+from .transform import TransformToken as NewTransformToken
+
+SUPPORTED_TOKENS = (
+    NewDataToken,
+    NewMethodToken,
+    NewTransformToken)

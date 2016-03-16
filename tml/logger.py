@@ -45,7 +45,7 @@ class Logger(Singleton):
 
     def __getattr__(self, name):
         if name in ('debug', 'info', 'warning', 'error', 'critical', 'log', 'exception'):  # proxy logging methods
-            if self.logger is None:  # suppress if not configured 
+            if self.logger is None:  # suppress if not configured
                 return lambda *args, **kwargs: None
             return getattr(self.logger, name)
         return getattr(self, name)
@@ -54,7 +54,7 @@ class Logger(Singleton):
         self.logger = logging.getLogger(self.namespace)
         self.logger.setLevel(log_level or Logger.default_level)
         file_handler = logging.handlers.RotatingFileHandler(self.path, mode=self.mode, maxBytes=self.max_bytes, backupCount=self.backup_count)
-        file_handler.setFormatter(logging.Formatter('[%(asctime)s] - %(name)s - %(message)-4s', '%Y-%m-%d %H:%M:%S'))
+        file_handler.setFormatter(logging.Formatter(u'[%(asctime)s] - %(name)s - %(message)-4s', '%Y-%m-%d %H:%M:%S'))
         self.logger.addHandler(file_handler)
         self.logger.propagate = False
 

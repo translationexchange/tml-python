@@ -1,6 +1,8 @@
 # encoding: UTF-8
 from ..strings import suggest_string, to_string
-from ..token import parser, execute_all
+from ..session_vars import get_current_context
+from ..tokenizers import DataTokenizer
+
 
 class Variable(object):
     """ Fetch variable from element """
@@ -15,12 +17,15 @@ class Variable(object):
 
 
 class Tokens(object):
-    def __init__(self, tokens):
-        self.tokens = tokens
+    def __init__(self, tokenizer, language):
+        self.tokenizer = tokenizer
+        self.language = language
 
     def __call__(self, data):
-        return execute_all(self.tokens, data, {})
-
+        return self.tokenizer.execute(
+            self.language,
+            context=data,
+            options={})
 
 class Template(object):
     """Template compileable"""
@@ -28,5 +33,7 @@ class Template(object):
         self.tpl = tpl
 
     def compile(self, context):
-        return Tokens(parser.default_parser.parse(self.tpl, context.language))
+        return Tokens(
+            DataTokenizer.compile(self.tpl, options={}),
+            context.language)
 

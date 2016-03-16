@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 # encoding: UTF-8
 import re
@@ -6,6 +7,7 @@ from ..exceptions import Error as BaseError
 from ..session_vars import get_current_context
 from ..strings import to_string
 from .. import utils
+from ..logger import LoggerMixin
 
 __author__ = 'xepa4ep'
 
@@ -17,9 +19,13 @@ def need_to_escape(options):
         Returns:
             boolean
     """
-    if 'escape' in options:
-        return options['escape']
-    return True
+    ctx = get_current_context()
+    if ctx and not ctx.block_option('skip_html_escaping'):
+        if 'escape' in options:
+            return options['escape']
+        if 'safe' in options:
+            return not options['safe']
+    return False
 
 def escape_if_needed(text, options):
     """ Escape string if it needed
@@ -66,7 +72,7 @@ class Error(BaseError):
     pass
 
 
-class DataToken(object):
+class DataToken(LoggerMixin):
 
     label = None
     full_name = None
@@ -87,8 +93,8 @@ class DataToken(object):
         return list(tokens)
 
     def __init__(self, label, token):
-        self.label = label
-        self.full_name = token
+        self.label = to_string(label)
+        self.full_name = to_string(token)
         self.parse_elements()
 
     @property
@@ -149,22 +155,21 @@ class DataToken(object):
     def token_value_from_array_param(self, array, language, options=None):
         options = {} if options is None else options
         if len(array) < 2:
-            raise Error('Invalid value for array token `%s` in `%s`' % (self.full_name, self.label))
+            self.error('Invalid value for array token `%s` in `%s`', self.full_name, self.label)
         if isinstance(array[0], list):
-            raise Error("List tokens are not supported yet.")
-
+            self.error("List tokens are not supported yet.")
         if not array[1].startswith(':'):   # already evaluated
             return self.sanitize(array[1], array[0], language, utils.merge_opts(options, safe=True))
         elif isinstance(array[0], dict):   # it is a dict
             try:
                 return self.sanitize(array[0].get(array[1][1:]), array[0], language, utils.merge_opts(options, safe=False))
             except KeyError:
-                raise Error('Invalid value for array token `%s` in `%s`' % (self.full_name, self.label))
+                self.error('Invalid value for array token `%s` in `%s`', self.full_name, self.label)
         else:   # it is an object
             try:
                 return self.sanitize(getattr(array[0], array[1][1:]), array[0], language, utils.merge_opts(options, safe=False))
             except AttributeError:
-                raise Error('Invalid value for array token `%s` in `%s`' % (self.full_name, self.label))
+                self.error('Invalid value for array token `%s` in `%s`', self.full_name, self.label)
 
     ##############################################################################
       #
@@ -189,19 +194,19 @@ class DataToken(object):
         if value:   # if value is present then evaluate immediately
             return self.sanitize(value, obj or the_hash, language, utils.merge_opts(options, safe=True))
         if not obj:   # if no object then nothing to evaluate. incorrect syntax
-            raise Error("Missing value for hash token #{full_name} in #{label}")
+            self.error("Missing value for hash token `%s` in `%s`", self.full_name, self.label)
         attr = the_hash.get('attribute', the_hash.get('property', None))
         if not attr:   # specified attr not set
-            raise Error("Missing value for hash token #{full_name} in #{label}")
+            self.error("Missing value for hash token `%s` in `%s`", self.full_name, self.label)
         if isinstance(obj, dict):   # if obj is dict, then access by key
             try:
                 return self.sanitize(obj.get(attr), obj, language, utils.merge_opts(options, safe=False))
             except KeyError:
-                raise Error("Missing value for hash token #{full_name} in #{label}")
+                self.error("Missing value for hash token `%s` in `%s`", self.full_name, self.label)
         try:   # obj is object, so access by attribute
             return self.sanitize(getattr(obj, attr), obj, language, utils.merge_opts(options, safe=False))
         except AttributeError:
-            raise Error("Missing value for hash token #{full_name} in #{label}")
+            self.error("Missing value for hash token `%s` in `%s`", self.full_name, self.label)
 
     def apply_language_cases(self, value, obj, language, options=None):
         options = {} if options is None else options
@@ -229,19 +234,24 @@ class DataToken(object):
 
     def sanitize(self, value, obj, language, options=None):
         options = {} if options is None else options
-        value = str(value)
-        ctx = get_current_context()
-        if ctx and not ctx.block_option('skip_html_escaping'):
-            value = escape_if_needed(value, options)
+        value = escape_if_needed(value, options)
         if is_language_cases_enabled():
             return self.apply_language_cases(value, obj, language, options)
         return value
 
     def substitute(self, label, context, language, options=None):
+        label = to_string(label)
+        try:
+            return self._substitute(label, context, language, options)
+        except Error as e:
+            self.exception(e)
+            return label
+
+    def _substitute(self, label, context, language, options):
         options = {} if options is None else options
         obj = context.get(self.key, None)
         if obj is None and not self.key in context:
-            raise Error('Missing value for `%s` in `%s`' % (self.full_name, self.label))
+            self.error('Missing value for `%s` in `%s`', self.full_name, self.label)
         if obj is None:
             return label.replace(self.full_name, '')
         value = self.token_value(obj, language, options)
@@ -263,3 +273,6 @@ class DataToken(object):
             if obj:
                 return obj
         return token_object
+
+    def error(self, msg, *params):
+        raise Error(to_string(msg) % params)

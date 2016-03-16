@@ -1,6 +1,6 @@
-from ..token.data import DataToken
-from ..token.method import MethodToken
-from ..token.transform import TransformToken
+from __future__ import absolute_import
+# encoding: UTF-8
+from ..token import SUPPORTED_TOKENS
 
 __author__ = 'xepa4ep'
 
@@ -12,7 +12,7 @@ class DataTokenizer(object):
     tokens = None
     options = None
 
-    SUPPORTED_TOKENS = (DataToken, MethodToken, TransformToken)
+    SUPPORTED_TOKENS = SUPPORTED_TOKENS
 
     def __init__(self, text, context=None, options=None):
         self.text = text
@@ -41,3 +41,12 @@ class DataTokenizer(object):
                 continue
             label = token.substitute(label, self.context, language, options)
         return label
+
+    @classmethod
+    def compile(cls, text, options=None):
+        return DataTokenizer(text, options=options)
+
+    def execute(self, language, context=None, options=None):
+        if context:
+            self.context = context
+        return self.substitute(language, options=options)

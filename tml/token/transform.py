@@ -27,6 +27,7 @@ import re
 import string
 from .data import DataToken, Error
 from .. import utils
+from ..strings import to_string
 
 __author__ = 'xepa4ep'
 
@@ -67,13 +68,21 @@ class TransformToken(DataToken):
         return not self.token_value_displayed()
 
     def substitute(self, label, context, language, options=None):
+        label = to_string(label)
+        try:
+            return self._substitute(label, context, language, options)
+        except Error as e:   # todo: log it
+            self.exception(e)
+            return label
+
+    def _substitute(self, label, context, language, options=None):
         options = {} if options is None else {}
         obj = self.token_object(context, self.key)
         language_context = None
         if not obj:
-            raise Error("Missing value for a token `%s` in `%s`\"" % (self.key, label))
+            self.error("Missing value for a token `%s` in `%s`\"", self.key, label)
         if not self.piped_params:
-            raise Error("Piped params may not be empty for token %s in %s" % (self.key, label))
+            self.error("Piped params may not be empty for token %s in %s", self.key, label)
         try:
             language_context = self.context_for_language(language)
         except:   # language context is absent, try to guess

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 # encoding: UTF-8
 from tml.rules.contexts import ContextNotFound
 from ..exceptions import RequiredArgumentIsNotPassed
+from ..token.data import DataToken
 
 
 class Context(object):
@@ -27,9 +28,8 @@ class Context(object):
             # check any rule:
             for type_code in self.rules[key]:
                 expected = self.rules[key][type_code]
-                try:
-                    value = data[key]
-                except KeyError:
+                value = DataToken.token_object(data, key)
+                if not value:
                     raise RequiredArgumentIsNotPassed(key, data)
                 actual = language.contexts.find_by_code(type_code).option(value)
                 if expected != actual:

@@ -2,6 +2,7 @@ import re
 import six
 from ..exceptions import Error as BaseError
 from ..session_vars import get_current_context
+from ..strings import to_string
 from .. import utils
 
 __author__ = 'xepa4ep'

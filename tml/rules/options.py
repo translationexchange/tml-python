@@ -101,7 +101,6 @@ def apply_mapping_rule(rule, args):
             rule (string): string rule where ${\d+} is replaced with argument value with expression index
             args (list): list of args
     """
-    context = get_current_context()
     rule = to_string(rule)
     value = rule  # {$0::plural}
 
@@ -111,14 +110,9 @@ def apply_mapping_rule(rule, args):
         if len(args) < var_idx:  # $5, but there is only 2 args ['message', 'messages']
             raise IndexOutOfBounds(rule)
         token_value = args[var_idx]
-        if len(group) > 2:
-            cases = group[2].split('::')[1:]
-        if cases and is_language_cases_enabled():
-            while cases:
-                case_key = cases.pop(0)
-                lcase = context.language.case_by_keyword(case_key)
-                token_value = lcase.execute(token_value)
         value = value.replace(token, token_value)
+        if len(group) > 2:
+            value += group[2]
     return value
 
 

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import unittest
 import pytest
 from tml.token.data import DataToken, Error
-
+import tml.rules.options
 
 class FakeUser(object):
 

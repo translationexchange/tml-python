@@ -205,7 +205,11 @@ class DataToken(object):
 
     def apply_language_cases(self, value, obj, language, options=None):
         options = {} if options is None else options
-        for case_key in self.case_keys:
+        return self._apply_language_cases(self.case_keys, value, obj, language, options)
+
+
+    def _apply_language_cases(self, case_keys, value, obj, language, options=None):
+        for case_key in case_keys:
             value = self.apply_case(case_key, value, obj, language, options)
         return value
 
@@ -246,3 +250,16 @@ class DataToken(object):
     def decorate(self, value, options=None):
         options = {} if options is None else options
         return value
+
+    @classmethod
+    def token_object(cls, token_values, token_name):
+        if not token_values:
+            return None
+        token_object = token_values.get(token_name, None)
+        if isinstance(token_object, list): # if list then return first el
+            return token_object[0]
+        if isinstance(token_object, dict):  # if dict access `object` key
+            obj = token_object.get('object', None)
+            if obj:
+                return obj
+        return token_object

@@ -40,7 +40,7 @@ class MethodTokenTest(unittest.TestCase):
         self.assertEquals(self.token.context_keys, [])
         self.assertEquals(self.token.case_keys, [])
 
-    def test_substitute(self):
+    def test_substitution(self):
         dummy_user = FakeUser()
         self.assertEquals(self.token.token_value(dummy_user, self.en), dummy_user.first_name)
 

@@ -1,5 +1,6 @@
 from ..token.data import DataToken
 from ..token.method import MethodToken
+from ..token.transform import TransformToken
 
 __author__ = 'xepa4ep'
 
@@ -11,7 +12,7 @@ class DataTokenizer(object):
     tokens = None
     options = None
 
-    SUPPORTED_TOKENS = (DataToken, MethodToken)
+    SUPPORTED_TOKENS = (DataToken, MethodToken, TransformToken)
 
     def __init__(self, text, context=None, options=None):
         self.text = text

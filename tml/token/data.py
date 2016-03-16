@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+# encoding: UTF-8
 import re
 import six
 from ..exceptions import Error as BaseError
@@ -80,8 +82,8 @@ class DataToken(object):
     def parse(cls, label, options=None):
         options = {} if options is None else options
         tokens = set()
-        for match_item in DataToken.EXPRESSION.findall(label):
-            tokens.add(DataToken(label, match_item[0]))
+        for match_item in cls.EXPRESSION.findall(label):
+            tokens.add(cls(label, match_item[0]))
         return list(tokens)
 
     def __init__(self, label, token):
@@ -147,7 +149,7 @@ class DataToken(object):
     def token_value_from_array_param(self, array, language, options=None):
         options = {} if options is None else options
         if len(array) < 2:
-            raise Error('Invalid value for array token %s in %s' % (self.full_name, self.label))
+            raise Error('Invalid value for array token `%s` in `%s`' % (self.full_name, self.label))
         if isinstance(array[0], list):
             raise Error("List tokens are not supported yet.")
 
@@ -157,12 +159,12 @@ class DataToken(object):
             try:
                 return self.sanitize(array[0].get(array[1][1:]), array[0], language, utils.merge_opts(options, safe=False))
             except KeyError:
-                raise Error('Invalid value for array token %s in %s' % (self.full_name, self.label))
+                raise Error('Invalid value for array token `%s` in `%s`' % (self.full_name, self.label))
         else:   # it is an object
             try:
                 return self.sanitize(getattr(array[0], array[1][1:]), array[0], language, utils.merge_opts(options, safe=False))
             except AttributeError:
-                raise Error('Invalid value for array token %s in %s' % (self.full_name, self.label))
+                raise Error('Invalid value for array token `%s` in `%s`' % (self.full_name, self.label))
 
     ##############################################################################
       #
@@ -189,6 +191,8 @@ class DataToken(object):
         if not obj:   # if no object then nothing to evaluate. incorrect syntax
             raise Error("Missing value for hash token #{full_name} in #{label}")
         attr = the_hash.get('attribute', the_hash.get('property', None))
+        if not attr:   # specified attr not set
+            raise Error("Missing value for hash token #{full_name} in #{label}")
         if isinstance(obj, dict):   # if obj is dict, then access by key
             try:
                 return self.sanitize(obj.get(attr), obj, language, utils.merge_opts(options, safe=False))
@@ -201,14 +205,14 @@ class DataToken(object):
 
     def apply_language_cases(self, value, obj, language, options=None):
         options = {} if options is None else options
-        for case_key in case_keys:
+        for case_key in self.case_keys:
             value = self.apply_case(case_key, value, obj, language, options)
         return value
 
     def apply_case(self, case_key, value, obj, language, options=None):
         options = {} if options is None else options
         lcase = language.case_by_keyword(case_key)
-        return lcase.execute(token_value)
+        return lcase.execute(value)
 
     # evaluate all possible methods for the token value and return sanitized result
     def token_value(self, obj, language, options=None):
@@ -224,7 +228,7 @@ class DataToken(object):
         value = str(value)
         ctx = get_current_context()
         if ctx and not ctx.block_option('skip_html_escaping'):
-            return escape_if_needed(value, options)
+            value = escape_if_needed(value, options)
         if is_language_cases_enabled():
             return self.apply_language_cases(value, obj, language, options)
         return value
@@ -233,7 +237,7 @@ class DataToken(object):
         options = {} if options is None else options
         obj = context.get(self.key, None)
         if obj is None and not self.key in context:
-            raise Error('Missing value for %s in %s' % (self.full_name, self.label))
+            raise Error('Missing value for `%s` in `%s`' % (self.full_name, self.label))
         if obj is None:
             return label.replace(self.full_name, '')
         value = self.token_value(obj, language, options)

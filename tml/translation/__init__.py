@@ -80,7 +80,6 @@ class TranslationOption(Context):
         self.language = language
         self.options = options
         if 'locale' in options and options['locale'] != language.locale:
-            print self.language.application
             self.language = self.application.language(options['locale'])
 
     @property

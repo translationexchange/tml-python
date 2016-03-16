@@ -1,4 +1,5 @@
-from ..token import DataToken
+from ..token.data import DataToken
+from ..token.method import MethodToken
 
 __author__ = 'xepa4ep'
 
@@ -10,7 +11,7 @@ class DataTokenizer(object):
     tokens = None
     options = None
 
-    SUPPORTED_TOKENS = (DataToken, )
+    SUPPORTED_TOKENS = (DataToken, MethodToken)
 
     def __init__(self, text, context=None, options=None):
         self.text = text

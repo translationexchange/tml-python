@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import unittest
 import pytest
-from tml.token import DataToken
+from tml.token.data import DataToken, Error
 
 
 class FakeUser(object):
@@ -61,4 +61,15 @@ class DataTokenTest(unittest.TestCase):
         for pair in cases:
             self.assertEquals(self.token.substitute(self.label, pair[0], self.en), pair[1])
 
+    def test_errors(self):
+        dummy_user = FakeUser()
+        cases = (
+            {'userr': None},
+            {'user': [dummy_user, ':name']},
+            {'user': {'object': dummy_user, 'attribute': 'name'}},
+            {'user': {'object': dummy_user, 'bad_key': str(dummy_user)}},
+        )
+        for case in cases:
+            with self.assertRaises(Error):
+                self.token.substitute(self.label, case, self.en)
 

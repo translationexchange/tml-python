@@ -41,12 +41,3 @@ class DataTokenizer(object):
                 continue
             label = token.substitute(label, self.context, language, options)
         return label
-
-    @classmethod
-    def compile(cls, text, options=None):
-        return DataTokenizer(text, options=options)
-
-    def execute(self, language, context=None, options=None):
-        if context:
-            self.context = context
-        return self.substitute(language, options=options)

@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from six import iteritems
+from six import iteritems, reraise
 import sys
 from .base import Singleton
 from .utils import APP_DIR, rel, merge
@@ -91,7 +91,7 @@ class Config(BaseConfigMixin, Singleton):
         #'host': "https://tools.translationexchange.com/agent/staging/agent.min.js"
     }
 
-    data_preprocessors = ('tml.tools.list.preprocess_lists',)
+    #data_preprocessors = ('tml.tools.list.preprocess_lists',)
     env_generators = ('tml.tools.viewing_user.get_viewing_user',)
 
     cache = {
@@ -146,7 +146,12 @@ class Config(BaseConfigMixin, Singleton):
 
     def is_interactive_mode(self):
         return False
-        #return sys.stdout.isatty()
+
+    def handle_exception(self, exc):
+        if self.strict_mode:
+            reraise(exc.__class__, exc, sys.exc_info()[2])
+        else:
+            pass   # silent (logged in tml.py)
 
 
 CONFIG = Config.instance()

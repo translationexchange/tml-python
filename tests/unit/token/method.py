@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import unittest
 import pytest
 from mock import patch
-from tests.common import FakeUser
+from tests.common import FakeUser, override_config
 from tml.strings import to_string
 from tml.token.method import MethodToken, Error
 import tml.token.data
@@ -43,7 +43,8 @@ class MethodTokenTest(unittest.TestCase):
         cases = (
             {'userr': None},
         )
-        for case in cases:
-            with self.assertRaises(Error):
-                token.substitute(self.label, case, self.en)
+        with override_config(strict_mode=True):
+            for case in cases:
+                with self.assertRaises(Error):
+                    token.substitute(self.label, case, self.en)
 

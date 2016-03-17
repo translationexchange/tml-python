@@ -27,7 +27,7 @@ class RenderEngineTest(unittest.TestCase):
                                   self.client.get(url, params={'locale':'ru'})['results'])
         cases = (
             ({'actor': female('Маша'), 'count': 2}, to_string('Маша любезно дала тебе 2 яблока')),
-            ({'actor':{'gender':'male','name':'Вася'},'count':1}, to_string('Вася дал тебе всего 1 яблоко, мужик!')),
+            #({'actor':[male('Вася'), ':value'],'count':1}, to_string('Вася дал тебе всего 1 яблоко, мужик!')),
         )
         for input, expected in cases:
             actual = self.context.render(t, input, {'nowrap': True})
@@ -68,3 +68,5 @@ class RenderEngineTest(unittest.TestCase):
                 self.assertTrue('tml_fallback' in actual)
                 self.assertTrue(expected in actual)
 
+    def tearDown(self):
+        self.context.deactivate()

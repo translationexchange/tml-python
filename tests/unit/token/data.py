@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import unittest
 import pytest
-from tests.common import FakeUser
+from tests.common import FakeUser, override_config
 from tml.token.data import DataToken, Error
 import tml.rules.options
 
@@ -53,6 +53,17 @@ class DataTokenTest(unittest.TestCase):
         for pair in cases:
             self.assertEquals(self.token.substitute(self.label, pair[0], self.en), pair[1])
 
+    def test_substitute_tokens_with_array_values(self):
+        users = [FakeUser(first_name='fn_{}'.format(i),
+                          last_name='ln_{}'.format(i),
+                          gender='male') for i in xrange(3)]
+        token = DataToken.parse("Hello {users}")[0]
+        self.assertEquals(token.token_value([users, ':first_name'], self.en), 'fn_0, fn_1 and fn_2')
+        self.assertEquals(token.token_value([users, ':first_name', {'limit': 2, 'joiner': 'or'}], self.en), 'fn_0 or fn_1')
+        self.assertEquals(token.token_value([users, '<b>{$0}</b>'], self.en), '<b>fn_0 ln_0</b>, <b>fn_1 ln_1</b> and <b>fn_2 ln_2</b>')
+        self.assertEquals(token.token_value([users, {'attribute': 'first_name'}], self.en), 'fn_0, fn_1 and fn_2')
+        self.assertEquals(token.token_value([users, {'property': 'first_name'}], self.en), 'fn_0, fn_1 and fn_2')
+
     def test_errors(self):
         dummy_user = FakeUser()
         cases = (
@@ -61,7 +72,8 @@ class DataTokenTest(unittest.TestCase):
             {'user': {'object': dummy_user, 'attribute': 'name'}},
             {'user': {'object': dummy_user, 'bad_key': str(dummy_user)}},
         )
-        for case in cases:
-            with self.assertRaises(Error):
-                self.token.substitute(self.label, case, self.en)
+        with override_config(strict_mode=True):
+            for case in cases:
+                with self.assertRaises(Error):
+                    self.token.substitute(self.label, case, self.en)
 

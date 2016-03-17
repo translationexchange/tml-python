@@ -115,7 +115,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 application.Application
         """
-        return self.language.application
+        return self._language.application   # stop recursion
 
     _default_language = None
 

@@ -140,6 +140,13 @@ class Data(object):
             ret = ret.render(self.context)
         return ret
 
+    def get(self, key, default=None):
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return default
+
+
     def generate_item(self, key):
         """ Generate item for key """
         for generator in self.context.env_generators:

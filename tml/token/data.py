@@ -8,6 +8,7 @@ from ..session_vars import get_current_context
 from ..strings import to_string
 from .. import utils
 from ..logger import LoggerMixin
+from ..config import CONFIG
 
 __author__ = 'xepa4ep'
 
@@ -145,10 +146,10 @@ class DataToken(LoggerMixin):
       # examples:
       #
       # tr("Hello {user}", {'user': [current_user, current_user.name]}}
-      # tr("Hello {user}", {'user': [current_user, ':name']}}
+      # tr("Hello {user}", {'user': [current_user, ''name'']}}
       #
       # tr("Hello {user}", {'user': [{'name': "Michael", 'gender': 'male'}, current_user.name]}}
-      # tr("Hello {user}", {'user': [{'name': "Michael", 'gender': 'male'}, ':name']}}
+      # tr("Hello {user}", {'user': [{'name': "Michael", 'gender': 'male'}, ''name'']}}
       #
     ##############################################################################
 
@@ -157,7 +158,7 @@ class DataToken(LoggerMixin):
         if len(array) < 2:
             self.error('Invalid value for array token `%s` in `%s`', self.full_name, self.label)
         if isinstance(array[0], list):
-            self.error("List tokens are not supported yet.")
+            return self.token_values_from_array(array, language, options)
         if not array[1].startswith(':'):   # already evaluated
             return self.sanitize(array[1], array[0], language, utils.merge_opts(options, safe=True))
         elif isinstance(array[0], dict):   # it is a dict
@@ -173,19 +174,92 @@ class DataToken(LoggerMixin):
 
     ##############################################################################
       #
-      # examples:
+      # tr("Hello {user_list}!", "", {'user_list': [[user1, user2, user3], ':name']}}
       #
-      # tr("Hello {user}", {'user': {'value': "Michael", 'gender': 'male'}}}
+      # first element is an array, the rest of the elements are similar to the
+      # property, string, with parameters that follow
       #
-      # tr("Hello {user}", {'user': {:object: {'gender': 'male'}, 'value': "Michael"}}}
-      # tr("Hello {user}", {'user': {:object: {'name': "Michael", 'gender': 'male'}, 'property': 'name'}}}
-      # tr("Hello {user}", {'user': {:object: {'name': "Michael", 'gender': :male}, 'attribute': 'name'}}}
+      # if you want to pass options, then make the second parameter an array as well
       #
-      # tr("Hello {user}", {'user': {'object': user, 'value': "Michael"}}}
-      # tr("Hello {user}", {'user': {'object': user, 'property' 'name'}}}
-      # tr("Hello {user}", {'user': {'object': user, :attribute: 'name'}}}
+      # tr("{users} joined the site", {'users': [[user1, user2, user3], ':name']})
       #
-    ##############################################################################
+      #
+      # tr("{users} joined the site", {'users': [[user1, user2, user3], 'attribute': 'name'})
+      #
+      # tr("{users} joined the site", {'users': [[user1, user2, user3], 'attribute': 'name', 'value': "<strong>{$0}</strong>"})
+      #
+      # tr("{users} joined the site", {'users': [[user1, user2, user3], "<strong>{$0}</strong>")
+      #
+      #
+      ##############################################################################
+
+    def token_values_from_array(self, params, language, options, context=None):
+        context = context or get_current_context()
+        tpl_sign = "{$0}"
+        default_list_options = {
+            'description': 'List joiner',
+            'limit': 4,
+            'separator': ', ',
+            'joiner': 'and',
+            #'less': '{laquo} less',  # todo: add fn
+            #'expandable': True,  # todo: add fn
+            #'collapsable': True   # todo: add fn
+        }
+        objects = params[0]
+        method = params[1]
+        if len(params) > 2:
+            list_options = utils.merge_opts(default_list_options, **params[2])
+        else:
+            list_options = utils.merge_opts(default_list_options, **{})
+
+        def render_element(obj):
+            element = ''
+            if isinstance(method, six.string_types):
+                if not method.startswith(':'):
+                    element = method.replace(tpl_sign, self.sanitize(to_string(obj), obj, language, utils.merge_opts(options, safe=False)))
+                else:
+                    if isinstance(obj, dict):
+                        value = obj.get(method[1:], '')
+                    else:
+                        value = getattr(obj, method[1:], '')
+                    element = self.sanitize(value, obj, language, utils.merge_opts(options, safe=False))
+            elif isinstance(method, dict):
+                attr = method.get('attribute', method.get('property', None))
+                if isinstance(obj, dict):
+                    value = obj.get(attr, '')
+                else:
+                    value = getattr(obj, attr, '')
+                forced_value = method.get('value', None)
+                if forced_value:
+                    element = forced_value.replace(tpl_sign, self.sanitize(value, obj, language, utils.merge_opts(options, safe=False)))
+                else:
+                    element = self.sanitize(value, obj, language, utils.merge_opts(options, safe=False))
+            return element
+
+        def build_str(limit, sep, joiner):
+            builder = []
+            builder.append(sep.join(values[0:limit]))
+            builder.append(joiner)
+            builder.append(values[limit])
+            return to_string(" ").join(builder)
+
+        values = map(render_element, objects)
+        if len(objects) == 1:
+            return values[0]
+        if not list_options.get('joiner', ''):
+            return list_options['separator'].join(values)
+        joiner = list_options['joiner']
+        if context: # translate joiner if context configured
+            context.push_options(dict(target_locale=language.locale))
+            joiner = context.tr(list_options['joiner'],
+                                description=list_options['description'],
+                                data={},
+                                options=options)
+            context.pop_options()
+
+        if len(values) <= list_options['limit']:
+            return build_str(-1, list_options['separator'], joiner)
+        return build_str(list_options['limit'] - 1, list_options['separator'], joiner)
 
     def token_value_from_hash_param(self, the_hash, language, options=None):
         options = {} if options is None else options
@@ -245,6 +319,7 @@ class DataToken(LoggerMixin):
             return self._substitute(label, context, language, options)
         except Error as e:
             self.exception(e)
+            CONFIG.handle_exception(e)
             return label
 
     def _substitute(self, label, context, language, options):

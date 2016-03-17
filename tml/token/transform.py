@@ -67,14 +67,6 @@ class TransformToken(DataToken):
     def is_implied(self):
         return not self.token_value_displayed()
 
-    def substitute(self, label, context, language, options=None):
-        label = to_string(label)
-        try:
-            return self._substitute(label, context, language, options)
-        except Error as e:   # todo: log it
-            self.exception(e)
-            return label
-
     def _substitute(self, label, context, language, options=None):
         options = {} if options is None else {}
         obj = self.token_object(context, self.key)

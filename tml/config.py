@@ -91,7 +91,7 @@ class Config(BaseConfigMixin, Singleton):
         #'host': "https://tools.translationexchange.com/agent/staging/agent.min.js"
     }
 
-    #data_preprocessors = ('tml.tools.list.preprocess_lists',)
+    data_preprocessors = ()
     env_generators = ('tml.tools.viewing_user.get_viewing_user',)
 
     cache = {

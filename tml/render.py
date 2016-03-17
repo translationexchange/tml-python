@@ -56,6 +56,7 @@ class RenderEngine(object):
         except OptionIsNotFound as e:
             translation = self.fallback(e.label, e.description)
             option = translation.fetch_option(translation_data, options)
+
         trans_value = decoration_parser(option.execute(translation_data, options)).render(translation_data)
         trans_options = option.get_options()
         trans_options.update(options)

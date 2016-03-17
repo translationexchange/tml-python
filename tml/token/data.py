@@ -144,9 +144,10 @@ class DataToken(LoggerMixin):
       # gets the value based on various evaluation methods
       #
       # examples:
-      #
+      # {% tr with user=some_user|name user-format="[user.name]" %}
+      # {% endtr %}
       # tr("Hello {user}", {'user': [current_user, current_user.name]}}
-      # tr("Hello {user}", {'user': [current_user, ''name'']}}
+      # tr("Hello {user}", {'user': [current_user, ':name']}}
       #
       # tr("Hello {user}", {'user': [{'name': "Michael", 'gender': 'male'}, current_user.name]}}
       # tr("Hello {user}", {'user': [{'name': "Michael", 'gender': 'male'}, ''name'']}}
@@ -184,7 +185,7 @@ class DataToken(LoggerMixin):
       # tr("{users} joined the site", {'users': [[user1, user2, user3], ':name']})
       #
       #
-      # tr("{users} joined the site", {'users': [[user1, user2, user3], 'attribute': 'name'})
+      # tr("{users} joined the site", {'users': [[user1, user2, user3], {'attribute': 'name'})
       #
       # tr("{users} joined the site", {'users': [[user1, user2, user3], 'attribute': 'name', 'value': "<strong>{$0}</strong>"})
       #
@@ -198,7 +199,7 @@ class DataToken(LoggerMixin):
         tpl_sign = "{$0}"
         default_list_options = {
             'description': 'List joiner',
-            'limit': 4,
+            'limit': 7,
             'separator': ', ',
             'joiner': 'and',
             #'less': '{laquo} less',  # todo: add fn
@@ -251,7 +252,7 @@ class DataToken(LoggerMixin):
         joiner = list_options['joiner']
         if context: # translate joiner if context configured
             context.push_options(dict(target_locale=language.locale))
-            joiner = context.tr(list_options['joiner'],
+            _, joiner, _ = context.tr(list_options['joiner'],
                                 description=list_options['description'],
                                 data={},
                                 options=options)
@@ -295,7 +296,7 @@ class DataToken(LoggerMixin):
     def apply_case(self, case_key, value, obj, language, options=None):
         options = {} if options is None else options
         lcase = language.case_by_keyword(case_key)
-        return lcase.execute(value)
+        return lcase and lcase.execute(value) or value
 
     # evaluate all possible methods for the token value and return sanitized result
     def token_value(self, obj, language, options=None):

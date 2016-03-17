@@ -153,8 +153,10 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
-        dict = self.build_dict(self.language)
-        return dict.fallback(self.build_key(label, description or '', language=self.default_language))
+        return return_label_fallback(
+            self.build_key(label, description or '', language=self.language))
+        # dict = self.build_dict(self.language)
+        # return dict.fallback()
 
     def tr(self, label, data=None, description="", options=None):
         """ Tranlate data
@@ -170,12 +172,14 @@ class AbstractContext(RenderEngine):
         data = data or {}
         options = options or {}
         error = None
+        print self.language.locale, 'hi'
         try:
             # Get transaltion:
             translation = self.fetch(label, description)
         except TranslationIsNotExists as e:
             # Translation does not exists: use fallback
             translation = self.fallback(label, description)
+            # print label, translation.key.language.locale, self.language.locale
             error = e
             options['pending'] = e.is_pending()
         # Render result:
@@ -274,19 +278,21 @@ class LanguageContext(AbstractContext):
         self.translator = translator
         set_current_translator(translator)
 
-    def fallback(self, label, description):
-        """ Fallback translation: try to use default language
-            Args:
-                label (string): tranlated label
-                description (string): desctioption
-            Returns:
-                translation.Translation
-        """
-        try:
-            key = Key(label=label, description=description, language=self.default_language)
-            return self.fallback_dict.fetch(key)
-        except TranslationIsNotExists:
-            return super(LanguageContext, self).fallback(label, description)
+    # def fallback(self, label, description):
+    #     """ Fallback translation: try to use default language
+    #         Args:
+    #             label (string): tranlated label
+    #             description (string): desctioption
+    #         Returns:
+    #             translation.Translation
+    #     """
+    #     return super(LanguageContext, self).fallback(label, description)
+        #     try:
+        #         key = Key(label=label, description=description, language=self.language)
+        #         _t = self.fallback_dict.fetch(key)
+        #         return self.fallback_dict.fetch(key)
+        # except TranslationIsNotExists:
+        #     return super(LanguageContext, self).fallback(label, description)
 
     def is_inline_mode(self):
         return self.translator and self.translator.is_inline()

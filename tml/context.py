@@ -172,14 +172,12 @@ class AbstractContext(RenderEngine):
         data = data or {}
         options = options or {}
         error = None
-        print self.language.locale, 'hi'
         try:
             # Get transaltion:
             translation = self.fetch(label, description)
         except TranslationIsNotExists as e:
             # Translation does not exists: use fallback
             translation = self.fallback(label, description)
-            # print label, translation.key.language.locale, self.language.locale
             error = e
             options['pending'] = e.is_pending()
         # Render result:

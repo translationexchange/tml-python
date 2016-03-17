@@ -117,6 +117,13 @@ def get_context():
         raise ContextNotConfigured()
     return context
 
+def get_current_language():
+    context = get_context()
+    return context.language
+
+def get_current_locale():
+    return get_current_language().locale
+
 
 def tr(label, data = {}, description = '', options = {}):
     """ Tranlate data

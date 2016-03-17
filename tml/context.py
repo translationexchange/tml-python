@@ -153,8 +153,14 @@ class AbstractContext(RenderEngine):
             Returns:
                 Translation
         """
+        original_language = None
+        locale = self.block_option('target_locale', None)
+        if locale:
+            original_language = self.application.language(locale)
+        else:
+            original_language = self.default_language
         return return_label_fallback(
-            self.build_key(label, description or '', language=self.language))
+            self.build_key(label, description or '', language=original_language))
         # dict = self.build_dict(self.language)
         # return dict.fallback()
 

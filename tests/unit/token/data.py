@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import unittest
 import pytest
+from six.moves import range
 from tests.common import FakeUser, override_config
 from tml.token.data import DataToken, Error
 import tml.rules.options
@@ -56,7 +57,7 @@ class DataTokenTest(unittest.TestCase):
     def test_substitute_tokens_with_array_values(self):
         users = [FakeUser(first_name='fn_{}'.format(i),
                           last_name='ln_{}'.format(i),
-                          gender='male') for i in xrange(3)]
+                          gender='male') for i in range(3)]
         token = DataToken.parse("Hello {users}")[0]
         self.assertEquals(token.token_value([users, ':first_name'], self.en), 'fn_0, fn_1 and fn_2')
         self.assertEquals(token.token_value([users, ':first_name', {'limit': 2, 'joiner': 'or'}], self.en), 'fn_0 or fn_1')

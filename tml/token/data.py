@@ -244,7 +244,7 @@ class DataToken(LoggerMixin):
             builder.append(values[limit])
             return to_string(" ").join(builder)
 
-        values = map(render_element, objects)
+        values = list(map(render_element, objects))   # in py3 map returns iterator
         if len(objects) == 1:
             return values[0]
         if not list_options.get('joiner', ''):

@@ -11,7 +11,7 @@ logs
 tests/fixtures/logs/tml.log
 build
 __pycache__
-tml.log
+tml.log*
 .pypirc
 .tox
 .cache

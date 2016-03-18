@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+from six.moves import range
 from time import time
 from tests.mock import Client
 from tml import Key, Gender
@@ -31,7 +32,7 @@ class Timer(object):
         return self.finish()
 
     def per_action(self):
-        return self.time/self.times
+        return self.time / self.times
 
 
 def test_load_language(app):
@@ -49,17 +50,18 @@ def main():
     print('Load language %f' % t.per_action())
     ru = Language.load_by_locale(app, 'ru')
     dict = SourceDictionary(language = ru, source = 'index')
-    t = dict.get_translation(Key(label = '{actor} give you {count}',
+    t = dict.fetch(Key(label = '{actor} give you {count}',
                       description = 'somebody give you few apples',
                       language = ru))
     def translate():
-        t = dict.get_translation(Key(label = '{actor} give you {count}',
+        t = dict.fetch(Key(label = '{actor} give you {count}',
                       description = 'somebody give you few apples',
                       language = ru))
         actors = [{'name':'Анна','gender':'female'}, {'name':'Мария','gender':'female'}, {'name':'Вася','gender':'male'}, {'name':'Артем','gender':'male'}]
         t.execute({'count': randint(1, 1000), 'actor': choice(actors)}, {})
 
-    t = Timer().call(translate, 10000)
+    t = Timer().call(translate, 1000)
+    t_trans = t.time
     print 'Translate %f' % t.per_action()
     def execute():
         count = randint(1, 100)
@@ -74,6 +76,7 @@ def main():
         t.execute({'name': choice(persons), 'to': choice(persons), 'count': count}, {})
     t = Timer().call(execute, 1000)
     print('Execute %f' % t.per_action())
+    print('Total %f' % t_trans)
 
 if __name__ == '__main__':
    main()

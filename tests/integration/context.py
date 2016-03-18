@@ -13,7 +13,7 @@ class ContextTest(unittest.TestCase):
 
     def test_abstract_context_spec(self):
         context = AbstractContext(FakeLanguage())
-        self.assertIsInstance(context._language, FakeLanguage, '_language is set')
+        self.assertIsInstance(context.language, FakeLanguage, '_language is set')
 
 
 if __name__ == '__main__':

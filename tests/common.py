@@ -53,7 +53,7 @@ class FakeUser(object):
     gender = 'male'
 
     def __init__(self, **kwargs):
-        for k, v in kwargs.iteritems():
+        for k, v in six.iteritems(kwargs):
             setattr(self, k, v)
 
     def __str__(self):

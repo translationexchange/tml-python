@@ -2,6 +2,7 @@ from __future__ import absolute_import
 # encoding: UTF-8
 import unittest
 import pytest
+from six import iteritems
 from mock import patch
 from tests.common import FakeUser
 from tml.strings import to_string
@@ -57,7 +58,7 @@ class TransformTokenTest(unittest.TestCase):
                 ({'count': 1}, '1 message'),
                 ({'count': 2}, '2 messages'),],
         }
-        for label, cases in case_dict.iteritems():
+        for label, cases in iteritems(case_dict):
             token = TransformToken.parse(label)[0]
             # print label
             for case in cases:

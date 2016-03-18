@@ -57,7 +57,7 @@ class AbstractContext(RenderEngine):
                 language (language.Language): selected language
                 dictionary (dictionary.AbstractDictionary): dict object for translation
         """
-        self._language = language
+        self.language = language
         self._block_option_queue = []
         super(AbstractContext, self).__init__()
         # self.dict = self.build_dict(self.language)
@@ -115,7 +115,7 @@ class AbstractContext(RenderEngine):
             Returns:
                 application.Application
         """
-        return self._language.application   # stop recursion
+        return self.language.application   # stop recursion
 
     _default_language = None
 
@@ -129,13 +129,13 @@ class AbstractContext(RenderEngine):
             self._default_language = self.application.language(self.default_locale)
         return self._default_language
 
-    @property
-    def language(self):
-        target_locale = self.block_option('target_locale', None)
-        if target_locale:
-            return self.application.language(target_locale)
-        else:
-            return self._language
+    # @property
+    # def language(self):
+    #     target_locale = self.block_option('target_locale', None)
+    #     if target_locale:
+    #         return self.application.language(target_locale)
+    #     else:
+    #         return self.language
 
     @property
     def default_locale(self):

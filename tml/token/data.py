@@ -235,6 +235,8 @@ class DataToken(LoggerMixin):
                     element = forced_value.replace(tpl_sign, self.sanitize(value, obj, language, utils.merge_opts(options, safe=False)))
                 else:
                     element = self.sanitize(value, obj, language, utils.merge_opts(options, safe=False))
+            else:  # use object by default (may be it just string)
+                element = obj
             return element
 
         def build_str(limit, sep, joiner):

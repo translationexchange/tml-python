@@ -57,7 +57,7 @@ class Application(object):
                 id (int): application id
                 languages (list): list of languages
         """
-        self.client = client
+        self.client = client or self.build_default_client()
         self.key = key
         self.sources = {}
         self.languages_by_locale = {}

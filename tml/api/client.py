@@ -133,6 +133,8 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         response = None
         if key == 'version':
             uri = pj(uri, 'version.json')
+        elif key == 'release':   # if download release
+            uri = pj(uri, opts['cache_version'] + '.tar.gz')
         else:
             uri = pj(uri, '%s/%s.json.gz' % (self.cache.version, key))
         url = pj(CONFIG.cdn_host(), uri)
@@ -210,6 +212,8 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             raise APIError(response.text, url=response.url, client=self)
         response.raise_for_status()
         compressed = response.request.method.lower() == 'get'   # if get then compressed result
+        if opts.get('raw', False):   # no need to deserialize and uncompress
+            return response.content
         if compressed and not opts.get('uncompressed', False):   # need uncompress
             compressed_data = response.content
             if not compressed_data:  # empty response
@@ -223,8 +227,6 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
             self.debug("Compressed: %s, uncompressed: %s", len(compressed_data), len(data))
         else:
             data = response.text
-        if opts.get('raw', False):   # no need to deserialize
-            return data
         try:
             data = json.loads(data)
         except Exception as e:

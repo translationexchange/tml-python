@@ -1,16 +1,18 @@
 from __future__ import absolute_import
 # encoding: UTF-8
+import os
 from six import string_types
 from importlib import import_module
 from types import FunctionType
 from six.moves.urllib.parse import urlencode
 from .base import SingletonMixin
 from .config import CONFIG
-from .utils import interval_timestamp, ts
-from .logger import LoggerMixin
+from .utils import interval_timestamp, ts, rel
+from .logger import LoggerMixin, get_logger
 
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
+
 
 class CacheVersion(LoggerMixin):
 
@@ -109,10 +111,13 @@ class CachedClient(SingletonMixin, LoggerMixin):
         else:
             return CachedClient()
 
+    @classmethod
+    def default_dir(cls):
+        return CONFIG['cache'].get('path', rel('tml/cache'))
 
     @classmethod
     def load_adapter(cls, klass, **kwargs):
-        def build_client(klass, *bases):
+        def build_cache(klass, *bases):
             return type(
                 klass.__name__,
                 bases + (CachedClient,),
@@ -128,12 +133,12 @@ class CachedClient(SingletonMixin, LoggerMixin):
             module = import_module(package_path)
             adapter_class = getattr(module, adapter_name)
             if type(adapter_class) is FunctionType:  # e.g. factory callable
-                return adapter_class(build_client)
+                return adapter_class(build_cache)
             else:
-                return build_client(adapter_class)()
+                return build_cache(adapter_class)()
         else:  # custom object
             if isinstance(klass, type):
-                return build_client(klass)()
+                return build_cache(klass)()
             else:  # object
                 return klass
 

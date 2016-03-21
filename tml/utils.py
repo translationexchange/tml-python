@@ -4,10 +4,11 @@ import logging.handlers
 import functools
 import json
 import gzip
+import tarfile
 from copy import copy
 from codecs import open
 from contextlib import contextmanager
-from six import StringIO, functools
+from six import StringIO, functools, string_types
 import warnings
 from datetime import datetime, timedelta
 from time import mktime
@@ -96,6 +97,15 @@ def read_gzip(payload):
     gzip_f = gzip.GzipFile(fileobj=buf, mode='rb')
     return gzip_f.read()
 
+def untar(source_file, dest_path='.'):
+    if isinstance(source_file, string_types):   # we deal with path
+        assert source_file.endswith('tar.gz'), "`source_file` path should end with `tar.gz` if provided as path"
+        source_file = tarfile.open(source_file)
+    assert isinstance(source_file, tarfile.TarFile), "`source_file` have to be an instance of `tarfile.TarFile`"
+    source_file.extractall(dest_path)
+    source_file.close()
+
+
 def read_json(path):
     with open(path, 'rb', encoding='utf-8') as fp:
         return json.loads(to_string(fp.read()))
@@ -119,3 +129,25 @@ class cached_property(object):
             return self
         res = instance.__dict__[self.name] = self.func(instance)
         return res
+
+
+class chdir(object):
+    """
+    Step into a directory temporarily.
+    """
+    def __init__(self, path):
+        self.old_dir = os.getcwd()
+        self.new_dir = path
+
+    def __enter__(self):
+        os.chdir(self.new_dir)
+
+    def __exit__(self, *args):
+        os.chdir(self.old_dir)
+
+
+def rm_symlink(path):
+    if os.path.realpath(path) != path:
+        target_path = os.path.realpath(path)
+    if os.path.exists(path):
+        os.remove(path)

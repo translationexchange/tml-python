@@ -89,9 +89,6 @@ class DataToken(LoggerMixin):
     def parse(cls, label, options=None):
         options = {} if options is None else options
         tokens = set()
-        # if not isinstance(label, six.string_types):
-        #     import pdb
-        #     pdb.set_trace()  "user|trs" => '{$0}' user|trs
         for match_item in cls.EXPRESSION.findall(label):
             tokens.add(cls(label, match_item[0]))
         return list(tokens)

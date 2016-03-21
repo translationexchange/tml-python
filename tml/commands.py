@@ -5,8 +5,10 @@ import time
 from .api.client import Client
 from .cache import CachedClient
 from .config import CONFIG
-from .utils import pj, rel, rm_symlink, untar, chdir
+from .utils import pj, rel, rm_symlink, untar, chdir, ts
 from .logger import get_logger
+from .application import Application
+from .language import Language
 
 __author__ = 'xepa4ep'
 
@@ -48,3 +50,33 @@ def download_release(cache_dir=None, force_dir=True):
     logger.debug("The new version `%s` has been marked as current", selected_version)
     t1 = time.time()
     logger.debug("Download process took %s seconds.", round(t1 - t0, 2))
+
+
+def warmup_cache(version=None):
+    t0 = time.time()
+    logger = get_logger()
+    logger.debug("Starting cache warmup...")
+    app_key = CONFIG.application_key()
+    client = Client(app_key)
+    # 1. get version
+    selected_version = version or extract_version(client, app_key)
+    logger.debug("Warming up version: %s", selected_version)
+    # 2. fetch and store app
+    application = client.cdn_call('application', {'t': ts()}, {'cache_version': selected_version})
+    CachedClient.instance().store(Application.cache_key, application)
+
+    # 3. fetch sources
+    sources = client.cdn_call('sources', {'t': ts()}, {'uncompressed': True, 'cache_version': selected_version}) or []
+    for lang in application['languages'] or []:
+        locale = lang['locale']
+        lang_key = Language.cache_key(locale)
+        language = client.cdn_call(lang_key, {'t': ts()}, {'cache_version': selected_version})
+        CachedClient.instance().store(lang_key, language)
+        for src in sources:
+            src_key = '%s/sources/%s' % (locale, src)
+            source = client.cdn_call(src_key, {'t': ts()}, {'cache_version':selected_version})
+            CachedClient.instance().store(src_key, source)
+
+    t1 = time.time()
+    logger.debug("Cache warmup took %s", round(t1 - t0, 2))
+

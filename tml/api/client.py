@@ -127,16 +127,21 @@ class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):
         method = 'get'
         params = {} if params is None else self._compact_params(params)
         opts = {} if opts is None else self._compact_params(opts)
-        if self.cache.version.is_invalid() and key != 'version':
-            return None
+        version = opts.get('cache_version', None)  # force opts
+        if not version:
+            if self.cache.version.is_invalid() and key != 'version':
+                return None
+            version = self.cache.version   # use default (from config)
+
         uri = self.key
         response = None
         if key == 'version':
             uri = pj(uri, 'version.json')
         elif key == 'release':   # if download release
-            uri = pj(uri, opts['cache_version'] + '.tar.gz')
+            uri = pj(uri, version + '.tar.gz')
         else:
-            uri = pj(uri, '%s/%s.json.gz' % (self.cache.version, key))
+            suffix = ('' if opts.get('uncompressed', False) else '.gz')
+            uri = pj(uri, '%s/%s.json%s' % (version, key, suffix))
         url = pj(CONFIG.cdn_host(), uri)
         try:
             with self.trace_call(url, method, params):

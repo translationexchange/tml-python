@@ -178,6 +178,7 @@ class AbstractContext(RenderEngine):
         data = data or {}
         options = options or {}
         error = None
+        self.push_options(options)
         try:
             # Get transaltion:
             translation = self.fetch(label, description)
@@ -186,6 +187,8 @@ class AbstractContext(RenderEngine):
             translation = self.fallback(label, description)
             error = e
             options['pending'] = e.is_pending()
+        finally:
+            self.pop_options()
         # Render result:
         return translation.key, self.render(translation, data, options), error
 
@@ -194,11 +197,14 @@ class AbstractContext(RenderEngine):
         options = options or {}
         error = None
         label = tml_legacy.suggest_label(legacy_label)
+        self.push_options(options)
         try:
             translation = self.fetch(label, description)
         except TranslationIsNotExists as e:
             translation = self.fallback(label, description)
             error = e
+        finally:
+            self.pop_options()
         option = translation.fetch_option(data, options=options)
         return translation.key, tml_legacy.execute(translation, data=data, options=options), error
 

@@ -118,6 +118,9 @@ class Config(BaseConfigMixin, Singleton):
 
     strict_mode = False
 
+    supported_tr_opts = ('source',
+                         'target_locale',)
+
     @property
     def default_locale(self):
         return self.locale['default']

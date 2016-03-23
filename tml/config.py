@@ -80,7 +80,8 @@ class Config(BaseConfigMixin, Singleton):
         'default': 'en',
         'method': 'current_locale',
         'subdomain': False,
-        'extension': False
+        'extension': False,
+        'query_param': 'locale'
     }
 
     agent = {
@@ -120,6 +121,8 @@ class Config(BaseConfigMixin, Singleton):
 
     supported_tr_opts = ('source',
                          'target_locale',)
+
+    tml_cookie = 'trex_%s'
 
     @property
     def default_locale(self):

@@ -84,7 +84,14 @@ class CacheFallbackMixin(object):
 
     # cache is enabled if: get and cache enabled and cache_key
     def should_enable_cache(self, method, opts=None):
-        return method == 'get' and CONFIG.cache_enabled() and opts.get('cache_key', None) is not None
+        opts = {} if not opts else opts
+        if method.lower() != 'get':
+            return False
+        if not opts.get('cache_key', None):
+            return False
+        if not CONFIG.cache_enabled():
+            return False
+        return True
 
 
 class Client(LoggerMixin, CacheFallbackMixin, AbstractClient):

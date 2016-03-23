@@ -5,6 +5,7 @@ import functools
 import json
 import gzip
 import tarfile
+from urllib import unquote, quote
 from copy import copy
 from codecs import open
 from contextlib import contextmanager
@@ -13,6 +14,8 @@ import warnings
 from datetime import datetime, timedelta
 from time import mktime
 from .strings import to_string
+from .exceptions import CookieNotParsed
+
 
 reduce = functools.reduce
 
@@ -78,10 +81,18 @@ def cookie_name(app_key):
 
 
 def decode_cookie(base64_payload, secret=None):
+    padding_chars = '==='
     try:
-        data = json.loads(base64.b64decode(base64_payload))
+        data = json.loads((unquote(base64_payload)).decode('base64', 'strict'))
         # TODO: Verify signature
         return data
+    except Exception as e:
+        raise CookieNotParsed(e)
+
+
+def encode_cookie(data, secret=None):
+    try:
+        return quote(json.dumps(data).encode('base64','strict'))
     except Exception as e:
         raise CookieNotParsed(e)
 

@@ -5,7 +5,7 @@ import functools
 import json
 import gzip
 import tarfile
-from urllib import unquote, quote
+from six.moves.urllib import parse
 from copy import copy
 from codecs import open
 from contextlib import contextmanager
@@ -83,7 +83,7 @@ def cookie_name(app_key):
 def decode_cookie(base64_payload, secret=None):
     padding_chars = '==='
     try:
-        data = json.loads((unquote(base64_payload)).decode('base64', 'strict'))
+        data = json.loads((parse.unquote(base64_payload)).decode('base64', 'strict'))
         # TODO: Verify signature
         return data
     except Exception as e:
@@ -92,7 +92,7 @@ def decode_cookie(base64_payload, secret=None):
 
 def encode_cookie(data, secret=None):
     try:
-        return quote(json.dumps(data).encode('base64','strict'))
+        return parse.quote(json.dumps(data).encode('base64','strict'))
     except Exception as e:
         raise CookieNotParsed(e)
 

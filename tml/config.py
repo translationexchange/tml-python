@@ -106,6 +106,28 @@ class Config(BaseConfigMixin, Singleton):
 
     context_class = None   # just for testing purpose
 
+    context_rules = {
+        'number': {'variables': {}},
+        'gender': {
+            'variables': {
+                '@gender': 'gender',
+                '@size': lambda lst: len(lst)
+            }
+        },
+        'genders': {
+            'variables': {
+                '@genders': lambda lst: [u['gender'] if hasattr(u, 'items') else getattr(u, 'gender') for u in lst]
+            }
+        },
+        'date': {'variables': {}},
+        'time': {'variables': {}},
+        'list': {
+            'variables': {
+                '@count': lambda lst: len(lst)
+            }
+        }
+    }
+
     # memcached
     #'cache': {
         #'enabled': True,

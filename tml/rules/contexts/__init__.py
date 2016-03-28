@@ -26,6 +26,7 @@ from __future__ import absolute_import
 __author__ = 'a@toukmanov.ru, xepa4ep'
 
 import re
+import six
 from tml.exceptions import Error as BaseError
 from _ctypes import ArgumentError
 from .count import Count
@@ -36,8 +37,10 @@ from .genders import Genders
 from ..options import Parser as OptionsParser
 from tml.rules.options import TokenMapping
 from tml.rules import ContextRules
-from ...exceptions import Error
-from ...strings import to_string, suggest_string
+from tml.config import CONFIG
+from tml.utils import hash_fetch
+from tml.exceptions import Error
+from tml.strings import to_string, suggest_string
 
 class Value(object):
     """ Value contexts """
@@ -98,6 +101,7 @@ class Context(object):
         self.options_parser = options_parser
         self.rules = rules
         self.variable_name = variable_name
+        self.variables = [self.variable_name]
         if token_expression:
             self.token_expression = re.compile(token_expression[1:-2])
 
@@ -118,7 +122,38 @@ class Context(object):
         """
         return self.pattern.match(value)
 
-    def option(self, value):
+    def token_vars(self, obj, config=None):
+        config = config if config is not None else CONFIG
+        the_vars = {}
+        for var in self.variables:
+            method = hash_fetch(config, 'context_rules.gender.variables.@{}'.format(var))
+            if not method:
+                the_vars[var] = self.match(obj)
+                continue
+            # import pdb; pdb.set_trace()
+            if isinstance(method, six.string_types):   # method is string
+                if hasattr(obj, 'items'):   # if hash
+                    object = hash_value(obj, 'object', default=obj)
+                    if hasattr(object, 'items'):
+                        the_vars[var] = hash_value(object, method)
+                    else:
+                        the_vars[var] = getattr(object, method, None)
+                elif isinstance(obj, six.string_types):  # if string
+                    the_vars[var] = object
+                else:   # if obj
+                    var_value = getattr(obj, method, None)
+                    if var_value and callable(var_value):
+                        var_value = var_value()
+                    the_vars[var] = var_value
+            elif callable(method):
+                the_vars[var] = method(obj)
+            else:
+                the_vars[var] = obj
+            if var == self.variable_name:   # todo: remove in future releases
+                the_vars[var] = self.match(the_vars[var])
+        return the_vars
+
+    def option(self, value, opts=None):
         """ Get option for value
             Args:
                 value: mixed data
@@ -128,8 +163,9 @@ class Context(object):
                 string: option after rules apply
         """
         # check context for value:
+        opts = {} if opts is None else opts
         try:
-            data = {self.variable_name: self.match(value)}
+            data = self.token_vars(value, config=opts.get('config', None)) #{self.variable_name: self.match(value)}
         except ArgumentError as not_match:
             raise ValueIsNotMatchContext(error = not_match,
                                          context = self,

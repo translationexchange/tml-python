@@ -52,6 +52,21 @@ def enable_warnings():
     warnings.simplefilter('always', DeprecationWarning)
 
 
+def hash_fetch(a, path, default=None):
+    if not hasattr(a, 'items'):
+        return default
+    ret = a
+    path_parts = path.split('.')
+    while path_parts:
+        if not ret or not hasattr(ret, 'items'):
+            return default
+        try:
+            ret = ret[path_parts.pop(0)]
+        except KeyError:
+            return default
+    return ret
+
+
 def merge(a, b):
     for key in b:
         if key in a:

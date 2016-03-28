@@ -89,6 +89,7 @@ class Config(BaseConfigMixin, Singleton):
         'type': 'agent',
         'cache':   86400,  # timeout every 24 hours
         'host': "https://tools.translationexchange.com/agent/stable/agent.min.js",
+        'force_injection': False    # force inject js agent as soon as tml is configured
         #'host': "https://tools.translationexchange.com/agent/staging/agent.min.js"
     }
 

@@ -20,6 +20,9 @@ class BaseConfigMixin(dict):
     def __contains__(self, key):
         return key in self.__dict__
 
+    def __len__(self):
+        return len(self.__dict__)
+
     def get(self, key, default=None):
         return self.__dict__.get(key.lower(), default)
 

@@ -58,7 +58,7 @@ def hash_fetch(a, path, default=None):
     ret = a
     path_parts = path.split('.')
     while path_parts:
-        if not ret or not hasattr(ret, 'items'):
+        if not hasattr(ret, 'items') or not len(ret):
             return default
         try:
             ret = ret[path_parts.pop(0)]

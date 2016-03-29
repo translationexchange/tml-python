@@ -77,8 +77,6 @@ class Gender(object):
         """ Check is gender string is valid gender """
         if gender in Gender.GENDERS:
             return gender
-        if not gender:
-            return Gender.OTHER
         raise ArgumentError('Gender unsupported: %s' % gender)
 
     @classmethod

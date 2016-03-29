@@ -80,7 +80,6 @@ class TransformToken(DataToken):
         except:   # language context is absent, try to guess
             language_context = None
         value = language.contexts.execute(self.piped_params, obj, utils.merge_opts({}, language_context=language_context)).strip()
-
         if not value:
             return label
         cases = self.parse_cases(value)   # message::plural => messages

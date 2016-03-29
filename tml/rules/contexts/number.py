@@ -32,6 +32,8 @@ from _ctypes import ArgumentError
 
 class Number(object):
     """ Number context """
+    key = 'number'
+
     @classmethod
     def match(cls, data):
         if type(data) is int:

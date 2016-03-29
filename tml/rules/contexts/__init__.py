@@ -126,20 +126,20 @@ class Context(object):
         config = config if config is not None else CONFIG
         the_vars = {}
         for var in self.variables:
-            method = hash_fetch(config, 'context_rules.gender.variables.@{}'.format(var))
+            method = hash_fetch(config, 'context_rules.{}.variables.@{}'.format(self.pattern.key, var))
             if not method:
                 the_vars[var] = self.match(obj)
                 continue
             # import pdb; pdb.set_trace()
             if isinstance(method, six.string_types):   # method is string
                 if hasattr(obj, 'items'):   # if hash
-                    object = hash_value(obj, 'object', default=obj)
+                    object = hash_fetch(obj, 'object', default=obj)
                     if hasattr(object, 'items'):
-                        the_vars[var] = hash_value(object, method)
+                        the_vars[var] = hash_fetch(object, method)
                     else:
                         the_vars[var] = getattr(object, method, None)
                 elif isinstance(obj, six.string_types):  # if string
-                    the_vars[var] = object
+                    the_vars[var] = obj
                 else:   # if obj
                     var_value = getattr(obj, method, None)
                     if var_value and callable(var_value):
@@ -149,6 +149,7 @@ class Context(object):
                 the_vars[var] = method(obj)
             else:
                 the_vars[var] = obj
+            #import pdb; pdb.set_trace()
             if var == self.variable_name:   # todo: remove in future releases
                 the_vars[var] = self.match(the_vars[var])
         return the_vars

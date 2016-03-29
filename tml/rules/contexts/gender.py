@@ -32,6 +32,7 @@ __author__ = 'a@toukmanov.ru'
 
 class Gender(object):
     """ Gender data """
+    key = 'gender'
     GENDERS = MALE, FEMALE, OTHER = ('male', 'female', 'other')
 
     def __init__(self, gender, value):
@@ -76,6 +77,8 @@ class Gender(object):
         """ Check is gender string is valid gender """
         if gender in Gender.GENDERS:
             return gender
+        if not gender:
+            return Gender.OTHER
         raise ArgumentError('Gender unsupported: %s' % gender)
 
     @classmethod

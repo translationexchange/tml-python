@@ -33,6 +33,8 @@ from _ctypes import ArgumentError
 
 class Genders(object):
     """ List of objects having gender """
+    key = 'genders'
+
     @classmethod
     def match(cls, data):
         """ Check is data list of genders """

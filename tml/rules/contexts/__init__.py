@@ -149,7 +149,6 @@ class Context(object):
                 the_vars[var] = method(obj)
             else:
                 the_vars[var] = obj
-            #import pdb; pdb.set_trace()
             if var == self.variable_name:   # todo: remove in future releases
                 the_vars[var] = self.match(the_vars[var])
         return the_vars

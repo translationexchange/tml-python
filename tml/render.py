@@ -127,7 +127,7 @@ class Data(object):
         try:
             # get item for data:
             ret = self.data[key]
-        except KeyError:
+        except KeyError as e:
             return self.generate_item(key)
         for preprocessor in self.context.data_preprocessors:
             # preprocess data ([] -> List etc)

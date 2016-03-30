@@ -17,7 +17,7 @@ class TmlDateTest(unittest.TestCase):
         self.context = build_context(client=self.client)
 
     def test_translate(self):
-        dummy_date = datetime.date(year=1989, month=10, day=07)
+        dummy_date = datetime.date(year=1989, month=10, day=7)
         with with_block_options(dry=True):
             assert to_string('Friday, October 7, 1989') == translate(dummy_date, ':verbose', {'with_leading_zero': False})
             assert to_string('10/07/1989') == translate(dummy_date, '%m/%d/%Y', {'with_leading_zero': True})

@@ -1,7 +1,10 @@
 import ctypes
 import datetime
 import six
-import __builtin__
+try:
+    import __builtin__
+except ImportError:
+    import builtins as __builtin__
 from .ext import date as date_exts, datetime as datetime_exts, lst as list_exts, string as string_exts
 from .logger import get_logger
 

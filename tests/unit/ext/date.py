@@ -22,3 +22,4 @@ class TmlDateTest(unittest.TestCase):
             assert to_string('Friday, October 7, 1989') == translate(dummy_date, ':verbose', {'with_leading_zero': False})
             assert to_string('10/07/1989') == translate(dummy_date, '%m/%d/%Y', {'with_leading_zero': True})
             assert to_string('October 7th') == translate(dummy_date, '{month_name} {days::ord}', {'with_leading_zero': False})
+

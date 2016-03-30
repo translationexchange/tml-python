@@ -2,6 +2,7 @@
 """ Test rules built-in functions """
 from __future__ import absolute_import
 import unittest
+from mock import patch
 from tml.rules.contexts import *
 from tml.strings import to_string
 
@@ -12,6 +13,14 @@ def die(object):
 class Dumn(object):
     def __str__(self):
         return 'qwerty'
+
+
+class DummyUser(object):
+    def __init__(self, sex):
+        self.sex = sex
+
+    def get_gender(self):
+        return self.sex == 1 and 'male' or 'female'
 
 
 class ContextsTest(unittest.TestCase):
@@ -67,6 +76,10 @@ class ContextsTest(unittest.TestCase):
         self.assertEquals('one', self.number.option(21), 'Check option')
         self.assertEquals('few', self.number.option(32), 'Check option')
         self.assertEquals('many', self.number.option(40), 'Check option')
+        self.assertEquals('male', self.gender.option(DummyUser(sex=1), dict(config={'context_rules': {'gender': {'variables': {'@gender': lambda x: x.sex == 1 and 'male' or 'female'}}}})))
+        self.assertEquals('female', self.gender.option(DummyUser(sex=0), dict(config={'context_rules': {'gender': {'variables': {'@gender': lambda x: x.sex == 1 and 'male' or 'female'}}}})))
+        self.assertEquals('male', self.gender.option(DummyUser(sex=1), dict(config={'context_rules': {'gender': {'variables': {'@gender': 'get_gender'}}}})))
+        self.assertEquals('female', self.gender.option(DummyUser(sex=0), dict(config={'context_rules': {'gender': {'variables': {'@gender': 'get_gender'}}}})))
         self.assertEquals(to_string('тест'), self.number.execute('тест, теста, тестов', 1), '1 тест')
         self.assertEquals(to_string('тестов'), self.number.execute('тест, теста, тестов', 11), '11 тестов')
         self.assertEquals(to_string('теста'), self.number.execute('тест, теста, тестов', 2), '2 теста')

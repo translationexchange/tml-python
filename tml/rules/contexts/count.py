@@ -30,9 +30,13 @@ from _ctypes import ArgumentError
 
 class Count(object):
     """ List having count """
+    key = 'list'
+
     @classmethod
     def match(cls, data):
         """ Check is data list of genders """
+        if isinstance(data, int):
+            return data
         if type(data) in (list, tuple):
             return len(data)
         if type(data) in (str, six.text_type):

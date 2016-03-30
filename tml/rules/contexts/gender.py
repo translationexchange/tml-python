@@ -32,6 +32,7 @@ __author__ = 'a@toukmanov.ru'
 
 class Gender(object):
     """ Gender data """
+    key = 'gender'
     GENDERS = MALE, FEMALE, OTHER = ('male', 'female', 'other')
 
     def __init__(self, gender, value):

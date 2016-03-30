@@ -31,9 +31,9 @@ class CaseTest(unittest.TestCase):
         self.assertEquals(to_string('Лены'),
                           c.execute(Gender.female('Лена')),
                           'Лена -> Лены')
+
         self.assertEquals(to_string('Вася'),
-                          c.execute(Gender.female('Вася')),
-                          'Вася -> Вася')
+                          c.execute(Gender.female('Вася')))
 
     @property
     def data(self):
@@ -41,7 +41,7 @@ class CaseTest(unittest.TestCase):
                 'err':{'rules': self.invalid_rules},
                 'gen2':{'rules':self.rules},
                 'err2':{'rules':self.invalid_rules}}
-        
+
 
     def test_from_data(self):
         data = self.data

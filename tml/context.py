@@ -129,6 +129,15 @@ class AbstractContext(RenderEngine):
             self._default_language = self.application.language(self.default_locale)
         return self._default_language
 
+    @property
+    def original_language(self):
+        locale = self.block_option('target_locale', None)
+        if locale:
+            original_language = self.application.language(locale)
+        else:
+            original_language = self.default_language
+        return original_language
+
     # @property
     # def language(self):
     #     target_locale = self.block_option('target_locale', None)
@@ -179,17 +188,21 @@ class AbstractContext(RenderEngine):
         options = options or {}
         error = None
         self.push_options(options)
-        try:
-            # Get transaltion:
-            translation = self.fetch(label, description)
-        except TranslationIsNotExists as e:
-            # Translation does not exists: use fallback
-            translation = self.fallback(label, description)
-            error = e
-            options['pending'] = e.is_pending()
-        finally:
-            self.pop_options()
-        # Render result:
+        if options.get('dry', False) or self.block_option('dry'):   # if dry then return none translation
+            key = self.build_key(label, description)
+            translation = return_label_fallback(key)
+        else:
+            try:
+                # Get transaltion:
+                translation = self.fetch(label, description)
+            except TranslationIsNotExists as e:
+                # Translation does not exists: use fallback
+                translation = self.fallback(label, description)
+                error = e
+                options['pending'] = e.is_pending()
+            finally:
+                self.pop_options()
+            # Render result:
         return translation.key, self.render(translation, data, options), error
 
     def tr_legacy(self, legacy_label, data=None, description="", options=None):

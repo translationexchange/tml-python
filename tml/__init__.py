@@ -147,4 +147,3 @@ def with_block_options(**options):
     context.push_options(options)
     yield
     context.pop_options()
-

@@ -20,6 +20,9 @@ class BaseConfigMixin(dict):
     def __contains__(self, key):
         return key in self.__dict__
 
+    def __len__(self):
+        return len(self.__dict__)
+
     def get(self, key, default=None):
         return self.__dict__.get(key.lower(), default)
 
@@ -106,6 +109,68 @@ class Config(BaseConfigMixin, Singleton):
 
     context_class = None   # just for testing purpose
 
+    context_rules = {
+        'number': {'variables': {}},
+        'gender': {
+            'variables': {
+                '@gender': 'gender',
+                '@size': lambda lst: len(lst)
+            }
+        },
+        'genders': {
+            'variables': {
+                '@genders': lambda lst: [u['gender'] if hasattr(u, 'items') else getattr(u, 'gender') for u in lst]
+            }
+        },
+        'date': {'variables': {}},
+        'time': {'variables': {}},
+        'list': {
+            'variables': {
+                '@count': lambda lst: len(lst)
+            }
+        }
+    }
+
+    localization = {
+        'default_day_names'       :  ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        'default_abbr_day_names'  :  ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        'default_month_names'     :  ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        'default_abbr_month_names':  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        'custom_date_formats'     :  {
+          'default'               : '%m/%d/%Y',            # 07/4/2008
+          'short_numeric'         : '%m/%d',               # 07/4
+          'short_numeric_year'    : '%m/%d/%y',            # 07/4/08
+          'long_numeric'          : '%m/%d/%Y',            # 07/4/2008
+          'verbose'               : '%A, %B %d, %Y',       # Friday, July  4, 2008
+          'monthname'             : '%B %d',               # July 4
+          'monthname_year'        : '%B %d, %Y',           # July 4, 2008
+          'monthname_abbr'        : '%b %d',               # Jul 4
+          'monthname_abbr_year'   : '%b %d, %Y',           # Jul 4, 2008
+          'date_time'             : '%m/%d/%Y at %H:%M',   # 01/03/1010 at 5:30
+        },
+        'token_mapping': {
+          '%a': '{short_week_day_name}',
+          '%A': '{week_day_name}',
+          '%b': '{short_month_name}',
+          '%B': '{month_name}',
+          '%p': '{am_pm}',
+          '%d': '{days}',
+          '%e': '{day_of_month}',
+          '%j': '{year_days}',
+          '%m': '{months}',
+          '%W': '{week_num}',
+          '%w': '{week_days}',
+          '%y': '{short_years}',
+          '%Y': '{years}',
+          '%l': '{trimed_hour}',
+          '%H': '{full_hours}',
+          '%I': '{short_hours}',
+          '%M': '{minutes}',
+          '%S': '{seconds}',
+          '%s': '{since_epoch}'
+        }
+    }
+
     # memcached
     #'cache': {
         #'enabled': True,
@@ -124,6 +189,8 @@ class Config(BaseConfigMixin, Singleton):
                          'target_locale',)
 
     tml_cookie = 'trex_%s'
+
+    decorator_class = "html"
 
     @property
     def default_locale(self):
@@ -153,6 +220,24 @@ class Config(BaseConfigMixin, Singleton):
 
     def is_interactive_mode(self):
         return False
+
+    def get_custom_date_format(self, format):
+        return self.localization['custom_date_formats'][format]
+
+    def strftime_symbol_to_token(self, symbol):
+        return self.localization['token_mapping'].get(symbol, None)
+
+    def get_abbr_day_name(self, index):
+        return self.localization['default_abbr_day_names'][index]
+
+    def get_day_name(self, index):
+        return self.localization['default_day_names'][index]
+
+    def get_abbr_month_name(self, index):
+        return self.localization['default_abbr_month_names'][index]
+
+    def get_month_name(self, index):
+        return self.localization['default_month_names'][index]
 
     def handle_exception(self, exc):
         if self.strict_mode:

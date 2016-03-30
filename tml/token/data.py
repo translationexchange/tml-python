@@ -9,6 +9,7 @@ from ..strings import to_string
 from .. import utils
 from ..logger import LoggerMixin
 from ..config import CONFIG
+from tml.native_decoration import get_decorator
 
 __author__ = 'xepa4ep'
 
@@ -237,7 +238,8 @@ class DataToken(LoggerMixin):
                     element = self.sanitize(value, obj, language, utils.merge_opts(options, safe=False))
             else:  # use object by default (may be it just string)
                 element = obj
-            return element
+            decorator = get_decorator()
+            return decorator.decorate_element(element, options)
 
         def build_str(limit, sep, joiner):
             builder = []
@@ -337,7 +339,8 @@ class DataToken(LoggerMixin):
 
     def decorate(self, value, options=None):
         options = {} if options is None else options
-        return value
+        decorator = get_decorator()
+        return decorator.decorate_token(self, value, options)
 
     @classmethod
     def token_object(cls, token_values, token_name):
@@ -351,6 +354,9 @@ class DataToken(LoggerMixin):
             if obj:
                 return obj
         return token_object
+
+    def decoration_name():
+        return 'html'
 
     def error(self, msg, *params):
         raise Error(to_string(msg) % params)

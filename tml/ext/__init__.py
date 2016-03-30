@@ -16,7 +16,10 @@ datetime = {
 }
 
 lst = {
-    'translate': list_ext.translate
+    'translate': list_ext.translate,
+    'translate_and_join': list_ext.translate_and_join,
+    'translate_sentence': list_ext.translate_sentence,
+    'tro': list_ext.tro
 }
 
 string = {

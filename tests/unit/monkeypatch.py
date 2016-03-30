@@ -1,6 +1,6 @@
 import datetime
 from tml.monkeypatch import patch_types
-from tml.ext import date as date_ext, datetime as datetime_ext, string as str_ext
+from tml.ext import date as date_ext, datetime as datetime_ext, string as str_ext, lst as list_ext
 
 def test_monkeypatch():
 
@@ -11,6 +11,8 @@ def test_monkeypatch():
         assert not chk_method(datetime.datetime, method)
     for method in str_ext:
         assert not chk_method(str, method)
+    for method in list_ext:
+        assert not chk_method(list, method)
 
     patch_types()
 
@@ -21,6 +23,8 @@ def test_monkeypatch():
         assert chk_method(datetime.datetime, method)
     for method in str_ext:
         assert chk_method(str, method)
+    for method in list_ext:
+        assert chk_method(list, method)
 
 
 def chk_method(klass, method):

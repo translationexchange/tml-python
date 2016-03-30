@@ -18,6 +18,8 @@ def patch_types():
     patch_type(datetime.datetime, datetime_exts)
     # str
     patch_type(str, string_exts)
+    # list
+    patch_type(str, string_exts)
     # __builtin__.list
     patch_type(__builtin__.list, list_exts)
 

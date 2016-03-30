@@ -24,15 +24,16 @@
 """
 from __future__ import absolute_import
 __author__ = ''
-
 from .contexts import Gender, Value
 from . import ContextRules
 from _ctypes import ArgumentError
 from .parser import parse
+from tml.native_decoration import get_decorator
 
 
 class Case(ContextRules):
     """ Language case """
+
     def execute(self, value):
         """ Execute case for value """
         data = {'value': Value.match(value)}
@@ -42,7 +43,21 @@ class Case(ContextRules):
         except ArgumentError:
             # Undefined gender:
             data['gender'] = Gender.OTHER
-        return self.apply(data)
+        conditions, operations = self.find_matching_rule(data)
+        if conditions is False:
+            return data['value']
+        transformed_value = self.engine.execute(operations, data)
+        decorator = get_decorator()
+        return decorator.decorate_language_case(
+            self, (conditions, operations), value, transformed_value, options={})
+
+
+    def find_matching_rule(self, data):
+        for conditions, operations in self.choices:
+            if (self.engine.execute(conditions, data)):
+                return (conditions, operations)
+        return False, None
+
 
     @classmethod
     def from_rules(cls, rules):

@@ -1,6 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
 import re
+import datetime
 from .utils import context_configured
 from ..config import CONFIG
 from ..token.data import DataToken
@@ -89,3 +88,27 @@ def _extract_month_name(self, language_context, options):
 
 def _extract_day_of_month(self, language_context, options):
     return self.strftime('%d')
+
+def _extract_am_pm(self, language_context, options):
+    return language_context.tr(self.strftime('%p'), description='Meridian indicator', data={}, options=options)[1]
+
+def _extract_full_hours(self, language_context, options):
+    return self.strftime('%H')
+
+def _extract_short_hours(self, language_context, options):
+    return self.strftime('%I')
+
+def _extract_trimed_hour(self, language_context, options):
+    return self.hour
+
+def _extract_minutes(self, language_context, options):
+    return self.strftime('%M')
+
+def _extract_seconds(self, language_context, options):
+    return self.strftime('%S')
+
+def _extract_since_epoch(self, language_context, options):
+    return (self - datetime.datetime(1970, 1, 1)).total_seconds()
+
+def _extract_day_of_month(self, language_context, options):
+    return self.strftime('%e')

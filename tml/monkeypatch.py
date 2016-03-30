@@ -2,7 +2,7 @@ import ctypes
 import datetime
 import six
 import __builtin__
-from .ext import date as date_exts, lst as list_exts
+from .ext import date as date_exts, datetime as datetime_exts, lst as list_exts
 from .logger import get_logger
 
 
@@ -14,6 +14,8 @@ _get_dict.argtypes = [ctypes.py_object]
 def patch_types():
     # datetime.date
     patch_type(datetime.date, date_exts)
+    # datetime.datetime
+    patch_type(datetime.datetime, datetime_exts)
     # __builtin__.list
     patch_type(__builtin__.list, list_exts)
 

@@ -1,10 +1,17 @@
 from . import date as date_ext
+from . import datetime as datetime_ext
 from . import list as list_ext
 
 date = {
     'translate': date_ext.translate,
     'tr': date_ext.translate,
     'trl': date_ext.trl
+}
+
+datetime = {
+    'translate': datetime_ext.translate,
+    'tr': datetime_ext.translate,
+    'trl': datetime_ext.trl
 }
 
 lst = {

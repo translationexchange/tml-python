@@ -190,6 +190,8 @@ class Config(BaseConfigMixin, Singleton):
 
     tml_cookie = 'trex_%s'
 
+    decorator_class = "html"
+
     @property
     def default_locale(self):
         return self.locale['default']

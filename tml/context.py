@@ -129,6 +129,15 @@ class AbstractContext(RenderEngine):
             self._default_language = self.application.language(self.default_locale)
         return self._default_language
 
+    @property
+    def original_language(self):
+        locale = self.block_option('target_locale', None)
+        if locale:
+            original_language = self.application.language(locale)
+        else:
+            original_language = self.default_language
+        return original_language
+
     # @property
     # def language(self):
     #     target_locale = self.block_option('target_locale', None)

@@ -23,7 +23,3 @@ class TmlStrTest(unittest.TestCase):
             assert to_string("Hello world") == translate("Hello world")
             assert to_string("This belongs to him") == translate("This belongs to {user|him,her}", data={'user': FakeUser(first_name="John", gender='male')})
 
-    def test_inline(self):
-        with patch.object(self.context, 'is_inline_mode', return_value=True):
-            assert to_string("<tml:label class=\"tml_pending tml_translatable\" data-translation_key=\"1d165e82b4cfcd93f813788b2cc10d52\" data-target_locale=\"en\">Hello world</tml:label>") == translate("Hello world")
-

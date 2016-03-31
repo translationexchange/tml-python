@@ -13,7 +13,7 @@ class DjangoCacheAdapter(object):
         params.update({
             'KEY_PREFIX': '',
             'VERSION': '',
-            'key_func': self.make_key})
+            'KEY_FUNCTION': self.make_key})
         self._cache = _create_cache(self.backend, **params)
 
     @property
@@ -41,7 +41,6 @@ class DjangoCacheAdapter(object):
 
     def fetch(self, key, opts=None):
         data = self._cache.get(key)
-        # import pdb; pdb.set_trace()
         if data:
             self.debug('Cache hit: %s', key)
             data = self._unpickle(data)

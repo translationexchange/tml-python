@@ -131,7 +131,8 @@ setup(
     # tml django setup.py: install_requires = ["tml[memcached]"],
     extras_require={
         'memcached': ['python-memcached>=1.57'],
-        'pylibmc': ['pylibmc>=1.5.0']
+        'pylibmc': ['pylibmc>=1.5.0'],
+        'redis': ['redis==2.10.5']
     },
 
 )

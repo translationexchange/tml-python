@@ -7,6 +7,7 @@ from tml.cache import CacheVersion, CachedClient
 from tml.cache_adapters import file as FileAdapter
 from tml.cache_adapters.test_utils import check_alive
 from tml.cache_adapters.memcached import PyLibMCCacheAdapter, DefaultMemcachedAdapter, BaseMemcachedAdapter
+from tml.cache_adapters.rediscache import BaseRedisAdapter, DefaultRedisAdapter
 from tml import configure
 from tests.common import override_config, FIXTURES_PATH
 from .settings import TML
@@ -99,7 +100,7 @@ class TestCache(unittest.TestCase):
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'ttl': 3600, 'namespace': ''}):
             cache = CachedClient.instance()
             self.assertEquals(cache.namespace, CONFIG.application_key()[:5], 'namespace set first 5 symbols of key')
-        
+
         with override_config(cache={'enabled': True, 'adapter': 'memcached', 'host': '127.0.0.1', 'ttl': 3600, 'namespace': ''}, application={'access_token': 'foobar'}):
             cache = CachedClient.instance()
             self.assertEquals(cache.namespace, CONFIG.access_token()[:5], 'namespace set first 5 symbols of token')
@@ -155,3 +156,35 @@ class TestCache(unittest.TestCase):
         self.assertEquals(cache.fetch('a'), 'b', 'upgrade version')
         cache.upgrade_version()
         self.assertEquals(cache.fetch('a'), None, 'upgrade version works')
+
+
+class TestRedisCache(unittest.TestCase):
+    def test_redis_init(self):
+        with override_config(cache={'enabled': True, 'adapter': 'rediscache', 'host': '127.0.0.1:6379', 'namespace': 'tml-2', 'ttl': 3600}):
+            cache = CachedClient.instance()
+            self.assertIsInstance(cache, BaseRedisAdapter, 'proper factory build')
+            self.assertEquals(cache.default_timeout, 3600)
+            self.assertEquals(cache.namespace, 'tml-2', 'namespace set')
+            cache._drop_it()
+
+        with override_config(cache={'enabled': True, 'adapter': 'rediscache', 'backend': 'default', 'host': '127.0.0.1:6379', 'namespace': 'tml-3', 'ttl': 1200}):
+            cache = CachedClient.instance()
+            self.assertIsInstance(cache, BaseRedisAdapter, 'proper factory build')
+            self.assertEquals(cache.default_timeout, 1200)
+            cache._drop_it()
+
+    def test_redis_func(self):
+        with override_config(cache={'enabled': True, 'adapter': 'rediscache', 'backend': 'default', 'host': '127.0.0.1:6379', 'namespace': 'tml-test'}):
+            cache = CachedClient.instance()
+            check_alive(cache)
+            self.assertEquals(cache.store('foo', 'bar'), 'bar', 'dummy store')
+            self.assertEquals(cache.fetch('foo'), 'bar', 'dummy fetch')
+            self.assertEquals(cache.delete('foo'), 'foo', 'dummy delete')
+            self.assertEquals(cache.fetch('foo'), None, 'dummy check delete')
+            self.assertEquals(cache.store('foo', {'a': 'b'}), {'a': 'b'}, 'json store')
+            self.assertEquals(cache.fetch('foo'), {'a': 'b'}, 'json fetch')
+            cache.delete('foo')
+            cache.store('foo', 'new_bar', opts=dict(timeout=1))
+            self.assertEquals(cache.fetch('foo'), 'new_bar', 'timeout')
+            time.sleep(1)
+            self.assertEquals(cache.fetch('foo'), None, 'timeout works')

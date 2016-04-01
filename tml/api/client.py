@@ -31,7 +31,7 @@ import json
 from requests import Response
 from requests.exceptions import HTTPError
 import six
-from ..utils import read_gzip, pj, interval_timestamp
+from ..utils import read_gzip, pj, interval_timestamp, ts
 from ..config import CONFIG
 from ..logger import get_logger
 from ..cache import CachedClient
@@ -60,9 +60,9 @@ class CacheFallbackMixin(object):
 
     # get cache version from CDN
     def get_cache_version(self):
-        t = interval_timestamp(CONFIG['version_check_interval'])
-        self.debug("Fetching cache version from CDN with timestamp: %s", t)
-        data = self.cdn_call('version', params={'t': t}, opts={'public': True, 'uncompressed': True})
+        # t = interval_timestamp(CONFIG['version_check_interval'])
+        self.debug("Fetching cache version from CDN with timestamp")
+        data = self.cdn_call('version', params={'t': ts()}, opts={'public': True, 'uncompressed': True})
         if not data:
             self.debug('No releases have been published yet')
             return '0'

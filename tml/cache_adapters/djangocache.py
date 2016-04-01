@@ -30,7 +30,7 @@ class DjangoCacheAdapter(object):
         return json.dumps(data)
 
     def _unpickle(self, payload):
-        return json.loads(payload.decode())
+        return json.loads(payload)
 
     def store(self, key, data, opts=None):
         self.debug('Cache store: %s', key)

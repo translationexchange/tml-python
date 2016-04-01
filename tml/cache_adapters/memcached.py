@@ -135,7 +135,7 @@ class PyLibMCCacheAdapter(BaseMemcachedAdapter):
         return json.dumps(data)
 
     def _unpickle(self, payload):
-        return json.loads(payload.decode())
+        return json.loads(payload)
 
 
 def MemcachedAdapterFactory(cache_builder):

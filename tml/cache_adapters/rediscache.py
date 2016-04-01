@@ -19,7 +19,7 @@ class BaseRedisAdapter(object):
             self._servers = server
         self.default_namespace = params['namespace']
         self.default_timeout = params['timeout']
-        self._options = params.get('OPTIONS', None)
+        self._options = params.get('OPTIONS', {})
         self._lib = library
         self._client = None
 
@@ -93,7 +93,10 @@ class DefaultRedisAdapter(BaseRedisAdapter):
     def _cache(self):
         server, port = self._servers[0].split(':')
         if getattr(self, '_client', None) is None:
-            self._client = self._lib.Redis(server, port)
+            if self._options.get('pool', False):
+                self._client = self._lib.ConnectionPool(max_connections=self._options.get('max_connections', 10), host=server, port=port)
+            else:
+                self._client = self._lib.Redis(server, port)
         return self._client
 
     def _pickle(self, data):

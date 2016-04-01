@@ -173,6 +173,13 @@ class TestRedisCache(unittest.TestCase):
             self.assertEquals(cache.default_timeout, 1200)
             cache._drop_it()
 
+        with override_config(cache={'enabled': True, 'adapter': 'rediscache', 'backend': 'default', 'host': '127.0.0.1:6379', 'options': {'pool': True, 'max_connections': 2}}):
+            import redis
+            cache = CachedClient.instance()
+            self.assertIsInstance(cache._cache, redis.ConnectionPool)
+            self.assertEquals(cache._cache.max_connections, 2)
+            cache._drop_it()
+
     def test_redis_func(self):
         with override_config(cache={'enabled': True, 'adapter': 'rediscache', 'backend': 'default', 'host': '127.0.0.1:6379', 'namespace': 'tml-test'}):
             cache = CachedClient.instance()

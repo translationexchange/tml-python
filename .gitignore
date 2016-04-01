@@ -19,4 +19,5 @@ tml.log*
 .DS_Store
 *.egg-info/
 *.swp
+*.rdb
 venv

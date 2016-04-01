@@ -13,7 +13,6 @@ DEFAULT_TIMEOUT = object()
 class BaseRedisAdapter(object):
 
     def __init__(self, server, params, library):
-        print server, params
         if isinstance(server, string_types):
             self._servers = server.split(';')
         else:

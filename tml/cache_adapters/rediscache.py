@@ -100,7 +100,7 @@ class DefaultRedisAdapter(BaseRedisAdapter):
         return json.dumps(data)
 
     def _unpickle(self, payload):
-        return json.loads(payload)
+        return json.loads(payload.decode())
 
 def RedisAdapterFactory(cache_builder):
     server = CONFIG.cache.get('host', '127.0.0.1:6379')

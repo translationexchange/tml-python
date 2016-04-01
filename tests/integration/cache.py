@@ -177,8 +177,8 @@ class TestRedisCache(unittest.TestCase):
         with override_config(cache={'enabled': True, 'adapter': 'rediscache', 'backend': 'default', 'host': '127.0.0.1:6379', 'namespace': 'tml-test'}):
             cache = CachedClient.instance()
             check_alive(cache)
-            self.assertEquals(cache.store('foo', 'bar'), 'bar', 'dummy store')
-            self.assertEquals(cache.fetch('foo'), 'bar', 'dummy fetch')
+            self.assertEquals(cache.store('foo', ['bar']), ['bar'], 'dummy store')
+            self.assertEquals(cache.fetch('foo'), ['bar'], 'dummy fetch')
             self.assertEquals(cache.delete('foo'), 'foo', 'dummy delete')
             self.assertEquals(cache.fetch('foo'), None, 'dummy check delete')
             self.assertEquals(cache.store('foo', {'a': 'b'}), {'a': 'b'}, 'json store')

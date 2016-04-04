@@ -120,7 +120,3 @@ class SourceDictionary(Hashtable):
     def verify_path(self):
         """Source is registered under main source, if not registered yet."""
         self.application.verify_source_path(self.source, self.source_path)
-
-    def __del__(self):
-        if self:
-            self.flush()

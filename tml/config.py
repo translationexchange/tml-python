@@ -87,6 +87,11 @@ class Config(BaseConfigMixin, Singleton):
         'query_param': 'locale'
     }
 
+    locale_mapping = {
+        'pt-br': 'pt-BR',
+        'zh-hans-cn': 'zh-Hans-CN'
+    }
+
     agent = {
         'enabled': True,
         'type': 'agent',
@@ -195,6 +200,11 @@ class Config(BaseConfigMixin, Singleton):
     @property
     def default_locale(self):
         return self.locale['default']
+
+    def get_locale(self, locale):
+        if not locale:
+            return self.default_locale
+        return self.locale_mapping.get(locale, locale)
 
     def cache_enabled(self):
         return self['cache'].get('enabled', False)

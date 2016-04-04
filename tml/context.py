@@ -248,7 +248,7 @@ class LanguageContext(AbstractContext):
         """
         CachedClient.instance().reset_version()
         self.set_translator(translator)
-        locale = locale or CONFIG.default_locale
+        locale = CONFIG.get_locale(locale)
         if key:
             application = Application.load_by_key(
                 client, key, locale=locale, source=source)

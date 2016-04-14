@@ -3,12 +3,10 @@ from __future__ import absolute_import
 import six
 from types import FunctionType
 from .. import configure, build_context, Key, with_block_options
-from ..application import Application
 from ..session_vars import get_current_context
 from ..translation import TranslationOption, OptionIsNotFound
 from ..legacy import text_to_sprintf, suggest_label
 from ..api.client import Client
-from ..api.snapshot import open_snapshot
 from ..render import RenderEngine
 from ..logger import LoggerMixin
 from ..utils import parse_accept_lang_header, language_code_re, import_string
@@ -27,17 +25,6 @@ def fallback_locale(locale):
         return exploded[0]
     else:
         return None
-
-
-# class Translation(BaseTranslation):
-
-#     def get_request_param(self, request, key):
-#         return request.GET.get(key, None)
-
-#     def get_language_from_request(self):
-#         pass
-#         # super(...)
-        # django_session....
 
 
 class BaseTranslation(LoggerMixin):
@@ -280,8 +267,6 @@ class BaseTranslation(LoggerMixin):
     def supported_locales(self):
         return [str(locale) for locale in self.application.supported_locales]
 
-    # def to_locale(self, language):
-    #     return to_locale(language)
 
     def get_language_from_request(self, request, check_path=False):
         """

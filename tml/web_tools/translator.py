@@ -2,7 +2,6 @@ from __future__ import absolute_import
 # encoding: UTF-8
 import six
 from types import FunctionType
-from django.utils.module_loading import import_string
 from .. import configure, build_context, Key, with_block_options
 from ..application import Application
 from ..session_vars import get_current_context
@@ -12,7 +11,7 @@ from ..api.client import Client
 from ..api.snapshot import open_snapshot
 from ..render import RenderEngine
 from ..logger import LoggerMixin
-from ..utils import parse_accept_lang_header, language_code_re
+from ..utils import parse_accept_lang_header, language_code_re, import_string
 
 __author__ = 'a@toukmanov.ru, xepa4ep'
 

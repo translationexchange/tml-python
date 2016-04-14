@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import logging.handlers
 import functools
@@ -14,7 +15,7 @@ import warnings
 from datetime import datetime, timedelta
 from time import mktime
 from .strings import to_string
-from .exceptions import CookieNotParsed
+from .exceptions import CookieNotParsed, ImportStringError
 
 
 reduce = functools.reduce
@@ -27,6 +28,18 @@ def rel(*x):
     return pj(os.path.abspath(BASE_DIR), *x)
 
 APP_DIR = rel('tml')
+
+
+accept_language_re = re.compile(r'''
+    ([A-Za-z]{1,8}(?:-[A-Za-z0-9]{1,8})*|\*)      # "en", "en-au", "x-y-z", "es-419", "*"
+    (?:\s*;\s*q=(0(?:\.\d{,3})?|1(?:.0{,3})?))?   # Optional "q=1.00", "q=0.8"
+    (?:\s*,\s*|$)                                 # Multiple accepts per header.
+    ''', re.VERBOSE)
+
+language_code_re = re.compile(
+    r'^[a-z]{1,8}(?:-[a-z0-9]{1,8})*(?:@[a-z0-9]{1,20})?$',
+    re.IGNORECASE
+)
 
 
 def deprecated(fn):
@@ -177,3 +190,80 @@ def rm_symlink(path):
         target_path = os.path.realpath(path)
     if os.path.exists(path):
         os.remove(path)
+
+
+def parse_accept_lang_header(lang_string):
+    """
+    Parses the lang_string, which is the body of an HTTP Accept-Language
+    header, and returns a list of (lang, q-value), ordered by 'q' values.
+
+    Any format errors in lang_string results in an empty list being returned.
+    """
+    result = []
+    pieces = accept_language_re.split(lang_string.lower())
+    if pieces[-1]:
+        return []
+    for i in range(0, len(pieces) - 1, 3):
+        first, lang, priority = pieces[i:i + 3]
+        if first:
+            return []
+        if priority:
+            try:
+                priority = float(priority)
+            except ValueError:
+                return []
+        if not priority:        # if priority is 0.0 at this point make it 1.0
+            priority = 1.0
+        result.append((lang, priority))
+    result.sort(key=lambda k: k[1], reverse=True)
+    return result
+
+
+def import_string(import_name, silent=False):
+    """Imports an object based on a string.  This is useful if you want to
+    use import paths as endpoints or something similar.  An import path can
+    be specified either in dotted notation (``xml.sax.saxutils.escape``)
+    or with a colon as object delimiter (``xml.sax.saxutils:escape``).
+
+    If `silent` is True the return value will be `None` if the import fails.
+
+    :param import_name: the dotted name for the object to import.
+    :param silent: if set to `True` import errors are ignored and
+                   `None` is returned instead.
+    :return: imported object
+
+    Notes:
+        Steal from werkzeug
+    """
+    # force the import name to automatically convert to strings
+    # import is not able to handle unicode strings in the fromlist
+    # if the module is a package
+    import_name = str(import_name).replace(':', '.')
+    try:
+        try:
+            __import__(import_name)
+        except ImportError:
+            if '.' not in import_name:
+                raise
+        else:
+            return sys.modules[import_name]
+
+        module_name, obj_name = import_name.rsplit('.', 1)
+        try:
+            module = __import__(module_name, None, None, [obj_name])
+        except ImportError:
+            # support importing modules not yet set up by the parent module
+            # (or package for that matter)
+            module = import_string(module_name)
+
+        try:
+            return getattr(module, obj_name)
+        except AttributeError as e:
+            raise ImportError(e)
+
+    except ImportError as e:
+        if not silent:
+            reraise(
+                ImportStringError,
+                ImportStringError(import_name, e),
+                sys.exc_info()[2])

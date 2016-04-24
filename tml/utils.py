@@ -267,3 +267,11 @@ def import_string(import_name, silent=False):
                 ImportStringError,
                 ImportStringError(import_name, e),
                 sys.exc_info()[2])
+
+
+def split_sentences(text):
+    sentence_regex = re.compile(r'[^.!?\s][^.!?]*(?:[.!?](?![\'"]?\s|$)[^.!?]*)*[.!?]?[\'"]?(?=\s|$)')
+    sentences = []
+    for s in sentence_regex.split(text):
+        sentences.append(s)
+    return sentences

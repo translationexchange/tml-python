@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import re
 from lxml import etree, html
 
-from ..utils import split_sentences, hash_fetch
+from ..utils import split_sentences, hash_fetch, to_string
 from ..session_vars import get_current_context
 from ..config import CONFIG
 
@@ -69,32 +69,32 @@ class DomTokenizer(object):
         if self.text_node(node) and not self.is_inline_node(node):
             container_value = self.translate_tml(node.text)
             return self.generate_html_token(node, container_value)
-        html, data_buffer = "", ""
+        html, data_buffer = to_string(""), to_string("")
         if node.text:
-            data_buffer += node.text
+            data_buffer += to_string(node.text)
         for child in node.iterchildren():
             if self.is_non_translatable_node(child):
-                html += self.node_html(child)
+                html += to_string(self.node_html(child))
             elif self.text_node(child) and not self.is_inline_node(child):
                 container_value = self.translate_tml(child.text)
-                html += self.generate_html_token(child, container_value)
+                html += to_string(self.generate_html_token(child, container_value))
             elif self.text_node(child) and self.is_inline_node(child):
                 data_buffer += self.generate_tml_tags(child)
             elif self.is_separator_node(child):
                 if data_buffer:
-                    html += self.translate_tml(data_buffer)
-                html += self.generate_html_token(child)
+                    html += to_string(self.translate_tml(data_buffer))
+                html += to_string(self.generate_html_token(child))
                 data_buffer = ""
             else:
                 if data_buffer:
-                    html += self.translate_tml(data_buffer)
+                    html += to_string(self.translate_tml(data_buffer))
                 container_value = self.translate_tree(child)
-                html += self.generate_html_token(child, container_value)
+                html += to_string(self.generate_html_token(child, container_value))
                 data_buffer = ""
             if child.tail:
                 data_buffer += child.tail
         if data_buffer:
-            html += self.translate_tml(data_buffer)
+            html += to_string(self.translate_tml(data_buffer))
         return html
 
 

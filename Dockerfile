@@ -50,4 +50,4 @@ VOLUME /src
 WORKDIR /src
 
 ENTRYPOINT ["/tools/clean-launch.sh"]
-CMD ["tox", "tests/unit tests/integration"]
+CMD ["tox", "tests/unit"]

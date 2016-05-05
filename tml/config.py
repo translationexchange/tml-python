@@ -176,6 +176,53 @@ class Config(BaseConfigMixin, Singleton):
         }
     }
 
+    translator_options = {
+        'debug': False,
+        'debug_format_html': "<span style='font-size:20px;color:red;'>{</span> {$0} <span style='font-size:20px;color:red;'>}</span>",
+        'debug_format': '{{{{$0}}}}',
+        'split_sentences': False,
+        'nodes': {
+          'ignored':    [],
+          'scripts':    ["style", "script", "code", "pre"],
+          'inline':     ["a", "span", "i", "b", "img", "strong", "s", "em", "u", "sub", "sup"],
+          'short':      ["i", "b"],
+          'splitters':  ["br", "hr"]
+        },
+        'attributes': {
+          'labels':     ["title", "alt"]
+        },
+        'name_mapping': {
+          'b':    'bold',
+          'i':    'italic',
+          'a':    'link',
+          'img':  'picture'
+        },
+        'data_tokens': {
+          'special': {
+            'enabled': True,
+            'regex': '(&[^;]*;)'
+          },
+          'date': {
+            'enabled': True,
+            'formats': [
+              ['((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d+,\s+\d+)', "{month} {day}, {year}"],
+              ['((January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+,\s+\d+)', "{month} {day}, {year}"],
+              ['(\d+\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec),\s+\d+)', "{day} {month}, {year}"],
+              ['(\d+\s+(January|February|March|April|May|June|July|August|September|October|November|December),\s+\d+)', "{day} {month}, {year}"]
+            ],
+            'name': 'date'
+          },
+          'rules': [
+            {'enabled': True, 'name': 'time',     'regex': '(\d{1,2}:\d{1,2}\s+([A-Z]{2,3}|am|pm|AM|PM)?)'},
+            {'enabled': True, 'name': 'phone',    'regex': '((\d{1}-)?\d{3}-\d{3}-\d{4}|\d?\(\d{3}\)\s*\d{3}-\d{4}|(\d.)?\d{3}.\d{3}.\d{4})'},
+            {'enabled': True, 'name': 'email',    'regex': '([-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|io|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?)'},
+            {'enabled': True, 'name': 'price',    'regex': '(\$\d*(,\d*)*(\.\d*)?)'},
+            {'enabled': True, 'name': 'fraction', 'regex': '(\d+\/\d+)'},
+            {'enabled': True, 'name': 'num',      'regex': '\\b(\d+(,\d*)*(\.\d*)?%?)\\b'}
+          ]
+        }
+    }
+
     # memcached
     #'cache': {
         #'enabled': True,
@@ -255,6 +302,17 @@ class Config(BaseConfigMixin, Singleton):
         else:
             pass   # silent (logged in tml.py)
 
+    def nested_value(self, hash_value, key, default_value=None):
+        parts = key.split('.')
+        for part in parts:
+            if not hash_value.get(part, None):
+                return default_value
+            hash_value = hash_value.get(part)
+
+        return hash_value
+
+    def translator_option(self, key):
+        return self.nested_value(self.translator_options, key)
 
 CONFIG = Config.instance()
 

@@ -65,7 +65,8 @@ with open(pj(here, 'HISTORY.rst'), encoding='utf-8') as f:
 
 requirements = [
     'requests==2.7.0',
-    'six==1.10.0'
+    'six==1.10.0',
+    'lxml==3.6.0'
 ]
 
 

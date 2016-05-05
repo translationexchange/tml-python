@@ -44,7 +44,7 @@ from .logger import get_logger
 
 __author__ = 'xepa4ep, a@toukmanov.ru'
 
-__VERSION__ = '0.3.0'
+__VERSION__ = '0.3.1'
 
 
 def full_version():

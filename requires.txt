@@ -1,5 +1,5 @@
 requests==2.7.0
 six==1.10.0
-lxml==3.6.0
+lxml==4.6.2
 
 
